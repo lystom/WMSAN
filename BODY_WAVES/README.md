@@ -1,3 +1,15 @@
+# Contents
+
+This repository contains scripts to plot source maps of ambient noise in the secondary microseismic frequency band.
+It uses the WAVEWATCHIII hindcast data to generate these maps for P and S waves.
+Here is the detail of its content:
+- microseismic_sources.ipynb : a Jupyter Notebook to generate and/or save source maps.
+- subfunctions_source_DF.py: python background functions.
+- read_hs_p2l.py : reads WW3 files.
+- ww3.07121700.dpt: bathymetry file.
+- readWW31.py : script reading the bathymetry file previously mentioned.
+- cP.nc and cS.nc : amplification coefficients for P and S waves, from Gualtieri et al. (2014).
+
 # Recommended Install
 
 ## for MacOSX
