@@ -1,3 +1,19 @@
+# Contents
+This repository provides scripts to compute Rayleigh source maps of ambient noise in the secondary microseismic band.
+It uses the WAVEWATCHIII hindcast data to model source areas and generates spectrograms of the vertical displacement for a given station location.
+
+Here is the detail of its content:
+- this README.md 
+- env_notebook.yml : an environnment YAML file to install python dependencies.
+- pkgs.txt : an ASCII file to install python dependencies.
+- rayleigh_source.ipynb : Jupyter Notebook to compute and/or save Rayleigh source maps.
+- spectrogram.ipynb :Jupyter Notebook to plot spectrogram of the vertical displacement in the secondary microseismic band.
+- source_microseism.py : background functions for source maps.
+- longuet_higgins.txt : values of the amplification coefficients for Longuet-Higgins (1950).
+- ww3.07121700.dpt : bathymetry file 
+- readWW31.py : pythin script to read bathymetry file above
+- read_hs_p2l : reads WW3 hindcast data
+
 # Recommended Install
 
 ## for MacOSX
