@@ -8,6 +8,7 @@ Here is the detail of its content:
 - pkgs.txt : an ASCII file to install python dependencies.
 - rayleigh_source.ipynb : Jupyter Notebook to compute and/or save Rayleigh source maps.
 - spectrogram.ipynb :Jupyter Notebook to plot spectrogram of the vertical displacement in the secondary microseismic band.
+- amplification_coeffs.ipynb : Jupyter Notebook computing Longuet-Higgins amplification coefficients maps.
 - source_microseism.py : background functions for source maps.
 - longuet_higgins.txt : values of the amplification coefficients for Longuet-Higgins (1950).
 - ww3.07121700.dpt : bathymetry file 
