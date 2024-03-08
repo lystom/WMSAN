@@ -181,7 +181,7 @@ def open_bathy(file_bathy, refined_bathymetry=False, extent=[-180, 180, -90, 90]
 
     if refined_bathymetry:
         # load refined bathymetry ETOPOv2
-        file_bathy = '/Users/tomasetl/Documents/code/ocean_source/pr_oceanswell/ocean_ampli/ETOPO_2022_v1_60s_N90W180_bed.nc'
+        file_bathy = './ETOPO_2022_v1_60s_N90W180_bed.nc'
         ds = xr.open_mfdataset(file_bathy, combine='by_coords')
         ds  = ds.rename({'lon':'longitude', 'lat': 'latitude'})
         #zlat = ds['latitude']
