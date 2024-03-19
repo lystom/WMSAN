@@ -16,18 +16,22 @@ Using Longuet-Higgins site effect and F.Ardhuin WW3 model.
 ##################################################################################
 
 ##Libraries
-import os.path
+import numpy as np
+import matplotlib.pyplot as plt
 import cartopy
 import cartopy.crs as ccrs
 import xarray as xr
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
+import pandas as pd
+import os.path
+import time as ttime
 
 from netCDF4 import Dataset, date2num
 from math import radians, log
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
+from obspy.geodetics.base import gps2dist_azimuth
 from datetime import datetime
+from scipy.interpolate import interp1d
+from tqdm import tqdm
 from calendar import monthrange
 from pyproj import Geod
 from numpy.lib.scimath import sqrt as csqrt
@@ -40,7 +44,7 @@ from readWW31 import read_dpt
 ############# DOWNLOAD WW3 FILES #################################################
 ##################################################################################
 
-def download_ww3_local(YEAR, MONTH, ftp_path_to_files="ftp://ftp.ifremer.fr/ifremer/dataref/ww3/GLOBMULTI_ERA5_GLOBCUR_01/GLOB-30M/2020/FIELD_NC/", ww3_local_path= './data/ww3/', full = False):
+def download_ww3_local(YEAR, MONTH, ftp_path_to_files="ftp://ftp.ifremer.fr/ifremer/dataref/ww3/GLOBMULTI_ERA5_GLOBCUR_01/GLOB-30M/2020/FIELD_NC/", ww3_local_path= './data/ww3/'):
     
     """
     Download WW3 files for a given year and month from the specified FTP path to a local directory.
@@ -55,10 +59,8 @@ def download_ww3_local(YEAR, MONTH, ftp_path_to_files="ftp://ftp.ifremer.fr/ifre
     None
     """
     workdir = os.getcwd()
-    print(workdir)
     # create directory if it does not exist
     try: 
-        os.mkdir('./data/')
         os.mkdir(ww3_local_path) 
     except OSError as error: 
         print(error)
@@ -73,32 +75,18 @@ def download_ww3_local(YEAR, MONTH, ftp_path_to_files="ftp://ftp.ifremer.fr/ifre
     for m in MONTH:
         print("Downloading can take some time...\n")
         file_p2l = ftp_path_to_files + "LOPS_WW3-GLOB-30M_%d%02d_p2l.nc"%(YEAR, m) # p2l file
-        print(file_p2l)
         check_file_p2l = ww3_local_path + "LOPS_WW3-GLOB-30M_%d%02d_p2l.nc"%(YEAR, m) # p2l file
-        if full:
-            file_hs = ftp_path_to_files + "LOPS_WW3-GLOB-30M_%d%02d.nc"%(YEAR, m) # hs file
-            check_file_hs = ww3_local_path + "LOPS_WW3-GLOB-30M_%d%02d.nc"%(YEAR, m) # hs file
         
         if os.path.exists(check_file_p2l):
             print("-----------------------------------------------------------------\n")
             print(check_file_p2l + " already downloaded\n")
             print("-----------------------------------------------------------------\n")
         else:
-            print(file_p2l)
             os.system("wget -nv -c %s"%(file_p2l))
             print("-----------------------------------------------------------------\n")
             print(file_p2l + " downloaded\n")
             print("-----------------------------------------------------------------\n")
-        if full:
-            if os.path.exists(check_file_hs):
-                print("-----------------------------------------------------------------\n")
-                print(check_file_hs + " already downloaded\n")
-                print("-----------------------------------------------------------------\n")
-            else:
-                os.system("wget -nv -c %s"%(file_hs))
-                print("-----------------------------------------------------------------\n")
-                print(file_hs + " downloaded\n")
-                print("-----------------------------------------------------------------\n")
+
     print( "WW3 files downloaded in %s"%(ww3_local_path))
     os.chdir(workdir)
     print("current directory : ", os.getcwd())
@@ -374,15 +362,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
         save = kwargs['save']
     else:
         save = False
-    if 'vmin' in kwargs:
-        vmin = kwargs['vmin']
-    else:
-        vmin = None
-    if 'vmax' in kwargs:
-        vmax = kwargs['vmax']
-    else:
-        vmax = None
-        
+
     ## Adapt latitude and longitude to values in parameters file
     lon_min = extent[0]
     lon_max = extent[1]
@@ -544,7 +524,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
                         gl.xformatter = LONGITUDE_FORMATTER
                         gl.yformatter = LATITUDE_FORMATTER
                         ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
-                        F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax)
+                        F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=0, vmax=3e10)
                         plt.savefig('F_%s_%d%02d%02dT%02d.png'%(wave_type, iyear, imonth, iday, ih), dpi = 300, bbox_inches='tight')
 
                     ## Sum F
@@ -569,7 +549,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
                     gl.xformatter = LONGITUDE_FORMATTER
                     gl.yformatter = LATITUDE_FORMATTER
                     ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
-                    F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax)
+                    F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=0, vmax=5e10),
                     plt.savefig('F_%s_%d%02d%02d.png'%(wave_type, iyear, imonth, iday), dpi = 300, bbox_inches='tight')
                     F_daily = np.zeros((dpt1.shape))
                     
@@ -587,7 +567,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
                 gl.xformatter = LONGITUDE_FORMATTER
                 gl.yformatter = LATITUDE_FORMATTER
                 ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
-                F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax)
+                F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=0, vmax=5e11)
                 plt.savefig('F_%s_%d%02d.png'%(wave_type, iyear, imonth), dpi = 300, bbox_inches='tight')
                 F_monthly = np.zeros((dpt1.shape))
                     
@@ -606,7 +586,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
             gl.xformatter = LONGITUDE_FORMATTER
             gl.yformatter = LATITUDE_FORMATTER
             ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
-            F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax)
+            F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=0, vmax=1e12)
             plt.savefig('F_%s_%d.png'%(wave_type, iyear), dpi = 300, bbox_inches='tight')
             F_daily = np.zeros((dpt1.shape))
             F_yearly = np.zeros((dpt1.shape))
