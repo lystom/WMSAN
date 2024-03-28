@@ -39,22 +39,19 @@ from read_hs_p2l import read_hs, read_p2l
 from readWW31 import read_dpt
 
 ## Set font size parameters to make readable figures
-##Fontsize
-
-SMALL_SIZE = 16
-MEDIUM_SIZE = 18
-LEGEND_SIZE = 22
+plt.style.use("ggplot")
+SMALL_SIZE = 18
+MEDIUM_SIZE = 22
 BIGGER_SIZE = 24
 
-plt.rc('font', size=MEDIUM_SIZE)          # controls default text sizes
-plt.rc('axes', titlesize=MEDIUM_SIZE)     # fontsize of the axes title
+plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
 plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
 plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
 plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
-plt.rc('legend', fontsize=LEGEND_SIZE)    # legend fontsize
-plt.rc('figure', titlesize=MEDIUM_SIZE)  # fontsize of the figure title
+plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
-plt.style.use('seaborn-v0_8-paper')
 plt.rcParams['xtick.direction'] = 'inout'
 plt.rcParams['ytick.direction'] = 'inout'
 plt.rcParams['font.family'] = "serif"
@@ -576,10 +573,11 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
     ## Plot
     plt.figure(figsize=(16,9))
     plt.title("spectrogram")
-    plt.pcolormesh(dates, freq, spectro.T, cmap='jet')#, vmin=-140, vmax=-80)
+    plt.pcolormesh(dates, freq, spectro.T, cmap='Spectral_r', vmin=-140, vmax=-80)
     plt.xlabel('Date ')
     plt.ylabel('Frequency [Hz]')
     plt.gcf().autofmt_xdate()
+    plt.ylim(0.1, 0.5)
     plt.colorbar(label='$m^2/Hz$ [dB]')
     plt.show()
     return
