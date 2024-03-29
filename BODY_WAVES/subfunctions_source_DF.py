@@ -40,6 +40,19 @@ from numpy.lib.scimath import sqrt as csqrt
 from read_hs_p2l import read_hs, read_p2l
 from readWW31 import read_dpt
 
+
+plt.style.use("ggplot")
+SMALL_SIZE = 18
+MEDIUM_SIZE = 20
+BIGGER_SIZE = 22
+
+plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
+plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 ##################################################################################
 ############# DOWNLOAD WW3 FILES #################################################
 ##################################################################################
@@ -515,16 +528,19 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
                         F_plot = xr.DataArray(F, 
                                                 coords={'latitude': zlat,'longitude': zlon}, 
                                                 dims=["latitude", "longitude"],
-                                                name = 'Equivalent Force. %s waves.\nFrequency %.3f-%.3f Hz.%d-%02d-%02dT%02d'%(wave_type,f1, f2, iyear, imonth, iday, ih))
+                                                name = 'Frequency %.3f-%.3f Hz.%d-%02d-%02dT%02d\n %s waves.\n'%(f1, f2, iyear, imonth, iday, ih, wave_type))
                         fig = plt.figure(figsize=(9,6))
-                        fig.suptitle('Equivalent Force. %s waves.\nFrequency %.3f-%.3f Hz.%d-%02d-%02dT%02d'%(wave_type, f1, f2, iyear, imonth, iday, ih))
+                        fig.suptitle('Frequency %.3f-%.3f Hz.%d-%02d-%02dT%02d\n %s waves.\n'%(f1, f2, iyear, imonth, iday, ih, wave_type))
                         ax = plt.axes(projection=ccrs.Robinson())
                         ax.coastlines()
                         gl = ax.gridlines()
                         gl.xformatter = LONGITUDE_FORMATTER
                         gl.yformatter = LATITUDE_FORMATTER
                         ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
-                        F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=0, vmax=3e10)
+                        if wave_type == 'P':
+                            F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=0, vmax=3e10)
+                        else:
+                            F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=0, vmax=5e9)
                         plt.savefig('F_%s_%d%02d%02dT%02d.png'%(wave_type, iyear, imonth, iday, ih), dpi = 300, bbox_inches='tight')
 
                     ## Sum F
@@ -540,16 +556,19 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
                     F_plot = xr.DataArray(F_daily, 
                         coords={'latitude': zlat,'longitude': zlon}, 
                         dims=["latitude", "longitude"],
-                        name = 'Equivalent Force. %s waves.Frequency %.3f-%.3f Hz.%d-%02d-%02d'%(wave_type,f1, f2, iyear, imonth, iday))
+                        name = 'Frequency %.3f-%.3f Hz.%d-%02d-%02d\n %s waves.\n'%(f1, f2, iyear, imonth, iday, wave_type))
                     fig = plt.figure(figsize=(9,6))
-                    fig.suptitle('Equivalent Force. %s waves.\nFrequency %.3f-%.3f Hz.%d-%02d-%02d'%(wave_type, f1, f2, iyear, imonth, iday))
+                    fig.suptitle('Frequency %.3f-%.3f Hz.%d-%02d-%02d.\n %s waves.\n'%(f1, f2, iyear, imonth, iday, wave_type))
                     ax = plt.axes(projection=ccrs.Robinson())
                     ax.coastlines()
                     gl = ax.gridlines()
                     gl.xformatter = LONGITUDE_FORMATTER
                     gl.yformatter = LATITUDE_FORMATTER
                     ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
-                    F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=0, vmax=5e10),
+                    if wave_type == 'P':
+                        F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=0, vmax=1e10),
+                    else:
+                        F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=0, vmax=1e10)
                     plt.savefig('F_%s_%d%02d%02d.png'%(wave_type, iyear, imonth, iday), dpi = 300, bbox_inches='tight')
                     F_daily = np.zeros((dpt1.shape))
                     
@@ -558,16 +577,19 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
                 F_plot = xr.DataArray(F_monthly, 
                     coords={'latitude': zlat,'longitude': zlon}, 
                     dims=["latitude", "longitude"],
-                    name = 'Equivalent Force. %s waves. Frequency %.3f-%.3f Hz.%d-%02d'%(wave_type,f1, f2, iyear, imonth))
+                    name = 'Frequency %.3f-%.3f Hz.%d-%02d\n %s waves.\n'%(f1, f2, iyear, imonth, wave_type))
                 fig = plt.figure(figsize=(9,6))
-                fig.suptitle('Equivalent Force. %s waves.\nFrequency %.3f-%.3f Hz.%d-%02d'%(wave_type, f1, f2, iyear, imonth))
+                fig.suptitle('Frequency %.3f-%.3f Hz.%d-%02d\n %s waves.\n'%(f1, f2, iyear, imonth, wave_type))
                 ax = plt.axes(projection=ccrs.Robinson())
                 ax.coastlines()
                 gl = ax.gridlines()
                 gl.xformatter = LONGITUDE_FORMATTER
                 gl.yformatter = LATITUDE_FORMATTER
                 ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
-                F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=0, vmax=5e11)
+                if wave_type == 'P':
+                    F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=0, vmax=5e11)
+                else:
+                    F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=0, vmax=5e10)
                 plt.savefig('F_%s_%d%02d.png'%(wave_type, iyear, imonth), dpi = 300, bbox_inches='tight')
                 F_monthly = np.zeros((dpt1.shape))
                     
@@ -577,16 +599,19 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
             F_plot = xr.DataArray(F_yearly,
                                 coords={'latitude': zlat,'longitude': zlon}, 
                                 dims=["latitude", "longitude"],
-                                name = 'Equivalent Force. %s waves.\nFrequency %.3f-%.3f Hz.%d'%(wave_type,f1, f2, iyear))
+                                name = 'Frequency %.3f-%.3f Hz.%d\n %s waves.\n'%(f1, f2, iyear, wave_type))
             fig = plt.figure(figsize=(9,6))
-            fig.suptitle('Equivalent Force. %s waves.\nFrequency %.3f-%.3f Hz.%d'%(wave_type, f1, f2, iyear))
+            fig.suptitle('Frequency %.3f-%.3f Hz.%d\n %s waves.\n'%(f1, f2, iyear, wave_type))
             ax = plt.axes(projection=ccrs.Robinson())
             ax.coastlines()
             gl = ax.gridlines()
             gl.xformatter = LONGITUDE_FORMATTER
             gl.yformatter = LATITUDE_FORMATTER
             ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
-            F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=0, vmax=1e12)
+            if wave_type == 'P':
+                F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=0, vmax=1e12)
+            else:
+                F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=0, vmax=1e11)
             plt.savefig('F_%s_%d.png'%(wave_type, iyear), dpi = 300, bbox_inches='tight')
             F_daily = np.zeros((dpt1.shape))
             F_yearly = np.zeros((dpt1.shape))
