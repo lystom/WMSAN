@@ -6,10 +6,18 @@ Here is the detail of its content:
 - this README.md 
 - env_notebook.yml : an environnment YAML file to install python dependencies.
 - pkgs.txt : an ASCII file to install python dependencies.
-- rayleigh_source.ipynb : Jupyter Notebook to compute and/or save Rayleigh source maps.
+
+- rayleigh_source.ipynb : Jupyter Notebook to compute and/or save Rayleigh source maps of the vertical displacement.
+
 - spectrogram.ipynb :Jupyter Notebook to plot spectrogram of the vertical displacement in the secondary microseismic band.
+
 - amplification_coeffs.ipynb : Jupyter Notebook computing Longuet-Higgins amplification coefficients maps.
+
+- microseismic_source.ipynb: Jupyter Notebook computing and/or saving the equivalent vertical force, necessary to run when using synthetic_CCF.ipynb.  
+- synthetic_CCF.ipynb : Jupyter Notebook computing synthetic cross-correlations using equivalent force computed in microseismic_sources.ipynb and precomputed waveforms in Syngine.
 - source_microseism.py : background functions for source maps.
+- synthetics.py: python background functions for synthetic_CCF.ipynb
+
 - longuet_higgins.txt : values of the amplification coefficients for Longuet-Higgins (1950).
 - ww3.07121700.dpt : bathymetry file 
 - readWW31.py : pythin script to read bathymetry file above
