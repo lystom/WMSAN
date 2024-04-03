@@ -10,6 +10,7 @@
 ############
 *.png
 *.jpg
+!package_archi.png
 
 # Packages #
 ############

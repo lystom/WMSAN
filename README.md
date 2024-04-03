@@ -25,3 +25,7 @@ or
 - [datetime](https://docs.python.org/3/library/datetime.html)
 - [scipy](https://scipy.org/)
 - [pandas](https://pandas.pydata.org/pandas-docs/version/2.1.4/index.html)
+
+# Architecture of WWSAN Python Package
+
+![Scheme showing the different codes and Notebooks present in this repository and how they connect.](./package_archi.png)
