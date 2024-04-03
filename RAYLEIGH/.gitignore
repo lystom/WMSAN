@@ -21,10 +21,14 @@
 # OS generated files #
 ######################
 .DS_Store
-../DS_Store
-../../DS_Store
+../.DS_Store
+../../.DS_Store
 
 # PyCache #
 ###########
 
 __pycache__/
+
+# Stations File #
+station_file.txt
+
