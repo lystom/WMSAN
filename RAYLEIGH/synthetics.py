@@ -137,10 +137,6 @@ def create_syngine_archive(station_file_path ='station_file.txt', sourcelongitud
             end = tr.stats.endtime
             time = np.arange(0, tr.stats.npts)*dt
             M[i, :] = tr
-            plt.figure()
-            plt.plot(time, st_synth[0])
-            plt.plot(time, tr)
-            plt.show()
             
         except:
             print('no data for %s'%station[i])
@@ -173,25 +169,25 @@ def create_spectrum_archive(archive_file = 'synthetics_iasp91_2s_Z.nc'):
         new_st = apply_delay_f_domain(new_st, delay/dt)
         
         ## Plot synthetic
-        plt.figure()
-        plt.title('%.1f degree'%dist)
-        plt.plot(time, st, 'b', label='synthetic', alpha=0.5)
-        plt.plot(time, new_st, 'r', label='delayed', alpha=0.5)
-        plt.axvline(arrival_original, color='b')
-        plt.axvline(arrival_new, color='r')
-        plt.xlim(min(arrival_new, arrival_original)-500, max(arrival_new, arrival_original)+500)
-        plt.savefig("waveform_%fdegree.png"%dist, dpi=300)
+        # plt.figure()
+        # plt.title('%.1f degree'%dist)
+        # plt.plot(time, st, 'b', label='synthetic', alpha=0.5)
+        # plt.plot(time, new_st, 'r', label='delayed', alpha=0.5)
+        # plt.axvline(arrival_original, color='b')
+        # plt.axvline(arrival_new, color='r')
+        # plt.xlim(min(arrival_new, arrival_original)-500, max(arrival_new, arrival_original)+500)
+        # plt.savefig("waveform_%fdegree.png"%dist, dpi=300)
         WAVEFORMS[i, :] = new_st
         
         ## FFT
         fft_synth = fft(new_st)
         freq_vect = np.fft.fftfreq(len(time), dt)
         # # # Plot
-        plt.subplot(211)
-        plt.plot(freq_vect, np.abs(fft_synth))
-        plt.subplot(212)
-        plt.plot(freq_vect, np.angle(fft_synth))
-        plt.savefig("spectrum_%fdegree.png"%dist, dpi=300)
+        # plt.subplot(211)
+        # plt.plot(freq_vect, np.abs(fft_synth))
+        # plt.subplot(212)
+        # plt.plot(freq_vect, np.angle(fft_synth))
+        # plt.savefig("spectrum_%fdegree.png"%dist, dpi=300)
         
         plt.close('all')
         SPECTRUM[i, :] = fft_synth
