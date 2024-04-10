@@ -185,7 +185,6 @@ def read_hs(file_path, time_vect, lon1 = (-180, 180), lat1 = (-90, 90)):
     except:
         print('Error opening file, please check that the file exists\n')
         print(file_path)
-        exit()
 
     # datetime
     year = time_vect[0]
@@ -222,7 +221,6 @@ def read_p2l(file_path, time_vect, lon1 = [-180, 180], lat1 = [-90, 90]):
     except:
         print('Error opening file, please check that the file exists\n')
         print(file_path)
-        exit()
     ds.assign_coords(f=("f", ds.f.data))
     ds = ds.rename({'f':'frequency'})
     # datetime
