@@ -375,6 +375,16 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
         save = kwargs['save']
     else:
         save = False
+        
+    if 'vmin' in kwargs:
+        vmin = kwargs['vmin']
+    else:
+        vmin = 0
+        
+    if 'vmax' in kwargs:
+        vmax = kwargs['vmax']
+    else:
+        vmax = 1e10
 
     ## Adapt latitude and longitude to values in parameters file
     lon_min = extent[0]
@@ -386,15 +396,26 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
     zlat = zlat.sel(latitude = slice(lat_min, lat_max))
     zlon = zlon.sel(longitude = slice(lon_min, lon_max))
     
+    ## Open Amplification Coefficient
+    # check for refined bathymetry
+    if abs(zlon[0] - zlon[1]) == 0.5:
+        ds_ampli = xr.open_dataset('./c%s.nc'%(wave_type)).astype('float64')
+        amplification_coeff = ds_ampli['C%s'%wave_type]
+        refined = False
+    else:
+        print("Refined bathymetry grid \n PLEASE RUN amplification_coefficients.ipynb before running this script")
+        ds_ampli = xr.open_dataset('./c%s_custom.nc'%(wave_type)).astype('float64')
+        amplification_coeff = ds_ampli['c%s'%wave_type]        
+        refined = True
+    
     ## Surface Element
     msin = np.array([np.sin(np.pi/2 - np.radians(zlat))]).T
     ones = np.ones((1, len(zlon)))
+    if refined:
+        res_mod = radians(abs(zlat[1] - zlat[0]))
     dA = radius**2*res_mod**2*np.dot(msin,ones)
-    
-    ## Open Amplification Coefficient
-    ds_ampli = xr.open_dataset('./c%s.nc'%(wave_type))
-    amplification_coeff = ds_ampli['C%s'%wave_type]
-    
+
+        
     ## Loop over dates
     YEAR = date_vec[0]
     MONTH = date_vec[1]
@@ -464,9 +485,14 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
                         Fp = Fp.where(np.isfinite(Fp))
                         Fp = Fp.drop('frequency')
                         Fp.coords['frequency'] = freq_seismic
+                        if refined == True:
+                            # interpolate Fp
+                            Fp = Fp.interp(longitude=zlon, latitude=zlat, method='linear')
+                        
                         amplification_coeff = amplification_coeff.sel(frequency = freq_seismic, latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
-                        F_f = amplification_coeff**2*Fp
-                        F = F_f
+                        amplification_coeff = amplification_coeff.reindex_like(Fp, method='nearest', tolerance=0.01)
+                        F_f = Fp*amplification_coeff**2
+                        F = F_f.copy()
                         for ifq, fq in enumerate(freq_seismic):
                             F_f[ifq, :, :] *= dA
                             F[ifq, :, :] = F_f[ifq, :, :]*df[ifq]
@@ -484,7 +510,6 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
 
                     ## Save F to file
                     if save == True:
-                        print(os.getcwd())
                         path_out = './F/'
                         if not os.path.exists(path_out):
                             print("make directory %s"%path_out)
@@ -500,19 +525,19 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
                             print(dim)
                         ncfile.title='Equivalent Vertical Force on %d-%02d-%02d-%02d'%(iyear, imonth, iday, ih)
                         ncfile.subtitle='Equivalent Force every 3 hours for the secondary microseismic peak'
-                        lat = ncfile.createVariable('latitude', np.float32, ('latitude',))
+                        lat = ncfile.createVariable('latitude', np.float64, ('latitude',))
                         lat.units = 'degrees_north'
                         lat.long_name = 'latitude'
-                        lon = ncfile.createVariable('longitude', np.float32, ('longitude',))
+                        lon = ncfile.createVariable('longitude', np.float64, ('longitude',))
                         lon.units = 'degrees_east'
                         lon.long_name = 'longitude'
-                        time = ncfile.createVariable('time', np.float32, ('time',))
+                        time = ncfile.createVariable('time', np.float64, ('time',))
                         time.units = 'hours since 1990-01-01'
                         time.long_name = 'time'
-                        freq_nc = ncfile.createVariable('frequency', np.float32, ('frequency',))
+                        freq_nc = ncfile.createVariable('frequency', np.float64, ('frequency',))
                         freq_nc.units = 'Hz'
                         freq_nc.long_name = 'frequency'
-                        F_freq = ncfile.createVariable('F_f', np.float32, ('frequency','latitude', 'longitude'))
+                        F_freq = ncfile.createVariable('F_f', np.float64, ('frequency','latitude', 'longitude'))
                         F_freq.units = 'N.s^{1/2}'
                         F_freq.long_name = 'Equivalent Vertical Force spectrum'
                         lat[:] = zlat
@@ -538,9 +563,9 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
                         gl.yformatter = LATITUDE_FORMATTER
                         ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
                         if wave_type == 'P':
-                            F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=0, vmax=3e10)
+                            F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax)
                         else:
-                            F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=0, vmax=5e9)
+                            F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax)
                         plt.savefig('F_%s_%d%02d%02dT%02d.png'%(wave_type, iyear, imonth, iday, ih), dpi = 300, bbox_inches='tight')
 
                     ## Sum F
@@ -566,9 +591,9 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
                     gl.yformatter = LATITUDE_FORMATTER
                     ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
                     if wave_type == 'P':
-                        F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=0, vmax=1e10),
+                        F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax),
                     else:
-                        F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=0, vmax=1e10)
+                        F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax)
                     plt.savefig('F_%s_%d%02d%02d.png'%(wave_type, iyear, imonth, iday), dpi = 300, bbox_inches='tight')
                     F_daily = np.zeros((dpt1.shape))
                     
@@ -587,9 +612,9 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
                 gl.yformatter = LATITUDE_FORMATTER
                 ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
                 if wave_type == 'P':
-                    F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=0, vmax=5e11)
+                    F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax)
                 else:
-                    F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=0, vmax=5e10)
+                    F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax)
                 plt.savefig('F_%s_%d%02d.png'%(wave_type, iyear, imonth), dpi = 300, bbox_inches='tight')
                 F_monthly = np.zeros((dpt1.shape))
                     
@@ -609,9 +634,9 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
             gl.yformatter = LATITUDE_FORMATTER
             ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
             if wave_type == 'P':
-                F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=0, vmax=1e12)
+                F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax)
             else:
-                F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=0, vmax=1e11)
+                F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax)
             plt.savefig('F_%s_%d.png'%(wave_type, iyear), dpi = 300, bbox_inches='tight')
             F_daily = np.zeros((dpt1.shape))
             F_yearly = np.zeros((dpt1.shape))
