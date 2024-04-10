@@ -152,10 +152,9 @@ def open_bathy(file_bathy, refined_bathymetry=False, extent=[-180, 180, -90, 90]
     zlon (xarray.DataArray): Longitude coordinates.
     zlat (xarray.DataArray): Latitude coordinates.
     """
+    [lon_min, lon_max, lat_min, lat_max] = extent
     if not refined_bathymetry:
         [zlat, zlon, dpt1, var] = read_dpt(file_bathy) # load bathymetry file
-        [lon_min, lon_max, lat_min, lat_max] = extent
-
         #convert to xarray
         dpt1 = xr.DataArray(dpt1, coords={'latitude':zlat, 'longitude': zlon}, dims=['latitude', 'longitude'])
         zlat = xr.DataArray(zlat, coords={'latitude':zlat}, dims=['latitude'])
@@ -332,7 +331,7 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                         
                         #print('integral over frequency range f1 = %.3f, f2 = %.3f'%(f1, f2))
                         Fp = p2l.sel(frequency = freq_ocean[index_freq], latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
-                        C = site_effect(dpt1, freq_seismic, vs_crust, path_longuet_higgins, zlat, zlon)  # computes Longuet-Higgins site effect given the bathymetryint(Fp.shape)
+                        C = site_effect(dpt1, freq_seismic, zlat, zlon,vs_crust, path_longuet_higgins)  # computes Longuet-Higgins site effect given the bathymetryint(Fp.shape)
                         if C.shape == Fp.shape:
                             SDF_f = 2*np.pi/(rho_s**2*(vs_crust*1e3)**5)*C.data*Fp.data
                         else:
