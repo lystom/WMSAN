@@ -366,11 +366,9 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                     ## Save SDF to file
                     if save == True:
                         ## Save SDF to file
-                        print(os.getcwd())
                         path_out = './SDF/'
-                        try:
-                            os.path.exists(path_out)
-                        except:
+                        if not os.path.exists(path_out):
+                            print('make directory '+path_out)
                             os.makedirs(path_out)  
                         # Create netCDF 3-hourly file
                         ncfile = Dataset(path_out+"rayleigh_SDF_%d%02d%02d%02d.nc"%(iyear, imonth, iday, ih), mode='w',format='NETCDF4_CLASSIC')
@@ -378,8 +376,6 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                         lon_dim = ncfile.createDimension('longitude', len(zlon))  # longitude axis
                         time_dim = ncfile.createDimension('time', daymax*8)  # unlimited axis (can be appended to).
                         freq_dim = ncfile.createDimension('frequency', n_freq)
-                        for dim in ncfile.dimensions.items():
-                            print(dim)
                         ncfile.title='Rayleigh waves power spectrum of vertical displacement on %d-%02d-%02d-%02d'%(iyear, imonth, iday, ih)
                         ncfile.subtitle='Equivalent Force maps every 3 hours for the secondary microseismic peak'
                         lat = ncfile.createVariable('latitude', np.float32, ('latitude',))
@@ -412,7 +408,7 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                                                 dims=["latitude", "longitude"],
                                                 name = 'Source of the power spectrum for the vertical displacement.\nRayleigh waves.\nFrequency %.3f-%.3f Hz.%d-%02d-%02dT%02d'%(f1, f2, iyear, imonth, iday, ih))
                         fig = plt.figure(figsize=(9,6))
-                        fig.suptitle('Source of the power spectrum for the vertical displacement. Rayleigh waves.\nFrequency %.3f-%.3f Hz.\n%d-%02d-%02dT%02d'%(f1, f2, iyear, imonth, iday, ih))
+                        fig.suptitle('Source of the power spectrum for the vertical displacement. Rayleigh waves.\nFrequency %.3f-%.3f Hz. %d-%02d-%02dT%02d'%(f1, f2, iyear, imonth, iday, ih))
                         ax = plt.axes(projection=ccrs.Robinson())
                         ax.coastlines()
                         gl = ax.gridlines()
@@ -524,7 +520,6 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
     hour = dates[0].hour
     
     file_netcdf = path_netcdf + 'rayleigh_SDF_%d%02d%02d%02d.nc'%(year, month, day, hour)
-    print(file_netcdf)
     dset = xr.open_mfdataset(file_netcdf, combine='by_coords')
     zlon = dset.longitude
     zlat = dset.latitude
@@ -578,7 +573,7 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
     plt.gcf().autofmt_xdate()
     plt.ylim(0.1, 0.5)
     plt.colorbar(label='$m^2/Hz$ [dB]')
-    plt.show()
+    plt.savefig('spectrogram_ww3.png', dpi=300, bbox_inches='tight')
     return
 
 
@@ -763,7 +758,6 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
 
                     ## Save F to file
                     if save == True:
-                        print(os.getcwd())
                         path_out = './F/'
                         if not os.path.exists(path_out):
                             print("make directory %s"%path_out)
