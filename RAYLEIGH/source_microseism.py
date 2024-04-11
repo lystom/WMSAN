@@ -641,7 +641,17 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
         save = kwargs['save']
     else:
         save = False
-
+            
+    if 'vmin' in kwargs:
+        vmin = kwargs['vmin']
+    else:
+        vmin = 0
+        
+    if 'vmax' in kwargs:
+        vmax = kwargs['vmax']
+    else:
+        vmax = 1e10
+        
     ## Adapt latitude and longitude to values in parameters file
     lon_min = extent[0]
     lon_max = extent[1]
@@ -652,13 +662,24 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
     zlat = zlat.sel(latitude = slice(lat_min, lat_max))
     zlon = zlon.sel(longitude = slice(lon_min, lon_max))
     
+    ## Open Amplification Coefficient
+    # check for refined bathymetry
+    if abs(zlon[0] - zlon[1]) == 0.5:
+        amplification_coeff = xr.open_dataarray('./C.nc')
+        refined = False
+    else:
+        print("Refined bathymetry grid \n PLEASE RUN amplification_coefficients.ipynb before running this script")
+        amplification_coeff = xr.open_dataarray('./c_custom.nc')
+        refined = True
+        
     ## Surface Element
     msin = np.array([np.sin(np.pi/2 - np.radians(zlat))]).T
     ones = np.ones((1, len(zlon)))
+    if refined:
+        res_mod = radians(abs(zlat[1] - zlat[0]))
     dA = radius**2*res_mod**2*np.dot(msin,ones)
     
-    ## Open Amplification Coefficient
-    amplification_coeff = xr.open_dataarray('./C.nc')
+
     
     ## Loop over dates
     YEAR = date_vec[0]
@@ -731,16 +752,17 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
                         Fp = Fp.drop('frequency')
                         Fp = Fp.rename({"freq": "frequency"})
                         
+                        if refined:
+                            # interpolate Fp
+                            Fp = Fp.interp(longitude=zlon, latitude=zlat, method='linear')
                         ## Amplification coefficient
                         amplification_coeff = amplification_coeff.sel(frequency = freq_seismic, method='nearest')
                         amplification_coeff = amplification_coeff.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
-                        amplification_coeff_square = amplification_coeff**2
-                        Fp_array = Fp.values
-                        amplification_coeff_square_array = amplification_coeff_square.values
-                        F_f = Fp_array * amplification_coeff_square_array
+                        amplification_coeff = amplification_coeff.reindex_like(Fp, method='nearest', tolerance=0.01)
+                        F_f = Fp*amplification_coeff**2
                         F = F_f
                         for ifq, fq in enumerate(freq_seismic.values):
-                            df_fq = df.values[ifq]
+                            df_fq = df[ifq]
                             F_fi = F_f[ifq, :, :]
                             F_fi *= dA
                             F[ifq, :, :] = F_fi*df_fq
@@ -807,7 +829,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
                         gl.xformatter = LONGITUDE_FORMATTER
                         gl.yformatter = LATITUDE_FORMATTER
                         ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
-                        F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=0, vmax=3e10)
+                        F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax)
                         plt.savefig('F_R_%d%02d%02dT%02d.png'%(iyear, imonth, iday, ih), dpi = 300, bbox_inches='tight')
 
                     ## Sum F
@@ -832,7 +854,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
                     gl.xformatter = LONGITUDE_FORMATTER
                     gl.yformatter = LATITUDE_FORMATTER
                     ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
-                    F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=0, vmax=3e10),
+                    F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax),
                     plt.savefig('F_R_%d%02d%02d.png'%(iyear, imonth, iday), dpi = 300, bbox_inches='tight')
                     F_daily = np.zeros((dpt1.shape))
                     
@@ -841,16 +863,16 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
                 F_plot = xr.DataArray(F_monthly, 
                     coords={'latitude': zlat,'longitude': zlon}, 
                     dims=["latitude", "longitude"],
-                    name = 'Equivalent Force. %s waves. Frequency %.3f-%.3f Hz.%d-%02d'%(wave_type,f1, f2, iyear, imonth))
+                    name = 'Equivalent Force. Rayleigh waves. Frequency %.3f-%.3f Hz.%d-%02d'%(f1, f2, iyear, imonth))
                 fig = plt.figure(figsize=(9,6))
-                fig.suptitle('Equivalent Force. %s waves.\nFrequency %.3f-%.3f Hz.%d-%02d'%(wave_type, f1, f2, iyear, imonth))
+                fig.suptitle('Equivalent Force. Rayleigh waves.\nFrequency %.3f-%.3f Hz.%d-%02d'%(f1, f2, iyear, imonth))
                 ax = plt.axes(projection=ccrs.Robinson())
                 ax.coastlines()
                 gl = ax.gridlines()
                 gl.xformatter = LONGITUDE_FORMATTER
                 gl.yformatter = LATITUDE_FORMATTER
                 ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
-                F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=0, vmax=1e11)
+                F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax)
                 plt.savefig('F_R_%d%02d.png'%(iyear, imonth), dpi = 300, bbox_inches='tight')
                 F_monthly = np.zeros((dpt1.shape))
                     
@@ -860,17 +882,17 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
             F_plot = xr.DataArray(F_yearly,
                                 coords={'latitude': zlat,'longitude': zlon}, 
                                 dims=["latitude", "longitude"],
-                                name = 'Equivalent Force. %s waves.\nFrequency %.3f-%.3f Hz.%d'%(wave_type,f1, f2, iyear))
+                                name = 'Equivalent Force. %s waves.\nFrequency %.3f-%.3f Hz.%d'%(f1, f2, iyear))
             fig = plt.figure(figsize=(9,6))
-            fig.suptitle('Equivalent Force. %s waves.\nFrequency %.3f-%.3f Hz.%d'%(wave_type, f1, f2, iyear))
+            fig.suptitle('Equivalent Force. Rayleigh waves.\nFrequency %.3f-%.3f Hz.%d'%(f1, f2, iyear))
             ax = plt.axes(projection=ccrs.Robinson())
             ax.coastlines()
             gl = ax.gridlines()
             gl.xformatter = LONGITUDE_FORMATTER
             gl.yformatter = LATITUDE_FORMATTER
             ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
-            F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=0, vmax=1e12)
-            plt.savefig('F_%s_%d.png'%(wave_type, iyear), dpi = 300, bbox_inches='tight')
+            F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax)
+            plt.savefig('F_R_%d.png'%(iyear), dpi = 300, bbox_inches='tight')
             F_daily = np.zeros((dpt1.shape))
             F_yearly = np.zeros((dpt1.shape))
         plt.close('all')
