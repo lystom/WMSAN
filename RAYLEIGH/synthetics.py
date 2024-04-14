@@ -67,30 +67,30 @@ def create_date_vect(dates):
     return date_vect
 
 ### Create GF Archive via syngine
-def create_station_file():
+def create_virtual_stations_file(file_name = 'virtual_stations_file.txt'):
     """Create station file"""
-    distance = np.arange(0, 181, 1)
+    distance = np.arange(0, 180.1, 0.1)
     n = len(distance)
     datacenter = "CUSTOM"
     net = "AA"
     sta = ["STA%03d"%i for i in range(n)]
-    lat = [round(90-distance[i], 1) for i in range(n)]
-    lon = np.zeros(n)
+    lat = np.zeros(n)   #[round(90-distance[i], 1) for i in range(n)]
+    lon = [round(distance[i], 1) for i in range(n)]
     loc = "--"
     elev = np.zeros(n)
     depth = np.zeros(n)
     
     # Write station file .txt
-    f = open('station_file.txt', 'w')
+    f = open(file_name, 'w')
     for i in range(n):
         f.write("CUSTOM   AA   %s   --   %s   %s   %s   %s\n"%(sta[i], lat[i], lon[i], elev[i], depth[i]))
     f.close()
     
-def create_syngine_archive(station_file_path ='station_file.txt', sourcelongitude=0, sourcelatitude=90, dt=0.25, comp='Z'):
+def create_syngine_archive(station_file_path ='virtual_stations_file.txt', sourcelongitude=0, sourcelatitude=90, dt=0.25, comp='Z'):
     """Create syngine archive"""
     
     # check if file exists
-    distance = np.arange(0, 181, 1)
+    distance = np.arange(0, 180.1, 0.1)
     # Open Station Info
     # Receivers
     network = []
@@ -111,10 +111,10 @@ def create_syngine_archive(station_file_path ='station_file.txt', sourcelongitud
         elev.append(float(l[6]))
         depth.append(float(l[7][:-2]))
     f.close()
-    model = "iasp91_2s"
+    model = "ak135f_1s"
 
     N = len(station)
-    M = np.zeros((N, 14762)) 
+    M = np.zeros((N, 7380)) 
     
     # Get synthetics
     for i in tqdm(range(len(station))):
@@ -137,13 +137,17 @@ def create_syngine_archive(station_file_path ='station_file.txt', sourcelongitud
             end = tr.stats.endtime
             time = np.arange(0, tr.stats.npts)*dt
             M[i, :] = tr
+            # plt.figure()
+            # plt.plot(time, st_synth[0])
+            # plt.plot(time, tr)
+            # plt.show()
             
         except:
             print('no data for %s'%station[i])
             raise  
     ## Save M as netcdf
     ds = xr.DataArray(M, coords={'distance': distance, 'time': time}, dims=['distance', 'time'])
-    ds.to_netcdf('synthetics_iasp91_2s_Z.nc')
+    ds.to_netcdf('synthetics_%s_Z.nc'%model)
     
 def create_spectrum_archive(archive_file = 'synthetics_iasp91_2s_Z.nc'):
     ## Open synthetics
@@ -154,7 +158,7 @@ def create_spectrum_archive(archive_file = 'synthetics_iasp91_2s_Z.nc'):
     fe = 1/dt
     ## thiner distance step
     new_distance = np.arange(0, 180.1, 0.1)
-    model_obspy = TauPyModel("iasp91")
+    model_obspy = TauPyModel("ak135")
     
     WAVEFORMS = np.zeros((len(new_distance), len(time))).astype(float)
     SPECTRUM = np.zeros((len(new_distance), len(time))).astype(complex)
@@ -169,36 +173,36 @@ def create_spectrum_archive(archive_file = 'synthetics_iasp91_2s_Z.nc'):
         new_st = apply_delay_f_domain(new_st, delay/dt)
         
         ## Plot synthetic
-        # plt.figure()
-        # plt.title('%.1f degree'%dist)
-        # plt.plot(time, st, 'b', label='synthetic', alpha=0.5)
-        # plt.plot(time, new_st, 'r', label='delayed', alpha=0.5)
-        # plt.axvline(arrival_original, color='b')
-        # plt.axvline(arrival_new, color='r')
-        # plt.xlim(min(arrival_new, arrival_original)-500, max(arrival_new, arrival_original)+500)
-        # plt.savefig("waveform_%fdegree.png"%dist, dpi=300)
+        plt.figure()
+        plt.title('%.1f degree'%dist)
+        plt.plot(time, st, 'b', label='synthetic', alpha=0.5)
+        plt.plot(time, new_st, 'r', label='delayed', alpha=0.5)
+        plt.axvline(arrival_original, color='b')
+        plt.axvline(arrival_new, color='r')
+        plt.xlim(min(arrival_new, arrival_original)-500, max(arrival_new, arrival_original)+500)
+        plt.savefig("waveform_%fdegree.png"%dist, dpi=300)
         WAVEFORMS[i, :] = new_st
         
         ## FFT
         fft_synth = fft(new_st)
         freq_vect = np.fft.fftfreq(len(time), dt)
         # # # Plot
-        # plt.subplot(211)
-        # plt.plot(freq_vect, np.abs(fft_synth))
-        # plt.subplot(212)
-        # plt.plot(freq_vect, np.angle(fft_synth))
-        # plt.savefig("spectrum_%fdegree.png"%dist, dpi=300)
+        plt.subplot(211)
+        plt.plot(freq_vect, np.abs(fft_synth))
+        plt.subplot(212)
+        plt.plot(freq_vect, np.angle(fft_synth))
+        plt.savefig("spectrum_%fdegree.png"%dist, dpi=300)
         
         plt.close('all')
         SPECTRUM[i, :] = fft_synth
     ## Save as h5 file
-    h5_name = 'synthetics_iasp91_2s_Z_waveforms.h5'
+    h5_name = 'synthetics_ak135f_1s_Z_waveforms.h5'
     h5_file = h5py.File(h5_name, 'w')
     h5_file.create_dataset('WAVEFORMS', data=WAVEFORMS)
     h5_file.create_dataset('distance', data=new_distance)
     h5_file.create_dataset('time', data=time)
     h5_file.close()
-    h5_name = 'synthetics_iasp91_2s_Z_spectrum.h5'
+    h5_name = 'synthetics_ak135f_1s_Z_spectrum.h5'
     h5_file = h5py.File(h5_name, 'w')
     h5_file.create_dataset('SPECTRUM', data=SPECTRUM)
     h5_file.create_dataset('distance', data=new_distance)
@@ -217,7 +221,7 @@ def open_archive(h5_name_spectrum = 'synthetics_iasp91_2s_Z_spectrum.h5', h5_nam
     freq = h5_file['frequency'][:]
     h5_file.close()
     fe = 2*np.max(freq)
-    return fe, freq, time, distance, S
+    return fe, freq, time, distance, S, W
 
 def open_model(path_file_WW3, date_vect, N, fe, lon_slice=slice(-180, 180), lat_slice=slice(-78, 80)):
     """ Reads the WW3 model for ambient noise sources at a specific time and date. 
@@ -310,9 +314,9 @@ def matrix_GF(spectrum_axi, lon, lat, N, distance_s, comp = 'Z', conjugate = Fal
         except:
             raise
         if conjugate:
-            S_synth[index, :] = np.squeeze(trace)
-        else:
             S_synth[index, :] = np.squeeze(np.conj(trace))
+        else:
+            S_synth[index, :] = np.squeeze((trace))
     return S_synth
 
 def compute_model_chunk(lon_inf, lon_sup, lat_inf, lat_sup, N, fe, date_vect, spectrum_axi, file_model, lon_staA, lat_staA, lon_staB, lat_staB, comp):
@@ -348,10 +352,10 @@ def compute_model_chunk(lon_inf, lon_sup, lat_inf, lat_sup, N, fe, date_vect, sp
             distance_staB = distance_to_station(lon, lat, lon_s = lon_staB, lat_s = lat_staB)
 
             ## Green's Functions spectrum
-            psd_model.values *= matrix_GF(spectrum_axi, lon=lon, lat=lat, N=N, distance_s=distance_staA, conjugate=False, comp=comp).astype(complex)
+            psd_model.values *= matrix_GF(spectrum_axi, lon=lon, lat=lat, N=N, distance_s=distance_staA, conjugate=True, comp=comp).astype(complex)
             
             ## Green's Functions spectrum
-            psd_model.values *= matrix_GF(spectrum_axi, lon=lon, lat=lat, N=N, distance_s=distance_staB, conjugate=True, comp=comp).astype(complex)
+            psd_model.values *= matrix_GF(spectrum_axi, lon=lon, lat=lat, N=N, distance_s=distance_staB, conjugate=False, comp=comp).astype(complex)
             
             del distance_staA, distance_staB, lon, lat 
             ## Sum along coordinates latitude and longitude
