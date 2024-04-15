@@ -55,6 +55,127 @@ def apply_delay_f_domain(s,d=0.):
     d_phase[int(np.round(len(d_phase)/2))::]-=2*np.pi*d #for the hermitian symmetry of the fft
     return np.real(np.fft.ifft(np.fft.fft(s)*np.exp(-1j*d_phase)))
 
+def get_synthetic_info(path_file_axisem='./RUN_single_vertforce_iasp91_1.s_256c_3600.s.h5', comp='Z'):
+    """
+        Function to get synthetic info from a specified h5 file and return fe, time, and N.
+        Parameters:
+        - path_file_axisem: str, default='/bettik/tomasetl/axicorr/taper_vertforce_iasp91_1.s_256c_3600.s.h5'
+        - comp: str, default='Z'
+        Returns:
+        - fe: float
+        - time: numpy.ndarray
+        - N: int
+    """
+    h5_file = h5py.File(path_file_axisem)
+    fe = h5_file['_metadata']['fe'][()]
+    dist = 0.1
+    trace = h5_file['L']['SYNTH%03d.00'%(dist*10)][comp][:].astype(np.single)
+    time = np.arange(0, len(trace)*1/fe, 1/fe).astype(np.single)
+    N = len(trace)
+    h5_file.close()
+    return fe, time, N
+
+def open_axisem(dist, path_file_axisem='./RUN_single_vertforce_iasp91_1.s_256c_3600.s.h5', comp='Z'):
+    """ Reads an AxiSEM .h5 archive in a 1D model given its path and a distance,
+    and returns sampling frequency, time vector and trace at the given distance.
+    Input:
+    path_file_axisem: path of axisem .h5 archive
+    dist : distance of interest
+     
+    Output:
+    fe_iasp: sampling frequency 
+    time_iasp: time vector of the archive
+    trace_synth: synthetic trace at the given distance."""
+    dist = np.round(dist, 1)
+    h5_file = h5py.File(path_file_axisem)
+    trace_synth = h5_file['L']['SYNTH%03d.00'%(dist*10)][comp][:].astype(np.single)
+    h5_file.close()
+    return trace_synth
+
+def taper_axisem_archive(time, distance, archive_name='./RUN_single_vertforce_iasp91_1.s_256c_3600.s.h5', umin = 2.5, umax = 3.5):
+    R = radius_earth*1e3  # Radius of the Earth in km
+    dt = time[1] - time[0]
+    fe = 1/dt
+    tapered_archive = np.zeros((len(distance), len(time)))
+    for i, dist in tqdm(enumerate(distance)):
+        dist_in_km = dist*np.pi*R/180
+        tmin = dist_in_km/umax
+        tmax = dist_in_km/umin
+        dt_width = tmax - tmin
+        if dt_width == 0.:
+            dt_width = 20  # in seconds
+        ## Taper
+        tukey = signal.windows.tukey(int(dt_width*fe), alpha=0.1)
+        dirac = np.zeros(len(time))
+        index = np.argmin(np.abs(time - (tmax + tmin)//2))
+        dirac[index] = 1
+        taper = signal.fftconvolve(dirac, tukey, mode='same')
+        W = open_axisem(dist, archive_name)
+        tapered_archive[i, :] = W*taper
+        
+    ## Save tapered archive as h5 file
+    h5_name_tapered = archive_name.replace('.s.h5', '_tapered.s.h5')
+    h5_file = h5py.File(h5_name_tapered, 'w')
+    h5_file.create_dataset('WAVEFORMS', data=tapered_archive)
+    h5_file.create_dataset('time', data=time)
+    h5_file.create_dataset('distance', data=distance)
+    h5_file.close()
+    return tapered_archive
+
+def create_spectrum_archive(time, distance, tapered_archive):
+    dt = time[1] - time[0]
+    fe = 1/dt
+    N = len(time)
+    freq = fftfreq(N, 1/fe)
+    spectrum = np.zeros((len(distance), len(freq))).astype(complex)
+    for dist in tqdm(distance):
+        index = np.argmin(np.abs(distance - dist))
+        W = tapered_archive[index, :]
+        spectrum[index, :] = fft(W)
+    
+    # Save as h5
+    h5_name_spectrum = 'spectrum_archive_tapered.h5'
+    h5_file = h5py.File(h5_name_spectrum, 'w')
+    h5_file.create_dataset('SPECTRUM', data=spectrum)
+    h5_file.create_dataset('frequency', data=freq)
+    h5_file.create_dataset('distance', data=distance)
+    h5_file.close()
+    
+def open_archive(h5_name = 'spectrum_archive_tapered.h5'):
+    h5_file = h5py.File(h5_name, 'r')
+    S = h5_file['SPECTRUM'][:]
+    distance = h5_file['distance'][:]
+    freq = h5_file['frequency'][:]
+    h5_file.close()
+    fe = 2*np.max(freq)
+    return fe, freq, distance, S
+
+def open_spectrum_axisem(path_file_axisem='/bettik/tomasetl/axicorr/spectrum_vertforce_iasp91_1.s_256c_3600.s.h5', comp='Z'):
+    """ Reads an AxiSEM .h5 archive in a 1D model given its path and a distance,
+    and returns sampling frequency, time vector and trace at the given distance.
+    Input:
+    path_file_axisem: path of axisem .h5 archive
+    dist : distance of interest
+     
+    Output:
+    fe_iasp: sampling frequency 
+    time_iasp: time vector of the archive
+    dist_iasp: distance vector of the archive
+    spectrum_synth: synthetic spectra """
+    h5_file = h5py.File(path_file_axisem, mode = 'r')
+    fe_iasp = h5_file['_metadata']['fe'][()].astype(np.single)
+    time_iasp = h5_file['_metadata']['time'][:].astype(np.single)
+    N = len(time_iasp)
+    freq_iasp = h5_file['_metadata']['freq'][:].astype(np.single)
+    index_freq = np.squeeze(np.argwhere(np.logical_and(freq_iasp>=0, freq_iasp<=2.)))
+    freq_iasp = freq_iasp[index_freq]
+    dist_iasp = h5_file['_metadata']['dist'][()].astype(np.single)
+    spectrum_synth = np.zeros((len(dist_iasp), len(freq_iasp))).astype(np.csingle)
+    for i, distance in enumerate(dist_iasp):
+        spectrum_synth[i,:] = h5_file['L']['SYNTH%03d.00'%(distance*10)][comp][index_freq].astype(np.csingle)
+    h5_file.close() 
+    spectrum_synth = xr.DataArray(spectrum_synth, coords={'distance':dist_iasp, 'frequency':freq_iasp})
+    return fe_iasp, freq_iasp, time_iasp, dist_iasp, spectrum_synth
 
 ## Create Date Vect
 def create_date_vect(dates):
@@ -65,163 +186,6 @@ def create_date_vect(dates):
         year, month, day, hour = date.year, date.month, date.day, date.hour
         date_vect[i] = [year, month, day, hour]
     return date_vect
-
-### Create GF Archive via syngine
-def create_virtual_stations_file(file_name = 'virtual_stations_file.txt'):
-    """Create station file"""
-    distance = np.arange(0, 180.1, 0.1)
-    n = len(distance)
-    datacenter = "CUSTOM"
-    net = "AA"
-    sta = ["STA%03d"%i for i in range(n)]
-    lat = np.zeros(n)   #[round(90-distance[i], 1) for i in range(n)]
-    lon = [round(distance[i], 1) for i in range(n)]
-    loc = "--"
-    elev = np.zeros(n)
-    depth = np.zeros(n)
-    
-    # Write station file .txt
-    f = open(file_name, 'w')
-    for i in range(n):
-        f.write("CUSTOM   AA   %s   --   %s   %s   %s   %s\n"%(sta[i], lat[i], lon[i], elev[i], depth[i]))
-    f.close()
-    
-def create_syngine_archive(station_file_path ='virtual_stations_file.txt', sourcelongitude=0, sourcelatitude=90, dt=0.25, comp='Z'):
-    """Create syngine archive"""
-    
-    # check if file exists
-    distance = np.arange(0, 180.1, 0.1)
-    # Open Station Info
-    # Receivers
-    network = []
-    station = []
-    lat = []
-    lon = []
-    elev = []
-    depth = []
-
-    f = open(station_file_path)
-    lines = f.readlines()
-    for l in lines:
-        l = l.split('   ')
-        network.append(l[1])
-        station.append(l[2])
-        lat.append(float(l[4]))
-        lon.append(float(l[5]))
-        elev.append(float(l[6]))
-        depth.append(float(l[7][:-2]))
-    f.close()
-    model = "ak135f_1s"
-
-    N = len(station)
-    M = np.zeros((N, 7380)) 
-    
-    # Get synthetics
-    for i in tqdm(range(len(station))):
-        sta, rcv_lat, rcv_lon, net = station[i], lat[i], lon[i], network[i]
-        url = "http://service.iris.edu/irisws/syngine/1/query?"
-        url += "model=%s&"%(model)
-        url += "sourcelatitude=%d&sourcelongitude=%d&"%(sourcelatitude, sourcelongitude)
-        url += "sourcedepthinmeters=0&sourceforce=-1e10,0,0&"
-        url += "receiverlatitude=%d&receiverlongitude=%d&components=%s&"%(rcv_lat, rcv_lon, comp)
-        url += "units=displacement&dt=%f&format=miniseed"%(dt)
-
-        try:
-            st_synth = obspy.read(url)
-            st_synth.detrend("demean")
-            st_filt = st_synth.copy()
-            st_filt.filter("lowpass", freq=0.5, corners=3)
-            tr = st_filt[0]
-            dt = tr.stats.delta
-            start = tr.stats.starttime
-            end = tr.stats.endtime
-            time = np.arange(0, tr.stats.npts)*dt
-            M[i, :] = tr
-            # plt.figure()
-            # plt.plot(time, st_synth[0])
-            # plt.plot(time, tr)
-            # plt.show()
-            
-        except:
-            print('no data for %s'%station[i])
-            raise  
-    ## Save M as netcdf
-    ds = xr.DataArray(M, coords={'distance': distance, 'time': time}, dims=['distance', 'time'])
-    ds.to_netcdf('synthetics_%s_Z.nc'%model)
-    
-def create_spectrum_archive(archive_file = 'synthetics_iasp91_2s_Z.nc'):
-    ## Open synthetics
-    SYNTH = xr.open_dataarray(archive_file)
-    distance = SYNTH.distance
-    time = SYNTH.time.values
-    dt = time[1]-time[0]
-    fe = 1/dt
-    ## thiner distance step
-    new_distance = np.arange(0, 180.1, 0.1)
-    model_obspy = TauPyModel("ak135")
-    
-    WAVEFORMS = np.zeros((len(new_distance), len(time))).astype(float)
-    SPECTRUM = np.zeros((len(new_distance), len(time))).astype(complex)
-
-    for i, dist in tqdm(enumerate(new_distance)):
-        st = SYNTH.sel(distance=dist, method='nearest')
-        dist_original = st.distance 
-        arrival_original = model_obspy.get_travel_times(source_depth_in_km=0, distance_in_degree=dist_original, phase_list=["PP"])[0].time    
-        arrival_new = model_obspy.get_travel_times(source_depth_in_km=0, distance_in_degree=dist, phase_list=["PP"])[0].time
-        delay = arrival_new - arrival_original
-        new_st = st.values.copy()
-        new_st = apply_delay_f_domain(new_st, delay/dt)
-        
-        ## Plot synthetic
-        plt.figure()
-        plt.title('%.1f degree'%dist)
-        plt.plot(time, st, 'b', label='synthetic', alpha=0.5)
-        plt.plot(time, new_st, 'r', label='delayed', alpha=0.5)
-        plt.axvline(arrival_original, color='b')
-        plt.axvline(arrival_new, color='r')
-        plt.xlim(min(arrival_new, arrival_original)-500, max(arrival_new, arrival_original)+500)
-        plt.savefig("waveform_%fdegree.png"%dist, dpi=300)
-        WAVEFORMS[i, :] = new_st
-        
-        ## FFT
-        fft_synth = fft(new_st)
-        freq_vect = np.fft.fftfreq(len(time), dt)
-        # # # Plot
-        plt.subplot(211)
-        plt.plot(freq_vect, np.abs(fft_synth))
-        plt.subplot(212)
-        plt.plot(freq_vect, np.angle(fft_synth))
-        plt.savefig("spectrum_%fdegree.png"%dist, dpi=300)
-        
-        plt.close('all')
-        SPECTRUM[i, :] = fft_synth
-    ## Save as h5 file
-    h5_name = 'synthetics_ak135f_1s_Z_waveforms.h5'
-    h5_file = h5py.File(h5_name, 'w')
-    h5_file.create_dataset('WAVEFORMS', data=WAVEFORMS)
-    h5_file.create_dataset('distance', data=new_distance)
-    h5_file.create_dataset('time', data=time)
-    h5_file.close()
-    h5_name = 'synthetics_ak135f_1s_Z_spectrum.h5'
-    h5_file = h5py.File(h5_name, 'w')
-    h5_file.create_dataset('SPECTRUM', data=SPECTRUM)
-    h5_file.create_dataset('distance', data=new_distance)
-    h5_file.create_dataset('frequency', data=freq_vect)
-    h5_file.close()
-
-def open_archive(h5_name_spectrum = 'synthetics_iasp91_2s_Z_spectrum.h5', h5_name_waveforms = 'synthetics_iasp91_2s_Z_waveforms.h5'):
-    h5_file = h5py.File(h5_name_waveforms, 'r')
-    W = h5_file['WAVEFORMS'][:]
-    time = h5_file['time'][:]
-    distance = h5_file['distance'][:]
-    h5_file.close()
-    h5_file = h5py.File(h5_name_spectrum, 'r')
-    S = h5_file['SPECTRUM'][:]
-    distance = h5_file['distance'][:]
-    freq = h5_file['frequency'][:]
-    h5_file.close()
-    fe = 2*np.max(freq)
-    return fe, freq, time, distance, S, W
 
 def open_model(path_file_WW3, date_vect, N, fe, lon_slice=slice(-180, 180), lat_slice=slice(-78, 80)):
     """ Reads the WW3 model for ambient noise sources at a specific time and date. 
@@ -402,7 +366,7 @@ def ccf_computation(coords_staA, coords_staB, path_model, date_vect, spectrum_ax
     ## Correlation in Time Domain
     corr = ifft(corr_f.data).real
     corr = np.fft.fftshift(corr)
-    corr *= 1e-20
+    corr *= 1e-40
     time_corr = np.arange(-N//2, N//2)*1/fe
 
     corr = xr.DataArray(corr, dims=['time'], coords={'time': time_corr}, name='synthetic correlation')
