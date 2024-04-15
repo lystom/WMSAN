@@ -25,7 +25,7 @@ Here is the detail of its content:
 
 or
 
-```conda env creat --file env_notebook.yml```
+```conda env create --file env_notebook.yml```
 
 ## Packages Needed
 - [numpy](https://numpy.org/doc/stable/)
