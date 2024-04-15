@@ -93,26 +93,30 @@ def open_axisem(dist, path_file_axisem='./RUN_single_vertforce_iasp91_1.s_256c_3
     return trace_synth
 
 def taper_axisem_archive(time, distance, archive_name='./RUN_single_vertforce_iasp91_1.s_256c_3600.s.h5', umin = 2.5, umax = 3.5):
-    R = radius_earth*1e3  # Radius of the Earth in km
+    R = radius_earth*1e-3  # Radius of the Earth in km
     dt = time[1] - time[0]
     fe = 1/dt
     tapered_archive = np.zeros((len(distance), len(time)))
-    for i, dist in tqdm(enumerate(distance)):
+    for i, dist in enumerate(distance):
         dist_in_km = dist*np.pi*R/180
         tmin = dist_in_km/umax
         tmax = dist_in_km/umin
+        if tmax >= np.max(time):
+            tmax = np.max(time)
+        if tmin >= np.max(time):
+            continue
         dt_width = tmax - tmin
+        print(tmin, tmax, dt_width)
         if dt_width == 0.:
             dt_width = 20  # in seconds
         ## Taper
-        tukey = signal.windows.tukey(int(dt_width*fe), alpha=0.1)
+        tukey = signal.windows.tukey(int(round(dt_width*fe)), alpha=0.1)
         dirac = np.zeros(len(time))
         index = np.argmin(np.abs(time - (tmax + tmin)//2))
         dirac[index] = 1
         taper = signal.fftconvolve(dirac, tukey, mode='same')
         W = open_axisem(dist, archive_name)
         tapered_archive[i, :] = W*taper
-        
     ## Save tapered archive as h5 file
     h5_name_tapered = archive_name.replace('.s.h5', '_tapered.s.h5')
     h5_file = h5py.File(h5_name_tapered, 'w')
