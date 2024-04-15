@@ -14,7 +14,7 @@ Here is the detail of its content:
 - amplification_coeffs.ipynb : Jupyter Notebook computing Longuet-Higgins amplification coefficients maps.
 
 - microseismic_source.ipynb: Jupyter Notebook computing and/or saving the equivalent vertical force, necessary to run when using synthetic_CCF.ipynb.  
-- synthetic_CCF.ipynb : Jupyter Notebook computing synthetic cross-correlations using equivalent force computed in microseismic_sources.ipynb and precomputed waveforms in Syngine.
+- synthetic_CCF.ipynb : Jupyter Notebook computing synthetic cross-correlations using equivalent force computed in microseismic_sources.ipynb and precomputed waveforms (default in AxiSEM).
 - source_microseism.py : background functions for source maps.
 - synthetics.py: python background functions for synthetic_CCF.ipynb
 
