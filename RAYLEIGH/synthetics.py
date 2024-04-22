@@ -67,6 +67,7 @@ def get_synthetic_info(path_file_axisem='./RUN_single_vertforce_iasp91_1.s_256c_
         - N: int
     """
     h5_file = h5py.File(path_file_axisem)
+    print(h5_file.keys())
     fe = h5_file['_metadata']['fe'][()]
     dist = 0.1
     trace = h5_file['L']['SYNTH%03d.00'%(dist*10)][comp][:].astype(np.single)
@@ -105,10 +106,7 @@ def taper_axisem_archive(time, distance, archive_name='./RUN_single_vertforce_ia
             tmax = np.max(time)
         if tmin >= np.max(time):
             continue
-        dt_width = tmax - tmin
-        print(tmin, tmax, dt_width)
-        if dt_width == 0.:
-            dt_width = 20  # in seconds
+        dt_width = tmax - tmin + 50
         ## Taper
         tukey = signal.windows.tukey(int(round(dt_width*fe)), alpha=0.1)
         dirac = np.zeros(len(time))
@@ -118,7 +116,7 @@ def taper_axisem_archive(time, distance, archive_name='./RUN_single_vertforce_ia
         W = open_axisem(dist, archive_name)
         tapered_archive[i, :] = W*taper
     ## Save tapered archive as h5 file
-    h5_name_tapered = archive_name.replace('.s.h5', '_tapered.s.h5')
+    h5_name_tapered = archive_name.replace('s.h5', '_tapered.s.h5')
     h5_file = h5py.File(h5_name_tapered, 'w')
     h5_file.create_dataset('WAVEFORMS', data=tapered_archive)
     h5_file.create_dataset('time', data=time)
