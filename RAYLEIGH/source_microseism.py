@@ -551,7 +551,11 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
         hour = date.hour
 
         file_netcdf = path_netcdf + 'rayleigh_SDF_%d%02d%02d%02d.nc'%(year, month, day, hour)
-        ds = xr.open_mfdataset(file_netcdf, combine='by_coords')
+        try:
+            ds = xr.open_mfdataset(file_netcdf, combine='by_coords')
+        except:
+            print("File %s does not exist"%(file_netcdf))
+            continue
         ## Compute RMS Displacement
         sdf_f = ds.sdf_f
         F_delta = np.zeros((sdf_f.shape))
