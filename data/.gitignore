@@ -1,0 +1,32 @@
+# Netcdf Files #
+###################
+*.nc
+!C.nc
+!c*.nc
+# HDF5 Files #
+###################
+*.h5
+
+# Images #
+############
+*.png
+*.jpg
+
+# Packages #
+############
+# it's better to unpack these files and commit the raw source
+# git has its own built in compression methods
+*.tar
+*.zip
+
+# OS generated files #
+######################
+.DS_Store
+../.DS_Store
+../../.DS_Store
+
+# PyCache #
+###########
+
+__pycache__/
+
