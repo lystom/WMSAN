@@ -28,13 +28,12 @@ ww3-source-maps/
 │       ├── rayleigh_source.ipynb
 │       └── spectrograms.ipynb    
 |-- data/
-│   └── wwsan/
-│       ├── C.nc
-│       ├── cP.nc
-│       ├── cS.nc
-│       ├── longuet_higgins.txt
-│       ├── stations_pair.txt
-│       └── ww3.07121700.dpt
+│   ├── C.nc
+│   ├── cP.nc
+│   ├── cS.nc
+│   ├── longuet_higgins.txt
+│   ├── stations_pair.txt
+│   └── ww3.07121700.dpt
 ```
 - src/ : contains all Python scripts and subfunctions.
 - notebooks/ : contains Jupyter Notebooks with detailed examples on how to use this package. Rayleigh waves and body waves are separated.
