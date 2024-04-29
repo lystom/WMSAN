@@ -23,6 +23,6 @@ __pycache__/
 
 # Build Directory #
 ###################
-./build
-./src/wwsan.egg-info
-./wwsan.egg-info
+build/
+src/wwsan.egg-info/
+wwsan.egg-info/
