@@ -1,0 +1,41 @@
+[build-system]
+requires = [
+    "setuptools>=61.2",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wwsan"
+version = "2024.0.0"
+authors = [
+  { name="Lisa Tomasetto", email="lisa.tomasetto@gmail.com" },
+]
+description = "Compute seismic sources of ambient noise using WAVEWATCHIII hindcast outputs."
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = ["numpy", 
+                "pandas",
+                "scipy",
+                "h5py",
+                "xarray",
+                "dask",
+                "matplotlib",
+                "pyproj",
+                "tqdm",
+                "netcdf4",
+                "cartopy",
+                "obspy",
+                "ipykernel",
+                "notebook",
+                "datetime"]
+
+
+[project.urls]
+Homepage = "https://github.com/lystom/WWSAN"
+Issues = "https://github.com/lystom/WWSAN/issues"
+Wiki = "https://github.com/lystom/WWSAN/wiki"
