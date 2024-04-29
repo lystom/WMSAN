@@ -38,7 +38,7 @@ ww3-source-maps/
 ```
 - src/ : contains all Python scripts and subfunctions.
 - notebooks/ : contains Jupyter Notebooks with detailed examples on how to use this package. Rayleigh waves and body waves are separated.
-- data/ contains additional files used in computation
+- data/ contains additional files used in computation.
 
 ## Installation
 The package will soon be available on [PyPI](https://pypi.org/).
@@ -46,19 +46,18 @@ The package will soon be available on [PyPI](https://pypi.org/).
 In the meantime, you can follow the next steps:
 1. Clone the repository 
 ``` 
-$ cd path_to_your_wwsan_directory/
-$ git clone https://gricad-gitlab.univ-grenoble-alpes.fr/tomasetl/ww3-source-maps.git 
-$ cd ww3-source-maps/
+cd path_to_your_wwsan_directory/
+git clone https://gricad-gitlab.univ-grenoble-alpes.fr/tomasetl/ww3-source-maps.git 
+cd ww3-source-maps/
 ````
 
 2. Create an environment and install 
-
-if you use conda environments:
+    if you use conda environments:
 ```
-$ conda create --name wwsan 
-$ conda activate wwsan
-$ conda install pip
-$ pip install .
+conda create --name wwsan 
+conda activate wwsan
+conda install pip
+pip install .
 ````
 
 otherwise
@@ -78,9 +77,9 @@ pip install .
 - [scipy](https://scipy.org/)
 - [pandas](https://pandas.pydata.org/pandas-docs/version/2.1.4/index.html)
 
-## Documentation
+# Documentation
 Documentation still under construction. Please refer to the Jupyter Notebooks for details on theory and how to use this repo.
 
-# Architecture of WWSAN Python Package
+## Architecture of WWSAN Python Package
 
 ![Scheme showing the different codes and Notebooks present in this repository and how they connect.](./package_archi.png)
