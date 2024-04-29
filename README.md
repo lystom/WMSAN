@@ -56,10 +56,21 @@ conda create --name wwsan
 conda activate wwsan
 conda install pip
 pip install .
-````
+```
+to deactivate your environment:
+```
+conda deactivate
+```
+
 - otherwise
 ```
-pip install .
+python3 -m venv venv
+source venv/bin/activate
+python3 -m pip install .
+```
+to deactivate your environment:
+```
+deactivate
 ```
 
 ### Dependencies
@@ -72,6 +83,8 @@ pip install .
 - [datetime](https://docs.python.org/3/library/datetime.html)
 - [scipy](https://scipy.org/)
 - [pandas](https://pandas.pydata.org/pandas-docs/version/2.1.4/index.html)
+- [dask](https://www.dask.org/)
+- [ipykernel](https://pypi.org/project/ipykernel/)
 
 # Documentation
 Documentation still under construction. Please refer to the Jupyter Notebooks for details on theory and how to use this repo.
