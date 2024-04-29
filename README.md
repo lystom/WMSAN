@@ -49,18 +49,15 @@ cd path_to_your_wwsan_directory/
 git clone https://gricad-gitlab.univ-grenoble-alpes.fr/tomasetl/ww3-source-maps.git 
 cd ww3-source-maps/
 ````
-
 2. Create an environment and install 
-    if you use conda environments:
+- if you use conda environments:
 ```
 conda create --name wwsan 
 conda activate wwsan
 conda install pip
 pip install .
 ````
-
-otherwise
-
+- otherwise
 ```
 pip install .
 ```
