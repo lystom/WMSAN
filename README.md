@@ -1,19 +1,12 @@
-# Recommended Install
+# WWSAN Python Package
 
-## for MacOSX
-```wget https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O ~/miniconda.sh```
-## for Linux
-```wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh```
-```bash ~/miniconda.sh```
-```source .bashrc```
+## Description
+This package is built to help computation of seismic ambient noise source maps and other products based on the WAVEWATCHIII hindcast output.
 
-## Install Environment 
-
-```conda create --name notebook --file pkgs.txt```
-
-or
-
-```conda env create --file env_notebook.yml```
+## Contents
+- src/ : contains all Python scripts and subfunctions.
+- data/ contains additional files used in computation
+- notebooks/ : contains Jupyter Notebooks with detailed examples on how to use this package. Rayleigh waves and body waves are separated.
 
 ## Packages Needed
 - [numpy](https://numpy.org/doc/stable/)
