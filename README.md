@@ -15,7 +15,7 @@ ww3-source-maps/
 │       ├── read_hs_p2l.py
 │       ├── subfunctions_body_waves.py
 │       ├── subfunctions_rayleigh_waves.py
-│       └── synthetics.ipynb
+│       └── synthetics.py
 |
 |-- notebooks/
 |   └── body_waves/
