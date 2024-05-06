@@ -32,6 +32,7 @@ wwsan.egg-info/
 notebooks/body_waves/F/
 notebooks/rayleigh_waves/F/
 notebooks/rayleigh_waves/CCF/
+notebooks/rayleigh_waves/SDF/
 
 # Heavy Files #
 ###############
