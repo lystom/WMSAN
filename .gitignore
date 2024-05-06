@@ -27,6 +27,12 @@ build/
 src/wwsan.egg-info/
 wwsan.egg-info/
 
+# Additionnal Directories #
+###########################
+notebooks/body_waves/F/
+notebooks/rayleigh_waves/F/
+notebooks/rayleigh_waves/CCF/
+
 # Heavy Files #
 ###############
 data/NOISE_vertforce_dirac_0-ak135f_1.s_3600s.h5
