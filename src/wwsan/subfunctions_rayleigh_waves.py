@@ -243,7 +243,16 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
         save = kwargs['save']
     else:
         save = False
-
+        
+    if 'vmin' in kwargs:
+        vmin = kwargs['vmin']
+    else:
+        vmin = 0
+        
+    if 'vmax' in kwargs:
+        vmax = kwargs['vmax']
+    else:
+        vmax = 1e-16
     
     ## Adapt latitude and longitude to values in parameters file
     lon_min, lon_max, lat_min, lat_max = extent[0], extent[1], extent[2], extent[3]
@@ -401,7 +410,7 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                         gl.xformatter = LONGITUDE_FORMATTER
                         gl.yformatter = LATITUDE_FORMATTER
                         ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
-                        SDF_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'SDF (m)', 'orientation': 'horizontal'}) #vmin=0, vmax=3e-17,
+                        SDF_plot.plot(ax=ax, transform=ccrs.PlateCarree(), vmin=vmin, vmax=vmax,  cbar_kwargs={'label':'SDF (m)', 'orientation': 'horizontal'}) 
                         plt.savefig('rayleigh_SDF_%d%02d%02dT%02d.png'%(iyear, imonth, iday, ih), dpi = 300, bbox_inches='tight')
 
                     ## Sum SDF
@@ -425,7 +434,7 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                     gl.xformatter = LONGITUDE_FORMATTER
                     gl.yformatter = LATITUDE_FORMATTER
                     ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
-                    SDF_plot.plot(ax=ax, transform=ccrs.PlateCarree(), vmin = 0, vmax = 1e-16, cbar_kwargs={'label':'SDF (m)', 'orientation': 'horizontal'})
+                    SDF_plot.plot(ax=ax, transform=ccrs.PlateCarree(), vmin = vmin, vmax = vmax, cbar_kwargs={'label':'SDF (m)', 'orientation': 'horizontal'})
                     plt.savefig('rayleigh_SDF_daily_%d%02d%02d.png'%(iyear, imonth, iday), dpi = 300, bbox_inches='tight')
                     plt.close('all')
                     SDF_daily = np.zeros((dpt1.shape))
@@ -443,7 +452,7 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                     gl.xformatter = LONGITUDE_FORMATTER
                     gl.yformatter = LATITUDE_FORMATTER
                     ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
-                    SDF_plot.plot(ax=ax, transform=ccrs.PlateCarree(), vmin = 0, vmax = 1e-15, cbar_kwargs={'label':'SDF (m)','orientation': 'horizontal'})
+                    SDF_plot.plot(ax=ax, transform=ccrs.PlateCarree(), vmin = vmin, vmax = vmax, cbar_kwargs={'label':'SDF (m)','orientation': 'horizontal'})
                     plt.savefig('rayleigh_SDF_monthly_%d%02d.png'%(iyear, imonth), dpi = 300, bbox_inches='tight')
                     #plt.show()
                     plt.close('all')
@@ -462,7 +471,7 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                     gl.yformatter = LATITUDE_FORMATTER
                     ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
                     fig.suptitle('Source of the power spectrum for the vertical displacement.Rayleigh waves.\nFrequency %.3f-%.3f Hz %d'%(f1, f2, iyear))
-                    SDF_plot.plot(ax=ax, transform=ccrs.PlateCarree(), vmin = 0, vmax = 1e-14, cbar_kwargs={'label':'SDF (m)','orientation': 'horizontal'})
+                    SDF_plot.plot(ax=ax, transform=ccrs.PlateCarree(), vmin = vmin, vmax = vmax, cbar_kwargs={'label':'SDF (m)','orientation': 'horizontal'})
                     plt.savefig('rayleigh_SDF_yearly_%d.png'%(iyear), dpi = 300, bbox_inches='tight')
                     plt.close('all')
                     SDF_yearly = np.zeros((dpt1.shape))
