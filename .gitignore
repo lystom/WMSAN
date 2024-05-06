@@ -37,4 +37,5 @@ notebooks/rayleigh_waves/CCF/
 ###############
 data/NOISE_vertforce_dirac_0-ak135f_1.s_3600s.h5
 data/ETOPO_2022_v1_60s_N90W180_bed.nc
-
+*.txt
+!stations_pair.txt
