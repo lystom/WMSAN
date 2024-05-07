@@ -26,7 +26,7 @@ ww3-source-maps/
 │       ├── microseismic_sources.ipynb
 │       ├── spectrograms.ipynb
 │       ├── rayleigh_source.ipynb
-│       └── spectrograms.ipynb    
+│       └── synthetic_CCF.ipynb    
 |-- data/
 │   ├── C.nc
 │   ├── cP.nc
