@@ -10,7 +10,7 @@ ww3-source-maps/
 |-- pyproject.toml
 |-- README.md
 |-- src/
-│   └── wwsan/
+│   └── wmsan/
 │       ├── readWW31.py
 │       ├── read_hs_p2l.py
 │       ├── subfunctions_body_waves.py
@@ -45,15 +45,15 @@ The package will soon be available on [PyPI](https://pypi.org/).
 In the meantime, you can follow the next steps:
 1. Clone the repository 
 ``` 
-cd path_to_your_wwsan_directory/
+cd path_to_your_wmsan_directory/
 git clone https://gricad-gitlab.univ-grenoble-alpes.fr/tomasetl/ww3-source-maps.git 
 cd ww3-source-maps/
 ````
 2. Create an environment and install 
 - if you use [Conda](https://docs.anaconda.com/free/miniconda/#quick-command-line-install) environments:
 ```
-conda create --name wwsan 
-conda activate wwsan
+conda create --name wmsan 
+conda activate wmsan
 conda install pip
 pip install .
 ```
@@ -89,6 +89,6 @@ deactivate
 # Documentation
 Documentation still under construction. Please refer to the Jupyter Notebooks for details on theory and how to use this repo.
 
-## Architecture of WWSAN Python Package
+## Architecture of WMSAN Python Package
 
 ![Scheme showing the different codes and Notebooks present in this repository and how they connect.](./package_archi.png)

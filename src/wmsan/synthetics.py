@@ -66,10 +66,14 @@ def get_synthetic_info(path_file_axisem='../../data/NOISE_vertforce_dirac_0-ak13
         - time: numpy.ndarray
         - N: int
     """
-    h5_file = h5py.File(path_file_axisem)
-    fe = h5_file['_metadata']['fe'][()]
-    dist = 0.1
-    trace = h5_file['L']['SYNTH%03d.00'%(dist*10)][comp][:].astype(np.single)
+    try:
+        h5_file = h5py.File(path_file_axisem)
+        fe = h5_file['_metadata']['fe'][()]
+        dist = 0.1
+        trace = h5_file['L']['SYNTH%03d.00'%(dist*10)][comp][:].astype(np.single)
+    except:
+        print('File not found', path_file_axisem, "Download the file from: \n", "Save in ../data/")
+        return None, None, None  
     time = np.arange(0, len(trace)*1/fe, 1/fe).astype(np.single)
     N = len(trace)
     h5_file.close()
@@ -87,9 +91,13 @@ def open_axisem(dist, path_file_axisem='../../data/NOISE_vertforce_dirac_0-ak135
     time_iasp: time vector of the archive
     trace_synth: synthetic trace at the given distance."""
     dist = np.round(dist, 1)
-    h5_file = h5py.File(path_file_axisem)
-    trace_synth = h5_file['L']['SYNTH%03d.00'%(dist*10)][comp][:].astype(np.single)
-    h5_file.close()
+    try:
+        h5_file = h5py.File(path_file_axisem)
+        trace_synth = h5_file['L']['SYNTH%03d.00'%(dist*10)][comp][:].astype(np.single)
+        h5_file.close()
+    except:
+        print('File not found', path_file_axisem, "Download the file from: \n", "Save in ../data/")
+        return None
     return trace_synth
 
 def taper_axisem_archive(time, distance, archive_name='../../data/NOISE_vertforce_dirac_0-ak135f_1.s_3600s.h5', umin = 2.5, umax = 3.5):

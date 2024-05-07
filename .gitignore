@@ -24,7 +24,7 @@ __pycache__/
 # Build Directory #
 ###################
 build/
-src/wwsan.egg-info/
+src/wmsan.egg-info/
 wwsan.egg-info/
 
 # Additionnal Directories #

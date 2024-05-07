@@ -121,24 +121,26 @@ def open_bathy(file_bathy, refined_bathymetry=False, extent=[-180, 180, -90, 90]
     zlon (xarray.DataArray): Longitude coordinates.
     zlat (xarray.DataArray): Latitude coordinates.
     """
-    [zlat, zlon, dpt1, var] = read_dpt(file_bathy) # load bathymetry file
     [lon_min, lon_max, lat_min, lat_max] = extent
-    
-    #convert to xarray
-    dpt1 = xr.DataArray(dpt1, coords={'latitude':zlat, 'longitude': zlon}, dims=['latitude', 'longitude'])
-    zlat = xr.DataArray(zlat, coords={'latitude':zlat}, dims=['latitude'])
-    zlon = xr.DataArray(zlon, coords={'longitude':zlon}, dims=['longitude'])
-
     if refined_bathymetry:
         # load refined bathymetry ETOPOv2
         file_bathy = '../../data/ETOPO_2022_v1_60s_N90W180_bed.nc'
-        ds = xr.open_mfdataset(file_bathy, combine='by_coords')
-        ds  = ds.rename({'lon':'longitude', 'lat': 'latitude'})
-        z = ds['z']
-        z *= -1 # ETOPOv2 to Depth
-        z = z.where(z>0, other=np.nan)
-        dpt1 = z.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
-    
+        try:
+            ds = xr.open_mfdataset(file_bathy, combine='by_coords')
+            ds  = ds.rename({'lon':'longitude', 'lat': 'latitude'})
+            z = ds['z']
+            z *= -1 # ETOPOv2 to Depth
+            z = z.where(z>0, other=np.nan)
+            dpt1 = z.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
+        except:
+            print("Refined bathymetry ETOPOv2 not found. \nYou can download it from:\n https://www.ngdc.noaa.gov/thredds/catalog/global/ETOPO2022/60s/60s_bed_elev_netcdf/catalog.html?dataset=globalDatasetScan/ETOPO2022/60s/60s_bed_elev_netcdf/ETOPO_2022_v1_60s_N90W180_bed.nc\nSave in ../data/")
+            return None, None, None
+    else:
+        [zlat, zlon, dpt1, var] = read_dpt(file_bathy) # load bathymetry file
+        #convert to xarray
+        dpt1 = xr.DataArray(dpt1, coords={'latitude':zlat, 'longitude': zlon}, dims=['latitude', 'longitude'])
+        zlat = xr.DataArray(zlat, coords={'latitude':zlat}, dims=['latitude'])
+        zlon = xr.DataArray(zlon, coords={'longitude':zlon}, dims=['longitude'])
     ## Mask nan values
     dpt1_mask = dpt1.where(np.isfinite(dpt1))
     zlon = dpt1_mask.longitude

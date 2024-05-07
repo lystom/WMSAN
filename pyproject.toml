@@ -5,12 +5,12 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "wwsan"
+name = "wmsan"
 version = "2024.0.1"
 authors = [
   { name="Lisa Tomasetto", email="lisa.tomasetto@gmail.com" },
 ]
-description = "Compute seismic sources of ambient noise using WAVEWATCHIII hindcast outputs."
+description = "Compute seismic sources of ambient noise using wave model hindcast outputs."
 readme = "README.md"
 requires-python = ">=3.8"
 classifiers = [
