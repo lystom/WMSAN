@@ -72,7 +72,7 @@ def get_synthetic_info(path_file_axisem='../../data/NOISE_vertforce_dirac_0-ak13
         dist = 0.1
         trace = h5_file['L']['SYNTH%03d.00'%(dist*10)][comp][:].astype(np.single)
     except:
-        print('File not found', path_file_axisem, "Download the file from: \n", "Save in ../data/")
+        print('File not found', path_file_axisem, "Download the file from: https://zenodo.org/records/11126562 \n", "Save in ../data/")
         return None, None, None  
     time = np.arange(0, len(trace)*1/fe, 1/fe).astype(np.single)
     N = len(trace)
@@ -96,7 +96,7 @@ def open_axisem(dist, path_file_axisem='../../data/NOISE_vertforce_dirac_0-ak135
         trace_synth = h5_file['L']['SYNTH%03d.00'%(dist*10)][comp][:].astype(np.single)
         h5_file.close()
     except:
-        print('File not found', path_file_axisem, "Download the file from: \n", "Save in ../data/")
+        print('File not found', path_file_axisem, "Download the file from: https://zenodo.org/records/11126562 \n", "Save in ../data/")
         return None
     return trace_synth
 
