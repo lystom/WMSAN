@@ -1,4 +1,4 @@
-# WWSAN Python Package
+# WMSAN Python Package
 
 ## Description
 This package is built to help computation of seismic ambient noise source maps and other products based on the WAVEWATCHIII hindcast output.
