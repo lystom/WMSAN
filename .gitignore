@@ -36,14 +36,14 @@ notebooks/rayleigh_waves/SDF/
 
 # Heavy Files #
 ###############
-data/NOISE_vertforce_dirac_0-ak135f_1.s_3600s.h5
-data/ETOPO_2022_v1_60s_N90W180_bed.nc
+data/*.h5
+data/20*/
+data/19*/
 *.txt
-data/cP_*.nc
-data/cS_*.nc
-data/C_*.nc
+data/*.nc
 
 !data/C.nc
 !data/cP.nc
-!data/cS.nc 
+!data/cS.nc
+!data/LOPS_WW3-GLOB-30M_dataref_dpt.nc 
 !stations_pair.txt
