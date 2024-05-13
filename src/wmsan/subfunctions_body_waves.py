@@ -37,7 +37,7 @@ from pyproj import Geod
 from numpy.lib.scimath import sqrt as csqrt
 
 from wwsan.read_hs_p2l import read_hs, read_p2l
-from wwsan.readWW31 import read_dpt
+#from wwsan.readWW31 import read_dpt
 
 
 plt.style.use("ggplot")
@@ -107,7 +107,7 @@ def download_ww3_local(YEAR, MONTH, ftp_path_to_files="ftp://ftp.ifremer.fr/ifre
 ################ OPEN BATHYMETRY FILE ############################################
 ##################################################################################
 
-def open_bathy(file_bathy, refined_bathymetry=False, extent=[-180, 180, -90, 90]):
+def open_bathy(file_bathy = '../../data/LOPS_WW3-GLOB-30M_202002_p2l.nc', refined_bathymetry=False, extent=[-180, 180, -90, 90]):
     """
     Open bathymetry file and optionally refine bathymetry using ETOPOv2 dataset. 
 
@@ -122,7 +122,10 @@ def open_bathy(file_bathy, refined_bathymetry=False, extent=[-180, 180, -90, 90]
     zlat (xarray.DataArray): Latitude coordinates.
     """
     [lon_min, lon_max, lat_min, lat_max] = extent
-    if refined_bathymetry:
+    ds = xr.open_mfdataset(file_bathy, combine='by_coords')
+    dpt1 = ds['dpt'].squeeze(dim = 'time', drop=True)
+    dpt1 = dpt1.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
+    if refined_bathymetry or file_bathy == '../../data/ETOPO_2022_v1_60s_N90W180_bed.nc':
         # load refined bathymetry ETOPOv2
         file_bathy = '../../data/ETOPO_2022_v1_60s_N90W180_bed.nc'
         try:
@@ -131,17 +134,11 @@ def open_bathy(file_bathy, refined_bathymetry=False, extent=[-180, 180, -90, 90]
             z = ds['z']
             z *= -1 # ETOPOv2 to Depth
             z = z.where(z>0, other=np.nan)
-            dpt1 = z.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
+            dpt1 = z.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))         
         except:
             print("Refined bathymetry ETOPOv2 not found. \nYou can download it from:\n https://www.ngdc.noaa.gov/thredds/catalog/global/ETOPO2022/60s/60s_bed_elev_netcdf/catalog.html?dataset=globalDatasetScan/ETOPO2022/60s/60s_bed_elev_netcdf/ETOPO_2022_v1_60s_N90W180_bed.nc\nSave in ../data/")
             return None, None, None
-    else:
-        [zlat, zlon, dpt1, var] = read_dpt(file_bathy) # load bathymetry file
-        #convert to xarray
-        dpt1 = xr.DataArray(dpt1, coords={'latitude':zlat, 'longitude': zlon}, dims=['latitude', 'longitude'])
-        zlat = xr.DataArray(zlat, coords={'latitude':zlat}, dims=['latitude'])
-        zlon = xr.DataArray(zlon, coords={'longitude':zlon}, dims=['longitude'])
-    ## Mask nan values
+    ## Mask nan values    
     dpt1_mask = dpt1.where(np.isfinite(dpt1))
     zlon = dpt1_mask.longitude
     zlat = dpt1_mask.latitude
@@ -390,7 +387,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
     # check for refined bathymetry
     if abs(zlon[0] - zlon[1]) == 0.5:
         ds_ampli = xr.open_dataset('../../data/c%s.nc'%(wave_type)).astype('float64')
-        amplification_coeff = ds_ampli['C%s'%wave_type]
+        amplification_coeff = ds_ampli['c%s'%wave_type]
         refined = False
     else:
         print("Refined bathymetry grid \n PLEASE RUN amplification_coefficients.ipynb before running this script")
@@ -455,7 +452,6 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
                     xfr = np.exp(np.log(freq_ocean[-1]/freq_ocean[0])/(nf-1))  # determines the xfr geometric progression factor
                     df = freq_ocean*0.5*(xfr-1/xfr)  # frequency interval in wave model times 2
                     freq_seismic = 2*freq_ocean  # ocean to seismic waves freq
-                
                     ## Check units of the model, depends on version
                     if unit1 == 'log10(Pa2 m2 s+1E-12':
                         p2l = np.exp(lg10*p2l)  - (1e-12-1e-16)
@@ -479,7 +475,8 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
                             # interpolate Fp
                             Fp = Fp.interp(longitude=zlon, latitude=zlat, method='linear')
                         
-                        amplification_coeff = amplification_coeff.sel(frequency = freq_seismic, latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
+                        amplification_coeff = amplification_coeff.sel(frequency = freq_seismic, method='nearest', tolerance=0.00001)
+                        amplification_coeff = amplification_coeff.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
                         amplification_coeff = amplification_coeff.reindex_like(Fp, method='nearest', tolerance=0.01)
                         F_f = Fp*amplification_coeff**2
                         F = F_f.copy()

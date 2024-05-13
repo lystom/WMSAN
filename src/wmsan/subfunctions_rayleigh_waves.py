@@ -36,7 +36,7 @@ from calendar import monthrange
 from pyproj import Geod
 
 from wwsan.read_hs_p2l import read_hs, read_p2l
-from wwsan.readWW31 import read_dpt
+#from wwsan.readWW31 import read_dpt
 
 ## Set font size parameters to make readable figures
 plt.style.use("ggplot")
@@ -136,7 +136,7 @@ def download_ww3_local(YEAR, MONTH, ftp_path_to_files="ftp://ftp.ifremer.fr/ifre
     print("current directory : ", os.getcwd())
 
 
-def open_bathy(file_bathy, refined_bathymetry=False, extent=[-180, 180, -90, 90]):
+def open_bathy(file_bathy = '../../data/LOPS_WW3-GLOB-30M_202002_p2l.nc', refined_bathymetry=False, extent=[-180, 180, -90, 90]):
     """
     Open bathymetry file and optionally refine bathymetry using ETOPOv2 dataset. 
 
@@ -151,7 +151,10 @@ def open_bathy(file_bathy, refined_bathymetry=False, extent=[-180, 180, -90, 90]
     zlat (xarray.DataArray): Latitude coordinates.
     """
     [lon_min, lon_max, lat_min, lat_max] = extent
-    if refined_bathymetry:
+    ds = xr.open_mfdataset(file_bathy, combine='by_coords')
+    dpt1 = ds['dpt'].squeeze(dim='time', drop=True)
+    dpt1 = dpt1.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
+    if refined_bathymetry or file_bathy == '../../data/ETOPO_2022_v1_60s_N90W180_bed.nc':
         # load refined bathymetry ETOPOv2
         file_bathy = '../../data/ETOPO_2022_v1_60s_N90W180_bed.nc'
         try:
@@ -160,17 +163,11 @@ def open_bathy(file_bathy, refined_bathymetry=False, extent=[-180, 180, -90, 90]
             z = ds['z']
             z *= -1 # ETOPOv2 to Depth
             z = z.where(z>0, other=np.nan)
-            dpt1 = z.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
+            dpt1 = z.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))         
         except:
             print("Refined bathymetry ETOPOv2 not found. \nYou can download it from:\n https://www.ngdc.noaa.gov/thredds/catalog/global/ETOPO2022/60s/60s_bed_elev_netcdf/catalog.html?dataset=globalDatasetScan/ETOPO2022/60s/60s_bed_elev_netcdf/ETOPO_2022_v1_60s_N90W180_bed.nc\nSave in ../data/")
             return None, None, None
-    else:
-        [zlat, zlon, dpt1, var] = read_dpt(file_bathy) # load bathymetry file
-        #convert to xarray
-        dpt1 = xr.DataArray(dpt1, coords={'latitude':zlat, 'longitude': zlon}, dims=['latitude', 'longitude'])
-        zlat = xr.DataArray(zlat, coords={'latitude':zlat}, dims=['latitude'])
-        zlon = xr.DataArray(zlon, coords={'longitude':zlon}, dims=['longitude'])
-    ## Mask nan values
+    ## Mask nan values    
     dpt1_mask = dpt1.where(np.isfinite(dpt1))
     zlon = dpt1_mask.longitude
     zlat = dpt1_mask.latitude
