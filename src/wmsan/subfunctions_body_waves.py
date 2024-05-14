@@ -36,9 +36,7 @@ from calendar import monthrange
 from pyproj import Geod
 from numpy.lib.scimath import sqrt as csqrt
 
-from wwsan.read_hs_p2l import read_hs, read_p2l
-#from wwsan.readWW31 import read_dpt
-
+from wmsan.read_hs_p2l import read_hs, read_p2l
 
 plt.style.use("ggplot")
 SMALL_SIZE = 18
@@ -56,7 +54,7 @@ plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 ############# DOWNLOAD WW3 FILES #################################################
 ##################################################################################
 
-def download_ww3_local(YEAR, MONTH, ftp_path_to_files="ftp://ftp.ifremer.fr/ifremer/dataref/ww3/GLOBMULTI_ERA5_GLOBCUR_01/GLOB-30M/2020/FIELD_NC/", ww3_local_path= '../../data/ww3/'):
+def download_ww3_local(YEAR, MONTH, ftp_path_to_files="ftp://ftp.ifremer.fr/ifremer/dataref/ww3/GLOBMULTI_ERA5_GLOBCUR_01/GLOB-30M/2020/FIELD_NC/", ww3_local_path= '../../data/ww3/', prefix = "GLOB-30M"):
     
     """
     Download WW3 files for a given year and month from the specified FTP path to a local directory.
@@ -86,8 +84,8 @@ def download_ww3_local(YEAR, MONTH, ftp_path_to_files="ftp://ftp.ifremer.fr/ifre
         MONTH = np.arange(1, 13)
     for m in MONTH:
         print("Downloading can take some time...\n")
-        file_p2l = ftp_path_to_files + "LOPS_WW3-GLOB-30M_%d%02d_p2l.nc"%(YEAR, m) # p2l file
-        check_file_p2l = ww3_local_path + "LOPS_WW3-GLOB-30M_%d%02d_p2l.nc"%(YEAR, m) # p2l file
+        file_p2l = ftp_path_to_files + "LOPS_WW3-%s_%d%02d_p2l.nc"%(prefix, YEAR, m) # p2l file
+        check_file_p2l = ww3_local_path + "LOPS_WW3-%s_%d%02d_p2l.nc"%(prefix, YEAR, m) # p2l file
         
         if os.path.exists(check_file_p2l):
             print("-----------------------------------------------------------------\n")
@@ -298,7 +296,7 @@ def ampli(dpt1, f, rp=[], layers=[1500, 1000, 5540, 3200, 2500], theta = radians
 ################# LOOP WW3 SOURCES ###############################################
 ##################################################################################
 
-def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [1/12, 1/2], **kwargs):
+def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [1/12, 1/2], c_file = "../../data/cP.nc", prefix = "GLOB-30M", **kwargs):
     """
     Input:
 	paths = [file_bathy, ww3_local_path]: paths of additional files bathymetry, ww3 p2l file
@@ -327,7 +325,6 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
     # Constants
     radius = 6.371*1e6 # radius of the earth in meters
     lg10 = log(10) # log of 10
-    res_mod = radians(0.5) # angular resolution of the model
     #
     f1 = parameters[0]
     f2 = parameters[1]
@@ -385,24 +382,23 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
     
     ## Open Amplification Coefficient
     # check for refined bathymetry
-    if abs(zlon[0] - zlon[1]) == 0.5:
+    res_bathy = abs(zlon[1] - zlon[0])
+    if res_bathy == 0.5:
         ds_ampli = xr.open_dataset('../../data/c%s.nc'%(wave_type)).astype('float64')
         amplification_coeff = ds_ampli['c%s'%wave_type]
         refined = False
     else:
         print("Refined bathymetry grid \n PLEASE RUN amplification_coefficients.ipynb before running this script")
-        ds_ampli = xr.open_dataset('../../data/c%s_custom.nc'%(wave_type)).astype('float64')
+        ds_ampli = xr.open_dataset(c_file).astype('float64')
         amplification_coeff = ds_ampli['c%s'%wave_type]        
         refined = True
     
     ## Surface Element
     msin = np.array([np.sin(np.pi/2 - np.radians(zlat))]).T
     ones = np.ones((1, len(zlon)))
-    if refined:
-        res_mod = radians(abs(zlat[1] - zlat[0]))
+    res_mod = radians(abs(zlat[1] - zlat[0]))
     dA = radius**2*res_mod**2*np.dot(msin,ones)
-
-        
+     
     ## Loop over dates
     YEAR = date_vec[0]
     MONTH = date_vec[1]
@@ -419,7 +415,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
         for imonth in MONTH:
             TOTAL_month = np.zeros(dpt1.shape)  # Initiate monthly source of Rayleigh wave matrix
             daymax = monthrange(iyear,imonth)[1]
-            filename_p2l = '%s/LOPS_WW3-GLOB-30M_%d%02d_p2l.nc'%(ww3_local_path, iyear, imonth)
+            filename_p2l = '%s/LOPS_WW3-%s_%d%02d_p2l.nc'%(ww3_local_path, prefix, iyear, imonth)
             print("File WW3 ", filename_p2l)
             try:
                 day = np.array(DAY)
@@ -471,10 +467,10 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
                         Fp = Fp.where(np.isfinite(Fp))
                         Fp = Fp.drop('frequency')
                         Fp.coords['frequency'] = freq_seismic
-                        if refined == True:
+                        res_p2l = abs(Fp.longitude[1]-Fp.longitude[0])
+                        if res_bathy != res_p2l:
                             # interpolate Fp
                             Fp = Fp.interp(longitude=zlon, latitude=zlat, method='linear')
-                        
                         amplification_coeff = amplification_coeff.sel(frequency = freq_seismic, method='nearest', tolerance=0.00001)
                         amplification_coeff = amplification_coeff.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
                         amplification_coeff = amplification_coeff.reindex_like(Fp, method='nearest', tolerance=0.01)
