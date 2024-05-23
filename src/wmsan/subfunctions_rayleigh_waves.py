@@ -87,7 +87,7 @@ def site_effect(z, f, zlat, zlon, vs_crust=2.8, path='../../data/longuet_higgins
     C = xr.DataArray(C, dims=('frequency','latitude', 'longitude'), coords={'frequency': f,'latitude': zlat, 'longitude': zlon})
     return C
 
-def download_ww3_local(YEAR, MONTH, ftp_path_to_files="ftp://ftp.ifremer.fr/ifremer/dataref/ww3/GLOBMULTI_ERA5_GLOBCUR_01/GLOB-30M/2020/FIELD_NC/", ww3_local_path= '../../data/ww3/', prefix = "GLOB-30M"):
+def download_ww3_local(YEAR, MONTH, ftp_path_to_files="ftp://ftp.ifremer.fr/ifremer/dataref/ww3/GLOBMULTI_ERA5_GLOBCUR_01/GLOB-30M/2020/FIELD_NC/", ww3_local_path= '../../data/ww3/', prefix = "WW3-GLOB-30M"):
     
     """
     Download WW3 files for a given year and month from the specified FTP path to a local directory.
@@ -117,8 +117,8 @@ def download_ww3_local(YEAR, MONTH, ftp_path_to_files="ftp://ftp.ifremer.fr/ifre
         MONTH = np.arange(1, 13)
     for m in MONTH:
         print("Downloading can take some time...\n")
-        file_p2l = ftp_path_to_files + "LOPS_WW3-%s_%d%02d_p2l.nc"%(prefix, YEAR, m) # p2l file
-        check_file_p2l = ww3_local_path + "LOPS_WW3-%s_%d%02d_p2l.nc"%(prefix, YEAR, m) # p2l file
+        file_p2l = ftp_path_to_files + "%s_%d%02d_p2l.nc"%(prefix, YEAR, m) # p2l file
+        check_file_p2l = ww3_local_path + "%s_%d%02d_p2l.nc"%(prefix, YEAR, m) # p2l file
         
         if os.path.exists(check_file_p2l):
             print("-----------------------------------------------------------------\n")
@@ -135,7 +135,7 @@ def download_ww3_local(YEAR, MONTH, ftp_path_to_files="ftp://ftp.ifremer.fr/ifre
     print("current directory : ", os.getcwd())
 
 
-def open_bathy(file_bathy = '../../data/LOPS_WW3-GLOB-30M_202002_p2l.nc', refined_bathymetry=False, extent=[-180, 180, -90, 90]):
+def open_bathy(file_bathy = '../../data/WW3-GLOB-30M_202002_p2l.nc', refined_bathymetry=False, extent=[-180, 180, -90, 90]):
     """
     Open bathymetry file and optionally refine bathymetry using ETOPOv2 dataset. 
 
@@ -172,7 +172,7 @@ def open_bathy(file_bathy = '../../data/LOPS_WW3-GLOB-30M_202002_p2l.nc', refine
     zlat = dpt1_mask.latitude
     return dpt1_mask, zlon, zlat
 
-def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [2.8, 2830, 1/12, 0.2], prefix = "GLOB-30M", **kwargs):
+def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [2.8, 2830, 1/12, 0.2], prefix = "WW3-GLOB-30M", **kwargs):
     """
     Input:
 	paths = [file_bathy, ww3_local_path, longuet_higgins_file]:
@@ -272,7 +272,7 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
         for imonth in MONTH:
             TOTAL_month = np.zeros(dpt1.shape)  # Initiate monthly source of Rayleigh wave matrix
             daymax = monthrange(iyear,imonth)[1]
-            filename_p2l = '%s/LOPS_WW3-%s_%d%02d_p2l.nc'%(ww3_local_path, prefix, iyear, imonth)
+            filename_p2l = '%s/%s_%d%02d_p2l.nc'%(ww3_local_path, prefix, iyear, imonth)
             print("File WW3 ", filename_p2l)
             try:
                 day = np.array(DAY)
@@ -571,7 +571,7 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
     return
 
 
-def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [1/12, 1/2], c_file = '../../data/C.nc', prefix = 'GLOB-30M', **kwargs):
+def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [1/12, 1/2], c_file = '../../data/C.nc', prefix = 'WW3-GLOB-30M', **kwargs):
     """
     Input:
 	paths = [file_bathy, ww3_local_path]: paths of additional files bathymetry, ww3 p2l file
@@ -689,7 +689,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
         for imonth in MONTH:
             TOTAL_month = np.zeros(dpt1.shape)  # Initiate monthly source of Rayleigh wave matrix
             daymax = monthrange(iyear,imonth)[1]
-            filename_p2l = '%s/LOPS_WW3-%s_%d%02d_p2l.nc'%(ww3_local_path, prefix, iyear, imonth)
+            filename_p2l = '%s/%s_%d%02d_p2l.nc'%(ww3_local_path, prefix, iyear, imonth)
             print("File WW3 ", filename_p2l)
             try:
                 day = np.array(DAY)

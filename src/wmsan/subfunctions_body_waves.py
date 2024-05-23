@@ -54,7 +54,7 @@ plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 ############# DOWNLOAD WW3 FILES #################################################
 ##################################################################################
 
-def download_ww3_local(YEAR, MONTH, ftp_path_to_files="ftp://ftp.ifremer.fr/ifremer/dataref/ww3/GLOBMULTI_ERA5_GLOBCUR_01/GLOB-30M/2020/FIELD_NC/", ww3_local_path= '../../data/ww3/', prefix = "GLOB-30M"):
+def download_ww3_local(YEAR, MONTH, ftp_path_to_files="ftp://ftp.ifremer.fr/ifremer/dataref/ww3/GLOBMULTI_ERA5_GLOBCUR_01/GLOB-30M/2020/FIELD_NC/", ww3_local_path= '../../data/ww3/', prefix = "WW3-GLOB-30M"):
     
     """
     Download WW3 files for a given year and month from the specified FTP path to a local directory.
@@ -84,8 +84,8 @@ def download_ww3_local(YEAR, MONTH, ftp_path_to_files="ftp://ftp.ifremer.fr/ifre
         MONTH = np.arange(1, 13)
     for m in MONTH:
         print("Downloading can take some time...\n")
-        file_p2l = ftp_path_to_files + "LOPS_WW3-%s_%d%02d_p2l.nc"%(prefix, YEAR, m) # p2l file
-        check_file_p2l = ww3_local_path + "LOPS_WW3-%s_%d%02d_p2l.nc"%(prefix, YEAR, m) # p2l file
+        file_p2l = ftp_path_to_files + "%s_%d%02d_p2l.nc"%(prefix, YEAR, m) # p2l file
+        check_file_p2l = ww3_local_path + "%s_%d%02d_p2l.nc"%(prefix, YEAR, m) # p2l file
         
         if os.path.exists(check_file_p2l):
             print("-----------------------------------------------------------------\n")
@@ -105,7 +105,7 @@ def download_ww3_local(YEAR, MONTH, ftp_path_to_files="ftp://ftp.ifremer.fr/ifre
 ################ OPEN BATHYMETRY FILE ############################################
 ##################################################################################
 
-def open_bathy(file_bathy = '../../data/LOPS_WW3-GLOB-30M_202002_p2l.nc', refined_bathymetry=False, extent=[-180, 180, -90, 90]):
+def open_bathy(file_bathy = '../../data/WW3-GLOB-30M_202002_p2l.nc', refined_bathymetry=False, extent=[-180, 180, -90, 90]):
     """
     Open bathymetry file and optionally refine bathymetry using ETOPOv2 dataset. 
 
@@ -296,7 +296,7 @@ def ampli(dpt1, f, rp=[], layers=[1500, 1000, 5540, 3200, 2500], theta = radians
 ################# LOOP WW3 SOURCES ###############################################
 ##################################################################################
 
-def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [1/12, 1/2], c_file = "../../data/cP.nc", prefix = "GLOB-30M", **kwargs):
+def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [1/12, 1/2], c_file = "../../data/cP.nc", prefix = "WW3-GLOB-30M", **kwargs):
     """
     Input:
 	paths = [file_bathy, ww3_local_path]: paths of additional files bathymetry, ww3 p2l file
@@ -415,7 +415,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
         for imonth in MONTH:
             TOTAL_month = np.zeros(dpt1.shape)  # Initiate monthly source of Rayleigh wave matrix
             daymax = monthrange(iyear,imonth)[1]
-            filename_p2l = '%s/LOPS_WW3-%s_%d%02d_p2l.nc'%(ww3_local_path, prefix, iyear, imonth)
+            filename_p2l = '%s/%s_%d%02d_p2l.nc'%(ww3_local_path, prefix, iyear, imonth)
             print("File WW3 ", filename_p2l)
             try:
                 day = np.array(DAY)
@@ -471,7 +471,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
                         if res_bathy != res_p2l:
                             # interpolate Fp
                             Fp = Fp.interp(longitude=zlon, latitude=zlat, method='linear')
-                        amplification_coeff = amplification_coeff.sel(frequency = freq_seismic, method='nearest', tolerance=0.00001)
+                        amplification_coeff = amplification_coeff.sel(frequency = freq_seismic, method='nearest', tolerance=0.01)
                         amplification_coeff = amplification_coeff.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
                         amplification_coeff = amplification_coeff.reindex_like(Fp, method='nearest', tolerance=0.01)
                         F_f = Fp*amplification_coeff**2
