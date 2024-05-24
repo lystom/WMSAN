@@ -228,11 +228,10 @@ def open_model(path_file_WW3, date_vect, N, fe, lon_slice=slice(-180, 180), lat_
     
     ## Interpolate over frequency range
     force_0 = xr.DataArray(np.zeros((len(ww3_data.longitude), len(ww3_data.latitude), 1)), coords={'longitude':ww3_data.longitude, 'latitude': ww3_data.latitude, 'frequency': [0]})
-    force_2 = xr.DataArray(np.zeros((len(ww3_data.longitude), len(ww3_data.latitude), 1)), coords={'longitude':ww3_data.longitude, 'latitude': ww3_data.latitude, 'frequency': [0.7]})
+    force_2 = xr.DataArray(np.zeros((len(ww3_data.longitude), len(ww3_data.latitude), 1)), coords={'longitude':ww3_data.longitude, 'latitude': ww3_data.latitude, 'frequency': [2.]})
     ww3_data = xr.concat([force_0, ww3_data, force_2], dim='frequency')
     force_spectrum = ww3_data.interp(frequency=frequency[np.logical_and(frequency>=0., frequency <= 2.)], method="linear", kwargs={"fill_value": 0.})
     del ww3_data
-
     return force_spectrum**2  # in N^2.s
 
 def distance_to_station(lon, lat, lon_s=0, lat_s=90, radius_earth=6371e3):
