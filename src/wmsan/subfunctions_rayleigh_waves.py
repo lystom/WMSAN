@@ -214,22 +214,22 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
         plot = True
         if plot_type == 'hourly':
             plot_hourly = True
-            F_hourly =  np.zeros(dpt1.shape)
+            SDF_hourly =  np.zeros(dpt1.shape)
         else:
             plot_hourly = False
         if plot_type == 'daily':
             plot_daily = True
-            F_daily =  np.zeros(dpt1.shape)
+            SDF_daily =  np.zeros(dpt1.shape)
         else:
             plot_daily = False
         if plot_type == 'monthly':
             plot_monthly = True
-            F_monthly =  np.zeros(dpt1.shape)
+            SDF_monthly =  np.zeros(dpt1.shape)
         else:
             plot_monthly = False
         if plot_type == 'yearly':
             plot_yearly = True
-            F_yearly =  np.zeros(dpt1.shape)
+            SDF_yearly =  np.zeros(dpt1.shape)
         else:
             plot_yearly = False
     else:
@@ -291,7 +291,6 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                 except:
                     day= np.arange(1,(monthrange(iyear,imonth)[1])+1)
             for iday in day:
-                SDF_day = np.empty(dpt1.shape)
                 if isinstance(HOUR, int):
                     HOUR = np.array([HOUR])
                 elif not len(HOUR):
