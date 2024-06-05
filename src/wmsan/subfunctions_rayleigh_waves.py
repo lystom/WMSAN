@@ -475,7 +475,7 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
     
     
     
-def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=1800):
+def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=1800, **kwargs):
     """
     Calculate spectrogram for a given path to NetCDF file, dates, and optional station coordinates and constants.
 
@@ -497,6 +497,16 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
     BKS (California USA), Q=88
     SSB (France) respectively, Q=260
     """
+                
+    if 'vmin' in kwargs:
+        vmin = kwargs['vmin']
+    else:
+        vmin = -80
+        
+    if 'vmax' in kwargs:
+        vmax = kwargs['vmax']
+    else:
+        vmax = -150
     ## Constants
     radius_earth = 6371e3  # m
     res_mod = 0.5  # resolution ww3 model
@@ -560,14 +570,14 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
     ## Plot
     plt.figure(figsize=(16,9))
     plt.title("spectrogram")
-    plt.pcolormesh(dates, freq, spectro.T, cmap='Spectral_r', vmin=-140, vmax=-80)
+    plt.pcolormesh(dates, freq, spectro.T, cmap='Spectral_r', vmin=vmin, vmax=vmax)
     plt.xlabel('Date ')
     plt.ylabel('Frequency [Hz]')
     plt.gcf().autofmt_xdate()
     plt.ylim(0.1, 0.5)
     plt.colorbar(label='$m^2/Hz$ [dB]')
     plt.savefig('spectrogram_ww3.png', dpi=300, bbox_inches='tight')
-    return
+    return dates, freq, spectro
 
 
 def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [1/12, 1/2], c_file = '../../data/C.nc', prefix = 'WW3-GLOB-30M', **kwargs):
