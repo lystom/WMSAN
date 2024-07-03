@@ -475,7 +475,7 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
     
     
     
-def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=1800, **kwargs):
+def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=1800, P=1, **kwargs):
     """
     Calculate spectrogram for a given path to NetCDF file, dates, and optional station coordinates and constants.
 
@@ -563,7 +563,7 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
             EXP = np.exp(-2*np.pi*f.data*radius_earth/(U*Q)*np.radians(distance))
             denominateur = 1/(radius_earth*np.sin(np.radians(distance)))
             facteur = EXP*denominateur
-            F_delta[ifreq, :, :] = facteur.T*SDF_freq*dA
+            F_delta[ifreq, :, :] = facteur.T*SDF_freq*dA*P
         disp_RMS = 10*np.log(np.sqrt(np.nansum(F_delta, axis = (1,2))))
         spectro[idate, :] = disp_RMS
     
