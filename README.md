@@ -89,6 +89,10 @@ deactivate
 # Documentation
 Documentation still under construction. Please refer to the Jupyter Notebooks for details on theory and how to use this repo.
 
+## Where should I start ?
+
+![Table representing the differrent paths to Jupyter Notebooks examples and where to find what you wish to compute.](./sumup.png) 
+
 ## Architecture of WMSAN Python Package
 
 ![Scheme showing the different codes and Notebooks present in this repository and how they connect.](./package_archi.png)
