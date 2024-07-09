@@ -16,6 +16,7 @@ ww3-source-maps/
 │       ├── subfunctions_body_waves.py
 │       ├── subfunctions_rayleigh_waves.py
 │       └── synthetics.py
+│       └── wmsan_to_noisi.py
 |
 |-- notebooks/
 |   └── body_waves/
@@ -26,7 +27,8 @@ ww3-source-maps/
 │       ├── microseismic_sources.ipynb
 │       ├── spectrograms.ipynb
 │       ├── rayleigh_source.ipynb
-│       └── synthetic_CCF.ipynb    
+│       └── synthetic_CCF.ipynb
+│       └── wmsan_to_noisi.ipynb
 |-- data/
 │   ├── C.nc
 │   ├── cP.nc
