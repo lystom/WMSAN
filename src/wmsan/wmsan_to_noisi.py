@@ -60,8 +60,7 @@ def geo_nearest_neighbour(latlon_target, latlon_input, values, leaf_size=30):
     lat_flat = latlat.flatten()
     lon_flat = lonlon.flatten()
     data_flat = values.flatten()
-
-    # lets find the nearest point in the grid to an island station
+    
     lat = np.radians(lat_flat)
     lon = np.radians(lon_flat)
     grid_in = np.array([lat, lon]).T
