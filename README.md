@@ -17,7 +17,8 @@ ww3-source-maps/
 │       ├── subfunctions_rayleigh_waves.py
 │       └── synthetics.py
 │       └── wmsan_to_noisi.py
-|
+│       └── temporal_variation.py
+│
 |-- notebooks/
 |   └── body_waves/
 │       ├── amplification_coeff.ipynb
@@ -29,6 +30,7 @@ ww3-source-maps/
 │       ├── rayleigh_source.ipynb
 │       └── synthetic_CCF.ipynb
 │       └── wmsan_to_noisi.ipynb
+│       └── temporal_variations.ipynb
 |-- data/
 │   ├── C.nc
 │   ├── cP.nc
