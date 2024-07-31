@@ -1,5 +1,12 @@
 # Getting Started
 Hello, here is where to start when using WMSAN. 
+
+## Package Overview
+This scheme describes the different products one can compute using this package and how they interact.
+
+![Scheme showing the different codes and Notebooks present in this repository and how they connect.](img/package_archi.png)
+
+
 First let's install the package!
 
 ## Installation
@@ -52,9 +59,6 @@ In the meantime, you can follow the next steps:
 - [pandas](https://pandas.pydata.org/pandas-docs/version/2.1.4/index.html)
 - [dask](https://www.dask.org/)
 - [ipykernel](https://pypi.org/project/ipykernel/)
-
-## Package Overview
-
 
 ## Where Should I Start ?
 ![Table representing the differrent paths to Jupyter Notebooks examples and where to find what you wish to compute.](img/sumup.png) 

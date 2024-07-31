@@ -5,6 +5,7 @@ nav:
   - Getting Started: getting_started.md
   - API Overview: api_overview.md
   - User Guide: user_guide.md
+  - Developer Guide: developer_guide.md
   - About: about.md
 theme:
   name: readthedocs
