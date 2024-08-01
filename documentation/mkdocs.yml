@@ -3,13 +3,24 @@ site_name: WMSAN
 nav:
   - Home: index.md
   - Getting Started: getting_started.md
-  - API Overview: api_overview.md
-  - User Guide: user_guide.md
-  - Developer Guide: developer_guide.md
-  - About: about.md
+  - API Overview:
+    - 'Index': api_overview/api_overview.md
+    - 'Read WW3 Files': api_overview/read_hs_p2l.md
+    - 'Body Wave': api_overview/body_waves.md
+    - 'Rayleigh Wave': api_overview/rayleigh_waves.md
+    - 'Temporal Variations': api_overview/temporal_variations.md
+    - 'Synthetic Cross-Correlation Functions': api_overview/synthetics.md
+    - 'To noisi': api_overview/wmsan_to_noisi.md
+  - User Guide: 
+    - User Guide: user_guide.md
+  - Developer Guide: 
+    - Developer Guide: developer_guide.md
+  - About: 
+    - About: about.md
+
 theme:
   name: readthedocs
-  logo: logowmsan.png
+  logo: img/logowmsan.png
   color_mode: auto
   features:
     - content.code.copy
@@ -19,3 +30,7 @@ repo_url: https://gricad-gitlab.univ-grenoble-alpes.fr/tomasetl/ww3-source-maps
 
 markdown_extensions:
   - attr_list
+
+plugins:
+  - mkdocstrings
+  - search

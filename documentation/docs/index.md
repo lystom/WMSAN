@@ -45,7 +45,7 @@ WMSAN for Wave Model Sources of Ambient Noise is a user-friendly Python package 
 - data/ contains additional files used in computation.
 
 [Getting Started](getting_started.md){: .btn}
-[API Overview](api_overview.md){: .btn}
+[API Overview](api_overview/api_overview.md){: .btn}
 [User Guide](user_guide.md){: .btn}
 [Developer Guide](developer_guide.md){: .btn}
 [About](about.md){: .btn}
