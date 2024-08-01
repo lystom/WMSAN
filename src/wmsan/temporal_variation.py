@@ -25,28 +25,24 @@ __credits__ = ["Reza D.D. Esfahani"]
 __version__ = "0.1"
 __maintainer__ = "Lisa Tomasetto"
 __email__ = "lisa.tomasetto@univ-grenoble-alpes.fr"
-__status__ = "Development"
 
 def temporal_evolution(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [1/12, 1/2],  c_file = '../../data/C.nc', prefix = 'WW3-GLOB-30M', **kwargs):
-    """
-    Compute the temporal evolution of the seismic sources in a given region.
+    """Compute the temporal evolution of the seismic sources in a given region.
 
-    Parameters:
+    Args:
         paths (list): A list containing the paths to the file with bathymetry data and the local path for WW3 data.
         dpt1 (xarray.DataArray): The bathymetry data.
         zlon (xarray.DataArray): The longitude values of the bathymetry data.
         zlat (xarray.DataArray): The latitude values of the bathymetry data.
-        date_vec (list, optional): A list containing the year, month, day, and hour of the dates to compute the temporal evolution. Defaults to [2020, [], [], []].
-        extent (list, optional): A list containing the longitude and latitude extent of the region. Defaults to [-180, 180, -90, 90].
-        parameters (list, optional): A list containing the minimum and maximum frequencies for integration (f1 and f2). Defaults to [1/12, 1/2].
-        c_file (str, optional): The path to the file with the amplification coefficient data. Defaults to '../../data/C.nc'.
-        prefix (str, optional): The prefix for the WW3 data file name. Defaults to 'WW3-GLOB-30M'.
-        **kwargs: Additional keyword arguments.
+        date_vec (list, optional): A list containing the year, month, day, and hour of the dates to compute the temporal evolution.
+        extent (list, optional): A list containing the longitude and latitude extent of the region.
+        parameters (list, optional): A list containing the minimum and maximum frequencies for integration (f1 and f2).
+        c_file (str, optional): The path to the file with the amplification coefficient data.
+        prefix (str, optional): The prefix for the WW3 data file name.
 
     Returns:
-        tuple: A tuple containing two elements:
-            - time (list): A list of datetime objects representing the time of each computation.
-            - temporal_variation (ndarray): An array containing the temporal variation of force of the seismic sources.
+        time (list): A list of datetime objects representing the time of each computation.
+        temporal_variation (ndarray): An array containing the temporal variation of force of the seismic sources.
     """
     
     file_bathy = paths[0]

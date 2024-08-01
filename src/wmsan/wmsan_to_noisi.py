@@ -1,14 +1,29 @@
 #!/usr/bin/env python3
 
 # Preamble
-__author__ = "Laura Ermert"
-__credits__ = ["Laura Ermert"]
-__version__ = "0.1"
-__maintainer__ = "Laura Ermert, Lisa Tomasetto"
-__email__ = "lisa.tomasetto@univ-grenoble-alpes.fr"
-__status__ = "Development"
+#__author__ = "Laura Ermert"
+#__credits__ = ["Laura Ermert"]
+#__version__ = "0.1"
+#__maintainer__ = "Laura Ermert, Lisa Tomasetto"
+#__email__ = "lisa.tomasetto@univ-grenoble-alpes.fr"
 # Script by Laura Ermert
 # mod. by Lisa Tomasetto 07/2024
+
+""" Functions to convert WMSAN data to Noisi source distribution starting file format. 
+
+It contains five functions:
+
+- `create_sourcegrid_WW3(lat_min, lat_max, lon_min, lon_max, output_path)`: Create a grid of latitude and longitude values within the specified range and save it as a NumPy array.
+
+- `get_nearest_neighbour_index(tree, query_point, n)`: Get the indices of the nearest neighbors to a given query point using a ball tree.
+
+- `get_nearest_neighbour(latlon_target, latlon_input, values, leaf_size=30)`: Get the nearest neighbors to a given query point using a ball tree.
+
+- `get_approx_surface_elements(lon)`: Returns an array of ones with the same length as the input array `lon`, representing an approximation of surface elements.
+
+- `run(noise_source_file, grid_file, greens_function_file)`: Runs the computation to generate the WMSAN to NOISI secondary microseismic source distribution for the given noise source file, grid file, and greens function file.
+
+"""
 
 ##############################################################################
 ## Imports ##
@@ -35,6 +50,18 @@ R = 6371008.7714
 ## Functions ##
 
 def create_sourcegrid_WW3(lat_min, lat_max, lon_min, lon_max, output_path):
+    """Create a grid of latitude and longitude values within the specified range and save it as a NumPy array.
+    
+    Args:
+        lat_min (float): The minimum value of the latitude range.
+        lat_max (float): The maximum value of the latitude range.
+        lon_min (float): The minimum value of the longitude range.
+        lon_max (float): The maximum value of the longitude range.
+        output_path (str): The path to the directory where the grid will be saved.
+
+    Returns:
+        None (NoneType): The function saves the grid as a NumPy array in the specified path.
+    """
     lon = np.arange(lon_min, lon_max, 0.5)
     lat = np.arange(lat_min, lat_max, 0.5)
     xx, yy = np.meshgrid(lon, lat)
@@ -43,11 +70,34 @@ def create_sourcegrid_WW3(lat_min, lat_max, lon_min, lon_max, output_path):
     np.save(output_path + 'sourcegrid.npy', np.array([xx, yy]))
     
 def get_nearest_neighbour_index(tree, query_point, n):
+    """Get the indices of the nearest neighbors to a given query point using a ball tree.
+    This function uses a ball tree to find the indices of the nearest neighbors to a given query point. It takes a ball tree object, a query point, and the number of nearest neighbors to find as input. It then queries the ball tree to find the distances and indices of the nearest neighbors to the query point. The function returns an array of indices of the nearest neighbors.
+        
+    Args:
+        tree (BallTree): The ball tree object used for nearest neighbor search.
+        query_point (array-like): The query point for which to find the nearest neighbors.
+        n (int): The number of nearest neighbors to find.
+
+    Returns:
+        values_out (array-like): An array of indices of the nearest neighbors.
+    """
     distances, indices = tree.query([pt], k=n)
     return(indices)
 
 
 def geo_nearest_neighbour(latlon_target, latlon_input, values, leaf_size=30):
+    """Find the nearest neighbors in a grid of latitude and longitude coordinates.
+    This function takes in a target set of latitude and longitude coordinates, an input set of latitude and longitude coordinates, and a set of values associated with the input coordinates. It uses a BallTree to efficiently find the nearest neighbor in the input set for each point in the target set. The function returns an array of values corresponding to the nearest neighbors.
+        
+    Args:
+        latlon_target (tuple of arrays): The target set of latitude and longitude coordinates.
+        latlon_input (tuple of arrays): The input set of latitude and longitude coordinates.
+        values (array-like): The set of values associated with the input coordinates.
+        leaf_size (int, optional): The number of points to group together in the BallTree. Defaults to 30.
+
+    Returns:
+        values_out (array-like): An array of values corresponding to the nearest neighbors.
+    """
 
     lat_in = latlon_input[0]
     lon_in = latlon_input[1]
@@ -78,13 +128,31 @@ def geo_nearest_neighbour(latlon_target, latlon_input, values, leaf_size=30):
 
 
 def get_approx_surface_elements(lon):
+    """Returns an array of ones with the same length as the input array `lon`, representing an approximation of surface elements.
+    
+    Args:
+        lon (array-like): An array-like object of longitude coordinates.
+        
+    Returns:
+        surfel (numpy.ndarray): A 1D array of ones with the same length as `lon`.
+    """
 
-    surfel = np.ones(len(lon)) #* 35_000 ** 2  # veeery rough
+    surfel = np.ones(len(lon))
     # set to 1 to suppress multiplication by surface element ==> (LISA) done by muting  35_000 ** 2
 
     return(surfel)
 
 def run(noise_source_file, grid_file, greens_function_file):
+    """Runs the computation to generate the WMSAN to NOISI secondary microseismic source distribution for the given noise source file, grid file, and greens function file.
+
+    Args:
+        noise_source_file (str): The path to the noise source file in N.s^{1/2}.
+        grid_file (str): The path to the grid file.
+        greens_function_file (str): The path to the greens function file.
+
+    Returns:
+        None (NoneType): This function does not return anything.
+    """
     fmin = 0.0    
     microseism_model = xr.load_dataset(noise_source_file)
     microseism_model = microseism_model.fillna(0.0)

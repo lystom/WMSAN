@@ -1,17 +1,30 @@
 #!/usr/bin/env python3
 
 # Preamble
-__author__ = "Lisa Tomasetto"
-__copyright__ = "Copyright 2024, UGA"
-__credits__ = ["Lisa Tomasetto"]
-__version__ = "0.1"
-__maintainer__ = "Lisa Tomasetto"
-__email__ = "lisa.tomasetto@univ-grenoble-alpes.fr"
-__status__ = "Production"
+#__author__ = "Lisa Tomasetto"
+#__copyright__ = "Copyright 2024, UGA"
+#__credits__ = ["Lisa Tomasetto"]
+#__version__ = "0.1"
+#__maintainer__ = "Lisa Tomasetto"
+#__email__ = "lisa.tomasetto@univ-grenoble-alpes.fr"
 
-"""
-This program aims at modeling the ambient noise source in the secondary microseismic range for Rayleigh waves.
-Using Longuet-Higgins site effect and F.Ardhuin WW3 model.
+
+"""This set of functions aims at modeling the ambient noise source in the secondary microseismic range for Rayleigh waves.
+Using Longuet-Higgins site effect and WAVEWATCHIII model.
+
+It contains six functions:
+
+- `download_ww3_local(YEAR, MONTH, ftp_path_to_files, ww3_local_path, prefix)`: download the WW3 files for the given month.
+
+- `open_bathy(file_bathy, refined_bathymetry, extent)`: open the bathymetry file. Either default WW3 grid, ETOPOv2 or a custom grid.
+
+- `subfctn_liquid_solid(p, mi, mt)`: compute the reflection and transmission coefficients between two media.
+
+- `bathy(z, f, p, m)`: compute the amplification coefficient for P and S waves.
+
+- `ampli(dpt1, f, rp, layers, theta)`: compute the amplification coefficient for P and S waves.
+
+- `loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type, date_vec, extent, parameters, c_file, prefix, **kwargs)`: compute the equivalent vertical force.
 """
 ##################################################################################
 
@@ -55,18 +68,15 @@ plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 ##################################################################################
 
 def download_ww3_local(YEAR, MONTH, ftp_path_to_files="ftp://ftp.ifremer.fr/ifremer/dataref/ww3/GLOBMULTI_ERA5_GLOBCUR_01/GLOB-30M/2020/FIELD_NC/", ww3_local_path= '../../data/ww3/', prefix = "WW3-GLOB-30M"):
+    """Download WW3 files for a given year and month from the specified FTP path to a local directory.
     
-    """
-    Download WW3 files for a given year and month from the specified FTP path to a local directory.
+    Args:
+        YEAR (int): The year for which the files should be downloaded.
+        MONTH (list): The month or months for which the files should be downloaded.
+        ftp_path_to_files (str, optional): The FTP path to the WW3 files.
+        ww3_local_path (str, optional): The local directory where the files should be saved.
+        prefix (str, optional): The prefix for the WW3 files.
     
-    Input:
-    - YEAR: the year for which the files should be downloaded
-    - MONTH: the month or months for which the files should be downloaded
-    - ftp_path_to_files: the FTP path to the WW3 files
-    - ww3_local_path: the local directory where the files should be saved
-    
-    Output:
-    None
     """
     workdir = os.getcwd()
     # create directory if it does not exist
@@ -106,18 +116,17 @@ def download_ww3_local(YEAR, MONTH, ftp_path_to_files="ftp://ftp.ifremer.fr/ifre
 ##################################################################################
 
 def open_bathy(file_bathy = '../../data/WW3-GLOB-30M_202002_p2l.nc', refined_bathymetry=False, extent=[-180, 180, -90, 90]):
-    """
-    Open bathymetry file and optionally refine bathymetry using ETOPOv2 dataset. 
+    """Open bathymetry file and optionally refine bathymetry using ETOPOv2 dataset. 
 
-    Input:
-    file_bathy (str): Path to the bathymetry file.
-    refined_bathymetry (bool, optional): Whether to use the refined ETOPOv2 dataset. Defaults to False.
-    extent (list, optional): The geographical extent of the bathymetry data in the format [lon_min, lon_max, lat_min, lat_max]. Defaults to [-180, 180, -90, 90].
+    Args:
+        file_bathy (str): Path to the bathymetry file.
+        refined_bathymetry (bool, optional): Whether to use the refined ETOPOv2 dataset. Defaults to False.
+        extent (list, optional): The geographical extent of the bathymetry data in the format [lon_min, lon_max, lat_min, lat_max].
 
-    Output:
-    dpt1_mask (xarray.DataArray): Masked bathymetry data.
-    zlon (xarray.DataArray): Longitude coordinates.
-    zlat (xarray.DataArray): Latitude coordinates.
+    Returns:
+        dpt1_mask (xarray.DataArray): Masked bathymetry data.
+        zlon (xarray.DataArray): Longitude coordinates.
+        zlat (xarray.DataArray): Latitude coordinates.
     """
     [lon_min, lon_max, lat_min, lat_max] = extent
     ds = xr.open_mfdataset(file_bathy, combine='by_coords')
@@ -145,7 +154,19 @@ def open_bathy(file_bathy = '../../data/WW3-GLOB-30M_202002_p2l.nc', refined_bat
 ############################ SITE EFFECT #########################################
 ##################################################################################
 def subfcn_liquid_solid(p, mi, mt):
-    """Reflection and Transmition coefficients for P and S waves between two media"""
+    """Calculate the reflection and transmission coefficients for P and S waves between two media.
+    Author: LI Lei, ll.ynyf@gmail.com modified by Pierre Boue 23/11/2020
+    
+    Args:
+        p (float or array-like): The wave slowness.
+        mi (tuple): The properties of the incident medium, consisting of the vertical P-wave velocity (vp1) and density (rho1).
+        mt (tuple): The properties of the transmitted medium, consisting of the vertical P-wave velocity (vp2), shear wave velocity (vs2), and density (rho2).
+
+    Returns:
+        Rpp (float or array-like): The reflection coefficient for P waves.
+        Tpp (float or array-like): The transmission coefficient for P waves.
+        Tps (float or array-like): The transmission coefficient for S waves.
+    """
     p2 = np.array(p)**2
     # vp, density of incident medium, vp, vs, density of transmitted medium
     (vp1, rho1, vp2, vs2, rho2) = (mi[0], mi[-1], mt[0], mt[1], mt[2])
@@ -163,28 +184,27 @@ def subfcn_liquid_solid(p, mi, mt):
 
 def bathy(z, f, p=[], m= [1500, 1000, 55400, 3200, 2500]):
     """Bathymetry secondary microseismic excitation coefficients(for P,S amplitude).
+    Based on LI Lei, ll.ynyf@gmail.com modified by Pierre Boue 23/11/2020
+    
+    Examples:
+        >>> z = np.linspace(0, 25000, 5001)
+        >>> f = 1/8
+        >>> cP, cS = bathy(z, f, [], [])
+        >>> x = f*z/1500
+        >>> plt.figure()
+        >>> plt.plot(x, abs(cP[0]), x, abs(cS[0]))
+        >>> plt.show()
+        
+    Args:
+        z (np.ndarray): thickness of water layer in meters, if z in m|km, v should be in m/s|km/s. All rhos must keep the same units.
+        f (np.ndarray): seismic frequency in Hz
+        p (np.ndarray, optional): slowness, if not specified return p values integral to 1/vp_crust
+        m (list, optional): [vp_water, rho_water, vp_crust, vs_crust, rho_crust]
 
-    Input:
-    z: thickness of water layer in meters
-    f: seismic frequency in Hz
-    p: slowness, if not specified return p values integral to 1/vp_crust
-    m: [vp_water, rho_water, vp_crust, vs_crust, rho_crust]
-     default values are [1.5 km/s, 1.0 g/cm³, 5.54 km/s, 3.2 km/s, 2.5 g/cm³]
-    if z in m|km, v should be in m/s|km/s. All rhos must keep the same units.
-
-    Output:
-    cP, cS: excitation coefficients of P|S waves in shape of [[p,]f, z]
-    author: TOMASETTO Lisa, lisa.tomasetto@gmail.com
-    based on LI Lei, ll.ynyf@gmail.com modified by Pierre Boue 23/11/2020
-    example:
-    z = np.linspace(0, 25000, 5001)
-    f = 1/8
-    cP, cS = bathy(z, f, [], [])
-    x = f*z/1500
-    plt.figure()
-    plt.plot(x, abs(cP[0]), x, abs(cS[0]))
-    plt.show()
-
+    Returns:
+        cP (np.ndarray): excitation coefficients of P waves in shape of [[p,]f, z]
+        cS (np.ndarray): excitation coefficients of S waves in shape of [[p,]f, z]
+    
     """
     ##
     (rhow, rhoc) = (m[1], m[4])  # in kg/m³
@@ -266,13 +286,20 @@ def bathy(z, f, p=[], m= [1500, 1000, 55400, 3200, 2500]):
 def ampli(dpt1, f, rp=[], layers=[1500, 1000, 5540, 3200, 2500], theta = radians(15.71)):
     """
     Compute amplification coefficient for P and S waves. 
-    Input: 
-    dpt1 : athymetry grid in meters
-    f: frequency vector in Hz
-    rp: ray parameter matrix to integrate over
-    layers: layers properties [Vp_w, rho_w, Vp_c, Vs_c, rho]
-    theta: limit angle of
-    Returns: cP, cS, bathy_ampli_P, bathy_ampli_S
+    
+    Args:
+        dpt1 (ndarray): bathymetry grid in meters
+        f (ndarray): frequency vector in Hz
+        rp (ndarray, optional): ray parameter matrix to integrate over. 
+        layers (list, optional): layers properties [Vp_w, rho_w, Vp_c, Vs_c, rho].
+        theta (float, optional): limit angle of. Defaults to radians(15.71).
+    
+    Returns:
+        cP (ndarray): Amplification coefficient for P waves.
+        cS (ndarray): Amplification coefficient for S waves.
+        bathy_ampli_P (ndarray): Amplification coefficient for P waves divided by theta.
+        bathy_ampli_S (ndarray): Amplification coefficient for S waves divided by theta.
+        
     """
     # compute amplification for Tp and rp following G14
     (cP, cS) = bathy(dpt1, f, rp, layers)
@@ -297,28 +324,30 @@ def ampli(dpt1, f, rp=[], layers=[1500, 1000, 5540, 3200, 2500], theta = radians
 ##################################################################################
 
 def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [1/12, 1/2], c_file = "../../data/cP.nc", prefix = "WW3-GLOB-30M", **kwargs):
+    """Compute the equivalent vertical force on the seafloor for a given wave type (P or S), given a path to the ww3 p2l file, the bathymetry, the wave type, the date vector and the spatial extent.
+    Saves in netcdf format the equivalent vertical force for each frequency if save argument True.
+	Plots in PNG source maps of P/S waves at given intervals depending on plot variables.
+ 
+    Args:
+	    paths (list): [file_bathy, ww3_local_path]: paths of additional files bathymetry, ww3 p2l file
+	    dpt1 (xarray.ndarray): bathymetry grid in m (depth) with dimensions lon x lat
+	    zlon (xarray.ndarray): longitude of bathymetry file (°)
+	    zlat (xarray.ndarray): latitude of bathymetry file (°)
+	    wave_type (str, optional): P or S waves.
+        date_vect (list, optional): date vector [year, month, day, hour], with hour in [0, 3, 6, 9, 12, 15, 18, 21].
+	    extent (list, optional): spatial extent format [lon_min, lon_max, lat_min, lat_max].
+	    parameters (list, optional): parameters minimum frequency, maximum frequency.
+        c_file (str, optional): path to amplification coefficient file.
+	    prefix (str, optional) : prefix of ww3 p2l file.
+		plot (Bool, optional): default: True
+		plot_hourly (Bool, optional): plot maps every 3-hours default: False
+		plot_daily (Bool, optional): plot maps every day, default: False
+		plot_monthly (Bool, optional): plot maps every month, default : True
+		plot_yearly (Bool, optional): plot map for the year average, default: False
+		save (Bool, optional): save 3-hourly matrix, default: False
+
     """
-    Input:
-	paths = [file_bathy, ww3_local_path]: paths of additional files bathymetry, ww3 p2l file
-	dpt1 : bathymetry grid in m (depth) with dimensions lon x lat
-	zlon : longitude of bathymetry file (°)
-	zlat : latitude of bathymetry file (°)
-	date_vect : date vector [year, month, day, hour], with hour in [0, 3, 6, 9, 12, 15, 18, 21]
-	extent : spatial extent format [lon_min, lon_max, lat_min, lat_max], default: [-180, 180, -90, 90]
-	parameters : parameters minimum frequency, maximum frequency,
-								default: [1/12, 1/2]
-	**kwargs : catalog of other potential arguments
-						plot : Bool default: True
-									plot_hourly: Bool,  plot maps every 3-hours default: False
-									plot_daily: Bool, plot maps every day, default: False
-									plot_monthly: Bool, plot maps every month, default : True
-									plot_yearly: Bool, plot map for the year average, default: False
-						save: Bool, save 3-hourly matrix, default: False
-    Output:
-			None
-			Saves in netcdf format the equivalent vertical force for each frequency if save argument True.
-			Plots in PNG source maps of P/S waves at given intervals depending on plot variables.
-    """
+    
     file_bathy = paths[0]
     ww3_local_path = paths[1]
     

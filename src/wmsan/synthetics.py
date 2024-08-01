@@ -1,14 +1,45 @@
 #!/usr/bin/env python3
 
-__author__ = "Lisa Tomasetto"
-__copyright__ = "Copyright 2024, UGA"
-__credits__ = ["Lisa Tomasetto"]
-__version__ = "0.1"
-__maintainer__ = "Lisa Tomasetto"
-__email__ = "lisa.tomasetto@univ-grenoble-alpes.fr"
-__status__ = "Developpement"
+#__author__ = "Lisa Tomasetto"
+#__copyright__ = "Copyright 2024, UGA"
+#__credits__ = ["Lisa Tomasetto"]
+#__version__ = "0.1"
+#__maintainer__ = "Lisa Tomasetto"
+#__email__ = "lisa.tomasetto@univ-grenoble-alpes.fr"
 
-"""Functions to generate synthetic cross-correlations from secondary microseisms sources."""
+"""Functions to generate synthetic cross-correlations from secondary microseisms sources.
+
+It contains fourteen functions:
+
+- `apply_delay_f_domain(s,d)`: Apply a delay d to the input signal s using Fourier domain.
+
+- `get_synthetic_info(path_file_axisem, comp)`: Get synthetic info from a specified h5 file and return fe, time, and N.
+
+- `open_axisem(dist, path_file_axisem, comp)`: Reads an AxiSEM .h5 archive in a 1D model given its path and a distance.
+
+- `taper_axisem_archive(time, distance, archive_name, umin, umax)`: Taper an AxiSEM .h5 archive in a 1D model given its path and a distance and minimum and maximum Rayleigh wave velocity.
+
+- `taper_axisem_archive_body_waves(time, distance, archive_name, phase1, phase2, model, **kwargs)`: Taper an AxiSEM .h5 archive around two body wave phases in a 1D model given its path and a distance.
+
+- `create_spectrum_archive(time, distance, tapered_archive, h5_name_spectrum)`: Create a Green's function archive in frequency domain from an AxiSEM archive.
+
+- `open_archive(h5_name)`: Open a Green's function archive in frequency domain.
+
+- `open_spectrum_axisem(path_file_axisem, comp)`: Reads an AxiSEM .h5 archive in a 1D model given its path and a distance, and returns sampling frequency, time vector and trace.
+
+- `create_date_vect(dates)`: Create a date vector from a list of dates.
+
+- `open_model(path_file_WW3, date_vect, N, fe, lon_slice, lat_slice)`: Open WW3 model for ambient noise sources at a specific time and date.
+
+- `distance_to_station(lon, lat, lon_s, lat_s, radius_earth)`: Computes the distance of every point of the model to station of coordinates (lonS, latS).
+
+- `matrix_GF(spectrum_axi, lon, lat, N, distance_s, comp, conjugate)`: Generates a synthetic seismogram (Green's Functions) matrix to a specific station in frequency domain using the given lon, lat, N, path_file_axisem, distance_s, and optional conjugate flag.
+
+- `compute_model_chunk(lon_inf, lon_sup, lat_inf, lat_sup, N, fe, date_vect, spectrum_axi, file_model, lon_staA, lat_staA, lon_staB, lat_staB, comp)`: Compute correlation function in frequency domain between stations A and B for a chunk of the www3 model source.
+
+- `ccf_computation(coords_staA, coords_staB, path_model, date_vect, spectrum_axi, fe, N, extent, comp)`: Compute the cross-correlation function between two seismic stations.
+
+"""
 
 ##########################################################################
 
@@ -38,33 +69,32 @@ radius_earth = 6371e3  # Earth's Radius in meters
 
 ## Functions
 def apply_delay_f_domain(s,d=0.):
+    """Apply a delay d to the input signal s using Fourier domain.
+    
+    Args:
+        s (numpy.ndarray): The input signal to apply delay.
+        d (float, optional): The delay to apply to the input signal.
+
+    Returns:    
+        s_delayed (numpy.ndarray): The delayed input signal.
     """
-    Apply a delay d to the input signal s using Fourier domain.
     
-    :param s: The input signal to apply delay.
-    :type s: numpy.ndarray
-    
-    :param d: The delay to apply to the input signal (default 0).
-    :type d: float
-    
-    :return: The delayed input signal.
-    :rtype: numpy.ndarray
-    """
     ## apply a delay d to the input signal s
     d_phase = 2*np.pi*d*np.arange(len(s))/(len(s))  # phase associated to d
     d_phase[int(np.round(len(d_phase)/2))::]-=2*np.pi*d  # for the hermitian symmetry of the fft
     return np.real(np.fft.ifft(np.fft.fft(s)*np.exp(-1j*d_phase)))
 
 def get_synthetic_info(path_file_axisem='../../data/NOISE_vertforce_dirac_0-ak135f_1.s_3600s.h5', comp='Z'):
-    """
-        Function to get synthetic info from a specified h5 file and return fe, time, and N.
-        Parameters:
-        - path_file_axisem: str, default='../../data/NOISE_vertforce_dirac_0-ak135f_1.s_3600s.h5'
-        - comp: str, default='Z'
-        Returns:
-        - fe: float
-        - time: numpy.ndarray
-        - N: int
+    """Function to get synthetic info from a specified h5 file and return fe, time, and N.
+    
+    Args:
+        path_file_axisem (str, optional): path of axisem .h5 archive.
+        comp (str, optional): component.
+    
+    Returns:
+        fe (float): sampling frequency
+        time (numpy.ndarray): time vector
+        N (int): number of points
     """
     try:
         h5_file = h5py.File(path_file_axisem)
@@ -80,27 +110,42 @@ def get_synthetic_info(path_file_axisem='../../data/NOISE_vertforce_dirac_0-ak13
     return fe, time, N
 
 def open_axisem(dist, path_file_axisem='../../data/NOISE_vertforce_dirac_0-ak135f_1.s_3600s.h5', comp='Z'):
-    """ Reads an AxiSEM .h5 archive in a 1D model given its path and a distance,
+    """Reads an AxiSEM .h5 archive in a 1D model given its path and a distance,
     and returns sampling frequency, time vector and trace at the given distance.
-    Input:
-    path_file_axisem: path of axisem .h5 archive
-    dist : distance of interest
+    
+    Args:
+        path_file_axisem (str, optional): path of axisem .h5 archive
+        dist (float): distance of interest
      
-    Output:
-    fe_iasp: sampling frequency 
-    time_iasp: time vector of the archive
-    trace_synth: synthetic trace at the given distance."""
+    Returns:
+        fe_iasp (float): sampling frequency 
+        time_iasp (numpy.ndarray): time vector of the archive
+        trace_synth (numpy.ndarray): synthetic trace at the given distance.
+    """
     dist = np.round(dist, 1)
     try:
         h5_file = h5py.File(path_file_axisem)
         trace_synth = h5_file['L']['SYNTH%03d.00'%(dist*10)][comp][:].astype(np.single)
         h5_file.close()
     except:
+        raise
         print('File not found', path_file_axisem, "Download the file from: https://zenodo.org/records/11126562 \n", "Save in ../data/")
         return None
     return trace_synth
 
 def taper_axisem_archive(time, distance, archive_name='../../data/NOISE_vertforce_dirac_0-ak135f_1.s_3600s.h5', umin = 2.5, umax = 3.5):
+    """Taper an AxiSEM .h5 archive in a 1D model given its path and distances as well as minimum and maximum Rayleigh wave velocity,and saves and returns the tapered archive.
+    
+    Args:
+        time (numpy.ndarray): time vector
+        distance (numpy.ndarray): distance vector
+        archive_name (str, optional): path of axisem .h5 archive, default='../../data/NOISE_vertforce_dirac_0-ak135f_1.s_3600s.h5'
+        umin (float, optional): minimum Rayleigh wave velocity
+        umax (float, optional): maximum Rayleigh wave velocity
+     
+    Returns:
+        tapered_archive (numpy.ndarray): tapered archive
+    """
     R = radius_earth*1e-3  # Radius of the Earth in km
     dt = time[1] - time[0]
     fe = 1/dt
@@ -131,7 +176,88 @@ def taper_axisem_archive(time, distance, archive_name='../../data/NOISE_vertforc
     h5_file.close()
     return tapered_archive
 
-def create_spectrum_archive(time, distance, tapered_archive):
+def taper_axisem_archive_body_waves(time, distance, archive_name='../../data/NOISE_vertforce_dirac_0-ak135f_1.s_3600s.h5', phase1 = 'P', phase2 = 'PP', model='ak135', **kwargs):
+    """Taper an AxiSEM .h5 archive around two body wave phases in a 1D model given its path and a distance,
+    and returns the tapered archive.
+    
+    Args:
+        time (numpy.ndarray): time vector.
+        distance (numpy.ndarray): distance vector.
+        archive_name (str, optional): path of axisem .h5 archive
+        phase1 (str, optional): first body wave phase.
+        phase2 (str, optional): second body wave phase.
+        model (str, optional): model to compute arrival times with TauP.
+     
+    Returns:
+        fe_iasp (float): sampling frequency.
+        time_iasp (numpy.ndarray): time vector of the archive.
+        trace_synth (numpy.ndarray): synthetic trace at the given distance.
+    """
+    
+    R = radius_earth*1e-3  # Radius of the Earth in km
+    dt = time[1] - time[0]
+    fe = 1/dt
+    tapered_archive = np.zeros((len(distance), len(time)))
+    
+    ## IASP travel times TauP
+    model_1D = TauPyModel(model='%s'%model)
+    tP_IASP = []
+    tPP_IASP = []
+    dist = np.arange(0, 180.1, 0.1)
+    for i, d in enumerate(dist):
+        try:
+            arr_phase1 = model_1D.get_travel_times(source_depth_in_km=0, distance_in_degree=d, phase_list=['%s'%phase1])
+            t_phase1 = arr_phase1[0].time
+        except:
+            t_phase1 = np.nan
+        
+        try:    
+            arr_phase2 = model_1D.get_travel_times(source_depth_in_km=0, distance_in_degree=d, phase_list=['%s'%phase2])
+            t_phase2 = arr_phase2[0].time
+        except:
+            t_phase2 = np.nan
+        dist_in_km = dist*np.pi*R/180
+        # Window around TauP
+        tukey_window = signal.windows.tukey(int(50*fe), alpha=0.3, sym=True)
+        dirac = np.zeros(len(time))
+        if t_phase1 >= 0:
+            index = [int(t_phase1*fe), int(t_phase2*fe)]
+        else:
+            index = int(t_phase2*fe)
+        dirac[index] = 1
+        window = signal.fftconvolve(dirac, tukey_window, mode='same')
+        W = open_axisem(d, archive_name)
+        tapered_archive[i, :] = W*window
+        
+    ## Save tapered archive as h5 file
+    h5_name_tapered = archive_name.replace('s.h5', '_tapered_%s_%s.h5'%(phase1, phase2))
+    h5_file = h5py.File(h5_name_tapered, 'w')
+    h5_file.create_dataset('WAVEFORMS', data=tapered_archive)
+    h5_file.create_dataset('time', data=time)
+    h5_file.create_dataset('distance', data=distance)
+    h5_file.close()
+    return tapered_archive
+
+def create_spectrum_archive(time, distance, tapered_archive, h5_name_spectrum = 'spectrum_archive_tapered.h5'):
+    """Create a Green's function archive in frequency domain from an AxiSEM archive.
+    This function creates a spectrum archive by computing the Fourier transform of the input archive for each distance value.
+    The resulting spectrum is saved as an HDF5 file with the specified name. The HDF5 file contains three datasets:
+    
+    'SPECTRUM': The spectrum data.
+    
+    'frequency': The frequency values.
+    
+    'distance': The distance values.
+    
+    Args:
+        time (numpy.ndarray): An array of time values.
+        distance (numpy.ndarray): An array of distance values.
+        tapered_archive (numpy.ndarray): The Green's Function archive in time domain file path.
+        h5_name_spectrum (str, optional): The name of the output HDF5 file.
+
+    Returns:
+        None (NoneType): The function saves the spectrum archive as an HDF5 file.
+    """
     dt = time[1] - time[0]
     fe = 1/dt
     N = len(time)
@@ -143,7 +269,6 @@ def create_spectrum_archive(time, distance, tapered_archive):
         spectrum[index, :] = fft(W)
     
     # Save as h5
-    h5_name_spectrum = '../../data/spectrum_archive_tapered.h5'
     h5_file = h5py.File(h5_name_spectrum, 'w')
     h5_file.create_dataset('SPECTRUM', data=spectrum)
     h5_file.create_dataset('frequency', data=freq)
@@ -151,6 +276,19 @@ def create_spectrum_archive(time, distance, tapered_archive):
     h5_file.close()
     
 def open_archive(h5_name = 'spectrum_archive_tapered.h5'):
+    """Open an AxiSEM .h5 archive in a 1D model given its path,
+    and returns sampling frequency, time vector and trace.
+    
+    Args:
+        h5_name (str, optional): path of axisem .h5 archive
+        
+    Returns:
+        fe (float): sampling frequency
+        freq (numpy.ndarray): frequency vector of the archive
+        distance (numpy.ndarray): distance vector of the archive
+        S (numpy.ndarray): synthetic spectra   
+    """
+    
     h5_file = h5py.File(h5_name, 'r')
     S = h5_file['SPECTRUM'][:]
     distance = h5_file['distance'][:]
@@ -160,17 +298,20 @@ def open_archive(h5_name = 'spectrum_archive_tapered.h5'):
     return fe, freq, distance, S
 
 def open_spectrum_axisem(path_file_axisem='./spectrum_vertforce_iasp91_1.s_256c_3600.s.h5', comp='Z'):
-    """ Reads an AxiSEM .h5 archive in a 1D model given its path and a distance,
-    and returns sampling frequency, time vector and trace at the given distance.
-    Input:
-    path_file_axisem: path of axisem .h5 archive
-    dist : distance of interest
+    """Reads an AxiSEM .h5 archive in a 1D model given its path and component,
+    and returns sampling frequency, time vector and trace.
+    
+    Args:
+        path_file_axisem (str, optional): path of axisem .h5 archive
+        comp (float): component
      
-    Output:
-    fe_iasp: sampling frequency 
-    time_iasp: time vector of the archive
-    dist_iasp: distance vector of the archive
-    spectrum_synth: synthetic spectra """
+    Returns:
+        fe_iasp (float): sampling frequency 
+        time_iasp (numpy.ndarray): time vector of the archive
+        dist_iasp (numpy.ndarray): distance vector of the archive
+        spectrum_synth (numpy.ndarray): synthetic spectra
+    """
+    
     h5_file = h5py.File(path_file_axisem, mode = 'r')
     fe_iasp = h5_file['_metadata']['fe'][()].astype(np.single)
     time_iasp = h5_file['_metadata']['time'][:].astype(np.single)
@@ -188,7 +329,14 @@ def open_spectrum_axisem(path_file_axisem='./spectrum_vertforce_iasp91_1.s_256c_
 
 ## Create Date Vect
 def create_date_vect(dates):
-    """Create date vector"""
+    """Creates a date vector from a list of dates.
+
+    Args:
+        dates (list): A list of datetime objects representing the dates.
+
+    Returns:
+        date_vect (numpy.ndarray): A 2D numpy array where each row represents a date and contains the year, month, day, and hour.
+    """
     date_vect = np.zeros((len(dates), 4))
     for i in range(len(dates)):
         date = dates[i]
@@ -197,14 +345,19 @@ def create_date_vect(dates):
     return date_vect
 
 def open_model(path_file_WW3, date_vect, N, fe, lon_slice=slice(-180, 180), lat_slice=slice(-78, 80)):
-    """ Reads the WW3 model for ambient noise sources at a specific time and date. 
-    Returns the PSD of the model on the whole grid.
-    Input:
-    path_file_WW3: path of WW3 model archive in N.s^{1/2}
-    date_vect: date and time vector [YEAR, MONTH, DAY, HOUR]
+    """Open WW3 model for ambient noise sources at a specific time and date. 
+    Returns the PSD of the given model in N^2.s with dimensions (dim_lon, dim_lat, 2*dim_freq+1).
 
-    Output:
-    Returns Hermitian PSD of the given model in N^2.s with dimensions (dim_lon, dim_lat, 2*dim_freq+1).
+    Args:
+        path_file_WW3 (str): Path of WW3 model archive in N.s^{1/2}.
+        date_vect (numpy.ndarray): Date and time vector [YEAR, MONTH, DAY, HOUR].
+        N (int): Length of the spectrum.
+        fe (float): Sampling frequency.
+        lon_slice (slice, optional): Slice of longitude to select.
+        lat_slice (slice, optional): Slice of latitude to select.
+
+    Returns:
+        force_spectrum (xarray.DataArray): Hermitian PSD of the given model in N^2.s with dimensions (dim_lon, dim_lat, 2*dim_freq+1).
     """
     year = date_vect[0]
     month = date_vect[1]
@@ -235,16 +388,17 @@ def open_model(path_file_WW3, date_vect, N, fe, lon_slice=slice(-180, 180), lat_
     return force_spectrum**2  # in N^2.s
 
 def distance_to_station(lon, lat, lon_s=0, lat_s=90, radius_earth=6371e3):
-    """ Computes the distance of every point of the model to station of coordinates (lonS, latS)
-    Input:
-    lon: longitudes of the grid
-    lat: latitude of the grid
-    lon_s: station longitude 
-    lat_s: station latitude
-    radius_earth : the radius of the Earth
+    """Computes the distance of every point of the model to station of coordinates (lonS, latS)
     
-    Output:
-    matrix of dimensions dim(lon) x dim(lat) 
+    Args:
+        lon (numpy.ndarray): longitudes of the grid
+        lat (numpy.ndarray): latitude of the grid
+        lon_s (float): station longitude 
+        lat_s (float): station latitude
+        radius_earth (float): the radius of the Earth
+    
+    Returns:
+        distanceS (np.ndarray): distance to station S matrix of dimensions dim(lon) x dim(lat) 
     """
     geoid = Geod(ellps="WGS84")  # set reference ellipsoid
     (lat_grid, lon_grid) = np.meshgrid(lat, lon)  # grid used
@@ -257,21 +411,21 @@ def distance_to_station(lon, lat, lon_s=0, lat_s=90, radius_earth=6371e3):
     return distanceS
 
 def matrix_GF(spectrum_axi, lon, lat, N, distance_s, comp = 'Z', conjugate = False):
-    """
-    Generates a synthetic seismogram (Green's Functions) matrix in frequency domain
+    """Generates a synthetic seismogram (Green's Functions) matrix in frequency domain
     using the given lon, lat, N, path_file_axisem, distance_s, and optional conjugate flag.
     Returns the synthetic seismogram matrix.
 
-    Input:
-    lon: longitude of the grid
-    lat: latitude of the grid
-    N: number of samples
-    path_file_axisem: path to the axisem tapered file
-    distance_s: distance matrix
-    conjugate: conjugate flag
+    Args:
+        spectrum_axi (numpy.ndarray): synthetic seismogram in frequency domain
+        lon (numpy.ndarray): longitude of the grid
+        lat (numpy.ndarray): latitude of the grid
+        N (int): number of samples
+        distance_s (numpy.ndarray): distance matrix
+        comp (str, optional): component
+        conjugate (bool, optional): conjugate flag
 
-    Output:
-    synth: synthetic seismogram
+    Returns:
+        synth (numpy.ndarray): synthetic seismogram
     """
     S_synth = np.zeros((len(lon), len(lat), N//2)).astype(complex)
     distance_s = np.round(distance_s, decimals=1)
@@ -292,53 +446,67 @@ def matrix_GF(spectrum_axi, lon, lat, N, distance_s, comp = 'Z', conjugate = Fal
     return S_synth
 
 def compute_model_chunk(lon_inf, lon_sup, lat_inf, lat_sup, N, fe, date_vect, spectrum_axi, file_model, lon_staA, lat_staA, lon_staB, lat_staB, comp):
-            """
-            Compute correlation function between stations A and B for a chunk of the www3 model source.   
+    """Computes correlation function between stations A and B for a chunk of the www3 model source.   
+    
+    Args:
+        lon_inf (float): Lower longitude bound.
+        lon_sup (float): Upper longitude bound.
+        lat_inf (float): Lower latitude bound.
+        lat_sup (float): Upper latitude bound.
+        N (int): Number of points.
+        fe (float): Sampling frequency.
+        date_vect (array): Vector of dates.
+        spectrum_axi (np.ndarray): Axisem archive spectrum.
+        file_model (str): WW3 PSD file.
+        lon_staA (float): Longitude of station A.
+        lat_staA (float): Latitude of station A.
+        lon_staB (float): Longitude of station B.
+        lat_staB (float): Latitude of station B.
+        comp (str): Component.
 
-            Parameters:
-            lon_inf (float): Lower longitude bound.
-            lon_sup (float): Upper longitude bound.
-            lat_inf (float): Lower latitude bound.
-            lat_sup (float): Upper latitude bound.
-            N (int): Number of points.
-            fe (float): Sampling frequency.
-            date_vect (array): Vector of dates.
-            file_model (str): Model file.
-            lon_staA (float): Longitude of station A.
-            lat_staA (float): Latitude of station A.
-            lon_staB (float): Longitude of station B.
-            lat_staB (float): Latitude of station B.
-            path_file_axi (str): Path to Axisem file.
+    Returns:
+        corr_f (np.ndarray): Computed correlation function as a single precision complex array.
+    """
+    ## Open model
+    psd_model = open_model(path_file_WW3=file_model, date_vect=date_vect, N=N, fe=fe, lon_slice=slice(lon_inf, lon_sup), lat_slice=slice(lat_inf, lat_sup))
+    psd_model.data = psd_model.data.astype(complex)
+    lon = psd_model.longitude
+    lat = psd_model.latitude
+    ## Distances
+    distance_staA = distance_to_station(lon, lat, lon_s = lon_staA, lat_s = lat_staA)
+    distance_staB = distance_to_station(lon, lat, lon_s = lon_staB, lat_s = lat_staB)
 
-            Returns:
-            np.ndarray: Computed correlation function as a single precision complex array.
-            """
-            ## Open model
-            psd_model = open_model(path_file_WW3=file_model, date_vect=date_vect, N=N, fe=fe, lon_slice=slice(lon_inf, lon_sup), lat_slice=slice(lat_inf, lat_sup))
-            psd_model.data = psd_model.data.astype(complex)
-            lon = psd_model.longitude
-            lat = psd_model.latitude
-            ## Distances
-            distance_staA = distance_to_station(lon, lat, lon_s = lon_staA, lat_s = lat_staA)
-            distance_staB = distance_to_station(lon, lat, lon_s = lon_staB, lat_s = lat_staB)
-
-            ## Green's Functions spectrum
-            psd_model.values *= matrix_GF(spectrum_axi, lon=lon, lat=lat, N=N, distance_s=distance_staA, conjugate=True, comp=comp).astype(complex)
+    ## Green's Functions spectrum
+    psd_model.values *= matrix_GF(spectrum_axi, lon=lon, lat=lat, N=N, distance_s=distance_staA, conjugate=True, comp=comp).astype(complex)
             
-            ## Green's Functions spectrum
-            psd_model.values *= matrix_GF(spectrum_axi, lon=lon, lat=lat, N=N, distance_s=distance_staB, conjugate=False, comp=comp).astype(complex)
+    ## Green's Functions spectrum
+    psd_model.values *= matrix_GF(spectrum_axi, lon=lon, lat=lat, N=N, distance_s=distance_staB, conjugate=False, comp=comp).astype(complex)
             
-            del distance_staA, distance_staB, lon, lat 
-            ## Sum along coordinates latitude and longitude
-            return psd_model.sum(dim=['longitude', 'latitude']).data.astype(complex)
+    del distance_staA, distance_staB, lon, lat 
+    ## Sum along coordinates latitude and longitude
+    return psd_model.sum(dim=['longitude', 'latitude']).data.astype(complex)
 
 
 def ccf_computation(coords_staA, coords_staB, path_model, date_vect, spectrum_axi, fe=4., N=14400, extent = [-180, 181, -80, 81], comp='Z'):
-    """
-    A function to compute the cross-correlation function between two seismic stations. 
+    """Computes the cross-correlation function between two seismic stations.
     It takes the coordinates of the stations, the path to the AxiSEM archive, the path to the model, 
     a vector of dates, a normalization factor, and a component parameter. 
     It returns the computed cross-correlation function and the corresponding time array.
+
+    Args:
+        coords_staA (tuple): Coordinates of station A (longitude, latitude).
+        coords_staB (tuple): Coordinates of station B (longitude, latitude).
+        path_model (str): Path to the WW3 PSD model.
+        date_vect (list): Vector of dates (year, month, day, hour).
+        spectrum_axi (array): AxiSEM spectrum.
+        fe (float, optional): Sampling frequency.
+        N (int, optional): Number of points.
+        extent (list, optional): Longitude and latitude slices.
+        comp (str, optional): Component parameter.
+
+    Returns:
+        corr (xarray.DataArray): Synthetic correlation in time domain.
+        time_corr (numpy.ndarray): Time array.
     """
 
     ## Coordinates of stations

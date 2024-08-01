@@ -1,4 +1,27 @@
 #!/usr/bin/env python3
+
+# Preamble
+#__author__ = "Lisa Tomasetto"
+#__copyright__ = "Copyright 2024, UGA"
+#__credits__ = ["Lisa Tomasetto"]
+#__version__ = "0.1"
+#__maintainer__ = "Lisa Tomasetto"
+#__email__ = "lisa.tomasetto@univ-grenoble-alpes.fr"
+#__status__ = "Production"
+
+"""This set of functions reads the netcdf files _hs.nc and _p2l.nc produced by WW3.
+
+It contains four functions read_WWNC, read_WWNCf, read_hs and read_p2l:
+
+- `read_WWNC (file_path, time_vect, lon1, lat1)`: Read netcdf _hs.nc file and return a matrix with dimension lon x lat of significant height of wind and swell waves in meters.
+
+- `read_WWNCf (file_path, time_vect, lon1, lat1)`: Read netcdf _p2l.nc file and return latitude, longitude, frequenc, p2l data which is the base 10 logarithm of power specral density of equivalent surface pressure and the units of p2l.
+
+- `read_hs (file_path, time_vect, lon1, lat1)`: Read netcdf significant wave height (_hs.nc) file and return latitude, longitude, frequenc, hs data. Uses xarray.
+
+- `read_p2l (file_path, time_vect, lon1, lat1)`: Read netcdf _p2l.nc file and return latitude, longitude, frequenc, p2l data the units of p2l. Uses xarray.
+"""
+
 import argparse
 import sys
 import os
@@ -10,31 +33,30 @@ from datetime import date
 from datetime import datetime
 from netCDF4 import Dataset
 
-
-# Preamble
-__author__ = "Lisa Tomasetto"
-__copyright__ = "Copyright 2024, UGA"
-__credits__ = ["Lisa Tomasetto"]
-__version__ = "0.1"
-__maintainer__ = "Lisa Tomasetto"
-__email__ = "lisa.tomasetto@univ-grenoble-alpes.fr"
-__status__ = "Production"
-
-""" This set of functions read the netcdf file _hs.nc and _p2l.nc produced by WW3"""
 def read_WWNC(file_path, time_vect, lon1, lat1):
-    """Read netcdf _hs.nc file and return a matrix with dimension lon x lat
-    of significant height of wind and swell waves in meters
-    example:
-    file_path = '../data/ftp.ifremer.fr/ifremer/ww3/HINDCAST/SISMO/GLOBAL05_2006_REF102040/data/WW3-GLOB-30M_200609_hs.nc'
-    year = 2006
-    month = 9
-    day = 4
-    hour = 12
-    lon1 = []
-    lat1 = []
-    time_vect = [year, month, day, hour]
-    A = read_WWNC(file_path, time_vect, [], [])
-    print(A) """
+    """Read netcdf _hs.nc file and return a matrix with dimension lon x lat of significant height of wind and swell waves in meters.
+    
+    Examples:
+        >>> file_path = '../data/ftp.ifremer.fr/ifremer/ww3/HINDCAST/SISMO/GLOBAL05_2006_REF102040/data/WW3-GLOB-30M_200609_hs.nc'
+        >>> year = 2006
+        >>> month = 9
+        >>> day = 4
+        >>> hour = 12
+        >>> lon1 = []
+        >>> lat1 = []
+        >>> time_vect = [year, month, day, hour]
+        >>> A = read_WWNC(file_path, time_vect, [], [])
+        >>> print(A)
+    
+    Args:
+        file_path (str): path of the netcdf file
+        time_vect (list): [year, month, day, hour]
+        lon1 (list): [lon_min, lon_max]
+        lat1 (list): [lat_min, lat_max]
+    
+    Returns:
+        hs (numpy.ndarray): matrix with dimension lon x lat of significant height of wind and swell waves in meters 
+    """
 
     ## open file
     f = Dataset(file_path, mode='r')
@@ -89,18 +111,32 @@ def read_WWNC(file_path, time_vect, lon1, lat1):
     return hs
 
 def read_WWNCf(file_path, time_vect, lon1, lat1):
-    """Read netcdf _p2l.nc file and return latitude, longitude, frequenc, p2l data which is the base 10 logarithm
- of power specral density of equivalent surface pressure and the units of p2l
-    example:
-    file_path = '../data/ftp.ifremer.fr/ifremer/ww3/HINDCAST/SISMO/GLOBAL05_2006_REF102040/WW3-GLOB-30M_200609_p2l.nc'
-    year = 2006
-    month = 9
-    day = 4
-    hour = 12
-    lon1 = []
-    lat1 = []
-    time_vect = [year, month, day, hour]
-    (lat, lon, freq, p2l, unit1) = read_WWNCf(file_path, time_vect, [], [])"""
+    """Read netcdf _p2l.nc file and return latitude, longitude, frequenc, p2l data which is the base 10 logarithm of power specral density of equivalent surface pressure and the units of p2l.
+    
+    Examples:
+        >>> file_path = '../data/ftp.ifremer.fr/ifremer/ww3/HINDCAST/SISMO/GLOBAL05_2006_REF102040/WW3-GLOB-30M_200609_p2l.nc'
+        >>> year = 2006
+        >>> month = 9
+        >>> day = 4
+        >>> hour = 12
+        >>> lon1 = []
+        >>> lat1 = []
+        >>> time_vect = [year, month, day, hour]
+        >>> (lat, lon, freq, p2l, unit1) = read_WWNCf(file_path, time_vect, [], [])
+    
+    Args:
+        file_path (str): path of the netcdf file
+        time_vect (list): [year, month, day, hour]
+        lon1 (list): [lon_min, lon_max]
+        lat1 (list): [lat_min, lat_max]
+        
+    Returns:
+        lat (numpy.ndarray): latitude
+        lon (numpy.ndarray): longitude
+        freq (numpy.ndarray): frequency
+        p2l (numpy.ndarray): p2l
+        unit1 (str): unit of p2l   
+    """
 
     ## open file
     f = Dataset(file_path, mode='r')
@@ -164,28 +200,34 @@ def read_WWNCf(file_path, time_vect, lon1, lat1):
     return lat, lon, freq, p2l, unit1, scale
 
 def read_hs(file_path, time_vect, lon1 = (-180, 180), lat1 = (-90, 90)):
-    """Read netcdf significant wave height (_hs.nc) file and return latitude, longitude, frequenc, hs data
-    units are m
-    the output is an xarray of shape (lat, lon)
+    """Read netcdf significant wave height (_hs.nc) file and return latitude, longitude, frequenc, hs data units are m. The output is an xarray of shape (lat, lon)
     
-    example:
-    file_path = '../data/ftp.ifremer.fr/ifremer/ww3/HINDCAST/SISMO/GLOBAL05_2006_REF102040/WW3-GLOB-30M_200609_hs.nc'
-    year = 2006
-    month = 9
-    day = 4
-    hour = 12
-    lon1 = [-180, 180]
-    lat1 = [-90, 90]
-    time_vect = [year, month, day, hour]
-    hs = read_hs(file_path, time_vect, lon1, lat1)
+    Examples:
+        >>> file_path = '../data/ftp.ifremer.fr/ifremer/ww3/HINDCAST/SISMO/GLOBAL05_2006_REF102040/WW3-GLOB-30M_200609_hs.nc'
+        >>> year = 2006
+        >>> month = 9
+        >>> day = 4
+        >>> hour = 12
+        >>> lon1 = [-180, 180]
+        >>> lat1 = [-90, 90]
+        >>> time_vect = [year, month, day, hour]
+        >>> hs = read_hs(file_path, time_vect, lon1, lat1)
+        >>> fig = plt.figure(figsize=(9,6))
+        >>> ax = plt.axes(projection=ccrs.Robinson())
+        >>> ax.coastlines()
+        >>> ax.gridlines()
+        >>> hs.plot(ax=ax, transform=ccrs.PlateCarree(), cbar_kwargs={'shrink': 0.4})
+        >>> plt.show()
     
-    # plot
-    fig = plt.figure(figsize=(9,6))
-    ax = plt.axes(projection=ccrs.Robinson())
-    ax.coastlines()
-    ax.gridlines()
-    hs.plot(ax=ax, transform=ccrs.PlateCarree(), cbar_kwargs={'shrink': 0.4})
-    plt.show()"""
+    Args:
+        file_path (str): path to _hs.nc file.
+        time_vect (list): [year, month, day, hour] of the time step.
+        lon1 (tuple, optional): (lon_min, lon_max) of the spatial extent.
+        lat1 (tuple, optional): (lat_min, lat_max) of the spatial extent.
+        
+    Returns:
+        hs (xarray.DataArray): array of shape (lat, lon) with significant height of wind and swell waves in meters
+    """
     
     # open file
     try:
@@ -210,19 +252,33 @@ def read_hs(file_path, time_vect, lon1 = (-180, 180), lat1 = (-90, 90)):
     hs = ds.hs.sel(time= timestep, longitude = lon, latitude= lat, method = 'nearest')
     return hs
     
-def read_p2l(file_path, time_vect, lon1 = [-180, 180], lat1 = [-90, 90]):
-    """Read netcdf _p2l.nc file and return latitude, longitude, frequenc, p2l data which is the base 10 logarithm
- of power specral density of equivalent surface pressure and the units of p2l
-    example:
-    file_path = '../data/ftp.ifremer.fr/ifremer/ww3/HINDCAST/SISMO/GLOBAL05_2006_REF102040/WW3-GLOB-30M_200609_p2l.nc'
-    year = 2006
-    month = 9
-    day = 4
-    hour = 12
-    lon1 = []
-    lat1 = []
-    time_vect = [year, month, day, hour]
-    (lat, lon, freq, p2l, unit1) = read_WWNCf(file_path, time_vect, lon1, lat1)"""
+def read_p2l(file_path, time_vect, lon1 = (-180, 180), lat1 = (-90, 90)):
+    """Read netcdf _p2l.nc file and return latitude, longitude, frequenc, p2l data which is the base 10 logarithm of power specral density of equivalent surface pressure and the units of p2l.
+ 
+    Examples:
+        >>> file_path = '../data/ftp.ifremer.fr/ifremer/ww3/HINDCAST/SISMO/GLOBAL05_2006_REF102040/WW3-GLOB-30M_200609_p2l.nc'
+        >>> year = 2006
+        >>> month = 9
+        >>> day = 4
+        >>> hour = 12
+        >>> lon1 = []
+        >>> lat1 = []
+        >>> time_vect = [year, month, day, hour]
+        >>> (lat, lon, freq, p2l, unit1) = read_WWNCf(file_path, time_vect, lon1, lat1)
+    
+    Args:
+        file_path (str): path of the netcdf file _p2l.nc
+        time_vect (list): [year, month, day, hour] of the time step.
+        lon1 (tuple, optional): (lon_min, lon_max) of the spatial extent.
+        lat1 (tuple, optional): (lat_min, lat_max) of the spatial extent.
+    
+    Returns:
+        lat (numpy.ndarray): latitude
+        lon (numpy.ndarray): longitude
+        freq (numpy.ndarray): frequency
+        p2l (numpy.ndarray): p2l
+        unit1 (str): unit of p2l 
+    """
     
     # open file
     try:
