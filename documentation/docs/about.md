@@ -1,42 +1,33 @@
-# Iapyge poena
+# About 
 
-## Huic Imbreus capellas
+## Change Logs
 
-Lorem markdownum dixit per lusuque timens
-[relevat](http://rostrisque.io/hectorquae.html), ab ignara amnes velox! Mendacem
-inquirit incidere!
+## License
+MIT License
 
-Ut gauderet adest positas mihi. Ille pia tibi cui moriorque cadet. Mihi dissipat
-nox a eundo extimuit [velim](http://exarsit-tali.io/formasme), denique haeserunt
-[quique comitum](http://minyis.net/nostras.html) nullisque denegat.
+Copyright (c) [2024] [Lisa Tomasetto]
 
-> Bellum sede abdita classem oblatae mugitibus plurimus, micantes oculos
-> cognoscere floresque te super plebe! Digitis **et** tibi. Cinnamaque ponit,
-> coeptis transmittere Oceanum est Attis Troezen potuere tunicis, lumina fuisse
-> tenent lugubris modo *sublatus turris*. Sed dare submovit quodque: videor
-> Belides stupet levis genialiter paulum rapit et me!
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-Parentis altera ut conspexit tenuere illic mollia maerens dicit paelicis et
-corpus? Arbutus ait avibus Pegasus surgere in Pallas, primo ore manifesta nec
-sui a! Loco est diurnos nostris tabuerant mirantem auras monstravit patriae
-submota solida quamvis: floresque maesta nigrior ferarum. Conscendit hortis
-adspexit abstulit, et atque inde precibus quae canis fatis altorum comitesque et
-tibi centum.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-## Colorum petis
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
-Trepidantis procul intertextos nocte dominum nives ut cervice ante levare et
-fuit edideras et amans. Visu deos, cui es, silvas es poteram rostro et femineae
-hausimus ait Iove Amazone?
+## Contributors
+[Lisa Tomasetto](https://github.com/lystom)
 
-- Tela ferentes Diomedeos pulchra genus
-- Quae sed an ego saepe cadet adest
-- Coniuge dum frustra
+[Reza D. D. Esfahani](https://github.com/resfahani)
 
-Habebat nymphae tot. Functa ipse; buxum eadem semper si habet et isto. Maligne
-Oete coniuge [sanguine](http://www.per.net/) liquidas siste vulnere manu
-recludit, lenis quem: fluminis tunc.
-
-Nec aut femina aptos, Minos inque, est partes deus dedit animata. Nigris
-vulnerat Athamanta, fides, frustra non servare certa, dis, et. Dederat formam
-singultuque aetas o vulgus? Ille et Phrygiaeque stipe.
+[Laura Ermert](https://lermert.github.io/)

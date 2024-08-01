@@ -12,9 +12,9 @@ nav:
     - 'Synthetic Cross-Correlation Functions': api_overview/synthetics.md
     - 'To noisi': api_overview/wmsan_to_noisi.md
   - User Guide: 
-    - User Guide: user_guide.md
+    - 'Tutorials': user_guide.md
   - Developer Guide: 
-    - Developer Guide: developer_guide.md
+    - 'How to contribute ?': developer_guide.md
   - About: 
     - About: about.md
 
