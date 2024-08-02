@@ -45,9 +45,35 @@ ww3-source-maps/
 - data/ contains additional files used in computation.
 
 ## Installation
-The package will soon be available on [PyPI](https://pypi.org/).
 
-In the meantime, you can follow the next steps:
+### PyPI
+
+The package is available on [PyPI](https://pypi.org/).
+
+- Create an environment and install
+
+    - if you use [Conda](https://docs.anaconda.com/free/miniconda/#quick-command-line-install) environments:
+
+            conda create --name wmsan 
+            conda activate wmsan
+            conda install pip
+            python3 -m pip install wmsan
+
+        to deactivate your environment:
+
+            conda deactivate
+
+    - otherwise
+
+            python3 -m venv venv
+            source venv/bin/activate
+            python3 -m pip install wmsan
+    
+        to deactivate your environment:
+    
+            deactivate
+
+### From Source
 1. Clone the repository 
 ``` 
 cd path_to_your_wmsan_directory/

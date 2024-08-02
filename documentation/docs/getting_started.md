@@ -12,10 +12,32 @@ First let's install the package!
 ## Installation
 
 ### PyPI
-The package will soon be available on [PyPI](https://pypi.org/).
+The package is available on [PyPI](https://pypi.org/).
 
-### Local Installation
-In the meantime, you can follow the next steps:
+- Create an environment and install
+
+    - if you use [Conda](https://docs.anaconda.com/free/miniconda/#quick-command-line-install) environments:
+
+            conda create --name wmsan 
+            conda activate wmsan
+            conda install pip
+            python3 -m pip install wmsan
+
+        to deactivate your environment:
+
+            conda deactivate
+
+    - otherwise
+
+            python3 -m venv venv
+            source venv/bin/activate
+            python3 -m pip install wmsan
+    
+        to deactivate your environment:
+    
+            deactivate
+
+### From Source
 
 1. Clone the repository
 
