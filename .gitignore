@@ -27,6 +27,9 @@ build/
 src/wmsan.egg-info/
 wwsan.egg-info/
 
+# Documentation Directory #
+documentation/
+
 # Additionnal Directories #
 ###########################
 notebooks/body_waves/F/
