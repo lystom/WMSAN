@@ -24,6 +24,9 @@ nav:
       - 'Rayleigh Waves': notebooks/rayleigh_waves/synthetic_CCF.ipynb
       - 'Body Waves': notebooks/body_waves/synthetic_CCF.ipynb
     - 'To noisi': notebooks/rayleigh_waves/wmsan_to_noisi.ipynb
+    - 'Synthetic Spectrograms':
+      - 'Source Distribution': notebooks/rayleigh_waves/rayleigh_source.ipynb
+      - 'Spectrograms': notebooks/rayleigh_waves/spectrograms.ipynb
   - Developer Guide: 
     - 'How to contribute ?': developer_guide.md
   - About: 

@@ -61,4 +61,5 @@ In the meantime, you can follow the next steps:
 - [ipykernel](https://pypi.org/project/ipykernel/)
 
 ## Where Should I Start ?
-![Table representing the differrent paths to Jupyter Notebooks examples and where to find what you wish to compute.](img/sumup.png) 
+Congratulations ! You successfully installed WMSAN.
+Now feel free to browse the [Tutorial](user_guide.md) for examples. The Pyhton functions details can be found in the [API Overview](api_overview/api_overview.md). 
