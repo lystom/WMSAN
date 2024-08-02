@@ -18,6 +18,7 @@ ww3-source-maps/
 │       └── synthetics.py
 │       └── wmsan_to_noisi.py
 │       └── temporal_variation.py
+│       └── synthetic_CCF.ipynb
 │
 |-- notebooks/
 |   └── body_waves/
