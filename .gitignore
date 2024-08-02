@@ -27,6 +27,10 @@ build/
 src/wmsan.egg-info/
 wwsan.egg-info/
 
+# Distribution Directory #
+##########################
+dist/
+
 # Documentation Directory #
 documentation/
 
