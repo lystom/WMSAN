@@ -24,7 +24,7 @@ Function to compute a time serie which correspond to the mean equivalent vertica
 [Temporal Variations](temporal_variations.md){: .btn}
 
 ## Synthetics Cross-Correlation Functions
-Functions to compute synthetic cross-correlations with a WW3 source distribution and a Green's Functions archive.
+Functions to compute synthetic cross-correlations with a WW3 source distribution and a Green's Functions archive. 
 
 [Synthetics](synthetics.md){: .btn}
 

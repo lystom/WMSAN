@@ -28,6 +28,8 @@ SOFTWARE.
 ## Contributors
 [Lisa Tomasetto](https://github.com/lystom)
 
+[Raphaël De Plaen](https://orcid.org/0000-0003-3477-2001)
+
 [Reza D. D. Esfahani](https://github.com/resfahani)
 
 [Laura Ermert](https://lermert.github.io/)

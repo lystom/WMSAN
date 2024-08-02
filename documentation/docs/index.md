@@ -1,8 +1,8 @@
-# Welcome to WMSAN
+# Welcome to WSAN
 
 ## Description
 
-WMSAN for Wave Model Sources of Ambient Noise is a user-friendly Python package to help seismologists model their observations through maps of ambient noise sources from WAVEWATCHIII hindcast outputs, but also to compute spectrograms (e.g., Ardhuin et al., 2011; Stutzmann et al., 2012) and seismic noise correlations (Ermert et al., 2020). In particular, we provide Python scripts and Jupyter Notebooks to compute maps of secondary microseismic noise sources distribution, synthetic seismic cross-correlations, temporal variations of sources and synthetic seismic spectrograms.
+WSAN for Wave Model Sources of Ambient Noise is a user-friendly Python package to help seismologists model their observations through maps of ambient noise sources from WAVEWATCHIII hindcast outputs, but also to compute spectrograms (e.g., Ardhuin et al., 2011; Stutzmann et al., 2012) and seismic noise correlations (Ermert et al., 2020). In particular, we provide Python scripts and Jupyter Notebooks to compute maps of secondary microseismic noise sources distribution, synthetic seismic cross-correlations, temporal variations of sources and synthetic seismic spectrograms.
 
 ## Project layout
 
