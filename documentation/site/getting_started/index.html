@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Getting Started - WMSAN</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Getting Started";
+        var mkdocs_page_input_path = "getting_started.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="..">
+          <img src="../img/logowmsan.png" class="logo" alt="Logo"/>
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Getting Started</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#package-overview">Package Overview</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#pypi">PyPI</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#from-source">From Source</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#dependencies">Dependencies</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#where-should-i-start">Where Should I Start ?</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API Overview</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../api_overview/api_overview/">Index</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../api_overview/read_hs_p2l/">Read WW3 Files</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../api_overview/body_waves/">Body Wave</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../api_overview/rayleigh_waves/">Rayleigh Wave</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../api_overview/temporal_variations/">Temporal Variations</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../api_overview/synthetics/">Synthetic Cross-Correlation Functions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../api_overview/wmsan_to_noisi/">To noisi</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">User Guide</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../user_guide/">Tutorials</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Site Effect</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../notebooks/rayleigh_waves/amplification_coeff/">Rayleigh Waves Site Effect</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../notebooks/body_waves/amplification_coeff/">Body Waves Site Effect</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Equivalent Vertical Force Maps</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../notebooks/rayleigh_waves/microseismic_sources/">Rayleigh Waves Equivalent Vertical Force</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../notebooks/body_waves/microseismic_sources/">Body Waves Equivalent Vertical Force</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../notebooks/rayleigh_waves/temporal_variations/">Rayleigh Waves Temporal Variations</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Synthetic Cross-Correlation Functions</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../notebooks/rayleigh_waves/synthetic_CCF/">Rayleigh Waves Synthetic Cross-correlation Functions</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../notebooks/body_waves/synthetic_CCF/">Body Waves Synthetics Cross-correlation Functions</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../notebooks/rayleigh_waves/wmsan_to_noisi/">WMSAN to noisi</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Synthetic Spectrograms</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../notebooks/rayleigh_waves/rayleigh_source/">Rayleigh Waves Power Spectrum of Vertical Displacement</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../notebooks/rayleigh_waves/spectrograms/">Rayleigh Waves Synthetic Spectrograms</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Developer Guide</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../developer_guide/">How to contribute ?</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">About</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../about/">About</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">WMSAN</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Getting Started</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="getting-started">Getting Started</h1>
+<p>Hello, here is where to start when using WMSAN. </p>
+<h2 id="package-overview">Package Overview</h2>
+<p>This scheme describes the different products one can compute using this package and how they interact.</p>
+<p><img alt="Scheme showing the different codes and Notebooks present in this repository and how they connect." src="../img/package_archi.png" /></p>
+<p>First let's install the package!</p>
+<h2 id="installation">Installation</h2>
+<h3 id="pypi">PyPI</h3>
+<p>The package is available on <a href="https://pypi.org/">PyPI</a>.</p>
+<ul>
+<li>
+<p>Create an environment and install</p>
+<ul>
+<li>
+<p>if you use <a href="https://docs.anaconda.com/free/miniconda/#quick-command-line-install">Conda</a> environments:</p>
+<pre><code>conda create --name wmsan 
+conda activate wmsan
+conda install pip
+python3 -m pip install wmsan
+</code></pre>
+<p>to deactivate your environment:</p>
+<pre><code>conda deactivate
+</code></pre>
+</li>
+<li>
+<p>otherwise</p>
+<pre><code>python3 -m venv venv
+source venv/bin/activate
+python3 -m pip install wmsan
+</code></pre>
+<p>to deactivate your environment:</p>
+<pre><code>deactivate
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="from-source">From Source</h3>
+<ol>
+<li>
+<p>Clone the repository</p>
+<pre><code>cd path_to_your_wmsan_directory/
+git clone https://gricad-gitlab.univ-grenoble-  alpes.fr/tomasetl/ww3-source-maps.git 
+cd ww3-source-maps/
+</code></pre>
+</li>
+<li>
+<p>Create an environment and install </p>
+<ul>
+<li>
+<p>if you use <a href="https://docs.anaconda.com/free/miniconda/#quick-command-line-install">Conda</a> environments:</p>
+<pre><code>conda create --name wmsan 
+conda activate wmsan
+conda install pip
+pip install .
+</code></pre>
+<p>to deactivate your environment:</p>
+<pre><code>conda deactivate
+</code></pre>
+</li>
+<li>
+<p>otherwise</p>
+<pre><code>python3 -m venv venv
+source venv/bin/activate
+python3 -m pip install .
+</code></pre>
+<p>to deactivate your environment:</p>
+<pre><code>deactivate
+</code></pre>
+</li>
+</ul>
+</li>
+</ol>
+<h3 id="dependencies">Dependencies</h3>
+<ul>
+<li><a href="https://numpy.org/doc/stable/">numpy</a></li>
+<li><a href="https://matplotlib.org/stable/">matplotlib</a></li>
+<li><a href="https://scitools.org.uk/cartopy/docs/latest/index.html">cartopy</a></li>
+<li><a href="https://docs.xarray.dev/en/stable/">xarray</a></li>
+<li><a href="https://unidata.github.io/netcdf4-python/">netCDF4</a></li>
+<li><a href="https://docs.obspy.org/">obspy</a></li>
+<li><a href="https://docs.python.org/3/library/datetime.html">datetime</a></li>
+<li><a href="https://scipy.org/">scipy</a></li>
+<li><a href="https://pandas.pydata.org/pandas-docs/version/2.1.4/index.html">pandas</a></li>
+<li><a href="https://www.dask.org/">dask</a></li>
+<li><a href="https://pypi.org/project/ipykernel/">ipykernel</a></li>
+</ul>
+<h2 id="where-should-i-start">Where Should I Start ?</h2>
+<p>Congratulations ! You successfully installed WMSAN.
+Now feel free to browse the <a href="../user_guide/">Tutorial</a> for examples. The Python functions details can be found in the <a href="../api_overview/api_overview/">API Overview</a>. </p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href=".." class="btn btn-neutral float-left" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../api_overview/api_overview/" class="btn btn-neutral float-right" title="Index">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://gricad-gitlab.univ-grenoble-alpes.fr/tomasetl/ww3-source-maps" class="icon icon-gitlab" style="color: #fcfcfc"> GitLab</a>
+        </span>
+    
+    
+      <span><a href=".." style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../api_overview/api_overview/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
