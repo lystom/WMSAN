@@ -1,0 +1,55 @@
+site_name: WMSAN
+
+nav:
+  - Home: index.md
+  - Getting Started: getting_started.md
+  - API Overview:
+    - 'Index': api_overview/api_overview.md
+    - 'Read WW3 Files': api_overview/read_hs_p2l.md
+    - 'Body Wave': api_overview/body_waves.md
+    - 'Rayleigh Wave': api_overview/rayleigh_waves.md
+    - 'Temporal Variations': api_overview/temporal_variations.md
+    - 'Synthetic Cross-Correlation Functions': api_overview/synthetics.md
+    - 'To noisi': api_overview/wmsan_to_noisi.md
+  - User Guide: 
+    - 'Tutorials': user_guide.md
+    - 'Site Effect': 
+      - 'Rayleigh Waves': notebooks/rayleigh_waves/amplification_coeff.ipynb
+      - 'Body Waves': notebooks/body_waves/amplification_coeff.ipynb
+    - 'Equivalent Vertical Force Maps':
+      - 'Rayleigh Waves': notebooks/rayleigh_waves/microseismic_sources.ipynb
+      - 'Body Waves': notebooks/body_waves/microseismic_sources.ipynb
+    - 'Temporal Variations': notebooks/rayleigh_waves/temporal_variations.ipynb
+    - 'Synthetic Cross-Correlation Functions': 
+      - 'Rayleigh Waves': notebooks/rayleigh_waves/synthetic_CCF.ipynb
+      - 'Body Waves': notebooks/body_waves/synthetic_CCF.ipynb
+    - 'To noisi': notebooks/rayleigh_waves/wmsan_to_noisi.ipynb
+    - 'Synthetic Spectrograms':
+      - 'Source Distribution': notebooks/rayleigh_waves/rayleigh_source.ipynb
+      - 'Spectrograms': notebooks/rayleigh_waves/spectrograms.ipynb
+  - Developer Guide: 
+    - 'How to contribute ?': developer_guide.md
+  - About: 
+    - About: about.md
+
+theme:
+  name: readthedocs
+  logo: img/logowmsan.png
+  color_mode: auto
+  features:
+    - content.code.copy
+
+repo_name: GitLab
+repo_url: https://gricad-gitlab.univ-grenoble-alpes.fr/tomasetl/ww3-source-maps
+
+markdown_extensions:
+  - attr_list
+  - mdx_math
+
+extra_javascript:
+  - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML
+
+plugins:
+  - mkdocstrings
+  - search
+  - mkdocs-jupyter
