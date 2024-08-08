@@ -84,4 +84,4 @@ The package is available on [PyPI](https://pypi.org/).
 
 ## Where Should I Start ?
 Congratulations ! You successfully installed WMSAN.
-Now feel free to browse the [Tutorial](user_guide.md) for examples. The Pyhton functions details can be found in the [API Overview](api_overview/api_overview.md). 
+Now feel free to browse the [Tutorial](user_guide.md) for examples. The Python functions details can be found in the [API Overview](api_overview/api_overview.md). 
