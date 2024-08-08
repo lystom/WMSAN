@@ -4,7 +4,7 @@ pages:
   script:
     - pip install mkdocs-material
     - pip install python-markdown-math
-    - pip install "mkdocstrings[python]""
+    - pip install "mkdocstrings[python]"
     - pip install mkdocs-jupyter
     - mkdocs build --site-dir public
   artifacts:
