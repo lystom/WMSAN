@@ -3,6 +3,9 @@ pages:
   image: python:latest
   script:
     - pip install mkdocs-material
+    - pip install python-markdown-math
+    - pip install mkdocstrings
+    - pip install mkdocs-jupyter
     - mkdocs build --site-dir public
   artifacts:
     paths:
