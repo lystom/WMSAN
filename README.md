@@ -122,8 +122,8 @@ Documentation still under construction. Please refer to the Jupyter Notebooks fo
 
 ## Where should I start ?
 
-![Table representing the differrent paths to Jupyter Notebooks examples and where to find what you wish to compute.](./sumup.png) 
+![Table representing the differrent paths to Jupyter Notebooks examples and where to find what you wish to compute.](https://gricad-gitlab.univ-grenoble-alpes.fr/tomasetl/ww3-source-maps/-/raw/main/sumup.png) 
 
 ## Architecture of WMSAN Python Package
 
-![Scheme showing the different codes and Notebooks present in this repository and how they connect.](./package_archi.png)
+![Scheme showing the different codes and Notebooks present in this repository and how they connect.](https://gricad-gitlab.univ-grenoble-alpes.fr/tomasetl/ww3-source-maps/-/raw/main/package_archi.png)
