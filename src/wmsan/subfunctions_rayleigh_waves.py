@@ -19,7 +19,7 @@ It contains six functions:
 
 - `open_bathy(file_bathy, refined_bathymetry, extent)`: open the bathymetry file. Either default WW3 grid, ETOPOv2 or a custom grid.
 
-- `loop_SDF(paths, dpt1, zlon, zlat, date_vec, extent, parameters, prefix, **kwargs): Computes the power spectrum of the vertical displacement for Rayleigh waves in m.s.
+- `loop_SDF(paths, dpt1, zlon, zlat, date_vec, extent, parameters, prefix, **kwargs)`: Computes the power spectrum of the vertical displacement for Rayleigh waves in m.s.
 
 - `spectrogram(path_netcdf, dates, lon_sta, lat_sta, Q, U, P, **kwargs)`: Plot spectrogram for a given path to NetCDF file, dates, and optional station coordinates and constants.
 

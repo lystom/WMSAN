@@ -6,8 +6,8 @@ nav:
   - API Overview:
     - 'Index': api_overview/api_overview.md
     - 'Read WW3 Files': api_overview/read_hs_p2l.md
-    - 'Body Wave': api_overview/body_waves.md
-    - 'Rayleigh Wave': api_overview/rayleigh_waves.md
+    - 'Body Waves': api_overview/body_waves.md
+    - 'Rayleigh Waves': api_overview/rayleigh_waves.md
     - 'Temporal Variations': api_overview/temporal_variations.md
     - 'Synthetic Cross-Correlation Functions': api_overview/synthetics.md
     - 'To noisi': api_overview/wmsan_to_noisi.md
