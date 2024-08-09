@@ -9,6 +9,9 @@ ww3-source-maps/
 |-- LICENSE
 |-- pyproject.toml
 |-- README.md
+|-- mkdocs.yml
+|-- docs/
+|-- site/
 |-- src/
 │   └── wmsan/
 │       ├── readWW31.py
@@ -118,7 +121,7 @@ deactivate
 - [ipykernel](https://pypi.org/project/ipykernel/)
 
 # Documentation
-Documentation still under construction. Please refer to the Jupyter Notebooks for details on theory and how to use this repo.
+A detailed documentation is available [on this page](https://tomasetl.gricad-pages.univ-grenoble-alpes.fr/ww3-source-maps/). 
 
 ## Where should I start ?
 
