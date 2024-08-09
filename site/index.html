@@ -61,9 +61,9 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="api_overview/read_hs_p2l/">Read WW3 Files</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="api_overview/body_waves/">Body Wave</a>
+                  <li class="toctree-l1"><a class="reference internal" href="api_overview/body_waves/">Body Waves</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="api_overview/rayleigh_waves/">Rayleigh Wave</a>
+                  <li class="toctree-l1"><a class="reference internal" href="api_overview/rayleigh_waves/">Rayleigh Waves</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="api_overview/temporal_variations/">Temporal Variations</a>
                   </li>
@@ -149,12 +149,15 @@
                 <h1 id="welcome-to-wmsan">Welcome to WMSAN</h1>
 <p><strong>WMSAN</strong> pronounced [<strong>wam-san</strong>]</p>
 <h2 id="description">Description</h2>
-<p><strong>WMSAN</strong> for <strong>Wave Model Sources of Ambient Noise</strong> is a user-friendly Python package to help seismologists model their observations through maps of ambient noise sources from <a href="https://www.weather.gov/sti/coastalact_ww3">WAVEWATCHIII</a> hindcast outputs, but also to synthetic compute spectrograms (e.g., <a href="https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2011JC006952">Ardhuin et al., 2011</a>; <a href="https://academic.oup.com/gji/article/191/2/707/644255">Stutzmann et al., 2012</a>) and seismic noise correlations (e.g., <a href="https://se.copernicus.org/articles/11/1597/2020/">Ermert et al., 2020</a>). In particular, we provide <a href="api_overview/api_overview/">Python scripts</a> and <a href="user_guide/">Jupyter Notebooks</a> to compute maps of secondary microseismic noise sources distribution, synthetic seismic cross-correlations, temporal variations of sources and synthetic seismic spectrograms.</p>
+<p><strong>WMSAN</strong> for <strong>Wave Model Sources of Ambient Noise</strong> is a user-friendly Python package to help seismologists model their observations through maps of ambient noise sources from <a href="https://www.weather.gov/sti/coastalact_ww3">WAVEWATCHIII</a> hindcast outputs, but also to compute synthetic spectrograms (e.g., <a href="https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2011JC006952">Ardhuin et al., 2011</a>; <a href="https://academic.oup.com/gji/article/191/2/707/644255">Stutzmann et al., 2012</a>) and seismic noise correlations (e.g., <a href="https://se.copernicus.org/articles/11/1597/2020/">Ermert et al., 2020</a>). In particular, we provide <a href="api_overview/api_overview/">Python scripts</a> and <a href="user_guide/">Jupyter Notebooks</a> to compute maps of secondary microseismic noise sources distribution, synthetic seismic cross-correlations, temporal variations of sources and synthetic seismic spectrograms.</p>
 <h2 id="project-layout">Project layout</h2>
 <pre><code>ww3-source-maps/
 |-- LICENSE
 |-- pyproject.toml
 |-- README.md
+|-- mkdocs.yml
+|-- docs/
+|-- site/
 |-- src/
 │   └── wmsan/
 │       ├── readWW31.py
@@ -189,7 +192,7 @@
 <ul>
 <li>src/ : contains all Python scripts and subfunctions.</li>
 <li>notebooks/ : contains Jupyter Notebooks with detailed examples on how to use this package. Rayleigh waves  and body waves are separated.</li>
-<li>data/ contains additional files used in computation.</li>
+<li>data/: contains additional files used in computation.</li>
 </ul>
 <p><a class="btn" href="getting_started/">Getting Started</a>
 <a class="btn" href="api_overview/api_overview/">API Overview</a>
@@ -249,5 +252,5 @@
 
 <!--
 MkDocs version : 1.6.0
-Build Date UTC : 2024-08-08 11:50:56.118337+00:00
+Build Date UTC : 2024-08-09 13:51:47.996170+00:00
 -->

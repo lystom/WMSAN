@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../../img/favicon.ico" />
-    <title>Rayleigh Wave - WMSAN</title>
+    <title>Rayleigh Waves - WMSAN</title>
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
@@ -13,7 +13,7 @@
     
       <script>
         // Current page data
-        var mkdocs_page_name = "Rayleigh Wave";
+        var mkdocs_page_name = "Rayleigh Waves";
         var mkdocs_page_input_path = "api_overview/rayleigh_waves.md";
         var mkdocs_page_url = null;
       </script>
@@ -55,9 +55,9 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../read_hs_p2l/">Read WW3 Files</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../body_waves/">Body Wave</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../body_waves/">Body Waves</a>
                   </li>
-                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Rayleigh Wave</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Rayleigh Waves</a>
     <ul class="current">
     </ul>
                   </li>
@@ -134,7 +134,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
           <li class="breadcrumb-item">API Overview</li>
-      <li class="breadcrumb-item active">Rayleigh Wave</li>
+      <li class="breadcrumb-item active">Rayleigh Waves</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -167,7 +167,7 @@ Using Longuet-Higgins site effect and WW3 model.</p>
 <p><code>open_bathy(file_bathy, refined_bathymetry, extent)</code>: open the bathymetry file. Either default WW3 grid, ETOPOv2 or a custom grid.</p>
 </li>
 <li>
-<p>`loop_SDF(paths, dpt1, zlon, zlat, date_vec, extent, parameters, prefix, **kwargs): Computes the power spectrum of the vertical displacement for Rayleigh waves in m.s.</p>
+<p><code>loop_SDF(paths, dpt1, zlon, zlat, date_vec, extent, parameters, prefix, **kwargs)</code>: Computes the power spectrum of the vertical displacement for Rayleigh waves in m.s.</p>
 </li>
 <li>
 <p><code>spectrogram(path_netcdf, dates, lon_sta, lat_sta, Q, U, P, **kwargs)</code>: Plot spectrogram for a given path to NetCDF file, dates, and optional station coordinates and constants.</p>
@@ -369,9 +369,8 @@ Using Longuet-Higgins site effect and WW3 model.</p>
     <div class="doc doc-contents ">
 
       <p>Computes the power spectrum of the vertical displacement for Rayleigh waves in m.s.
-Saves in netcdf format power spectrum of the vertical displacement for Rayleigh waves,
-    if save argument True.
-    Plots in PNG source maps of Rayleigh waves at given intervals depending on plot variables.</p>
+Saves in netcdf format if save argument True.
+Plots in PNG source maps of Rayleigh waves at given intervals depending on plot variables.</p>
 
 
 <table class="field-list">
@@ -446,19 +445,69 @@ Saves in netcdf format power spectrum of the vertical displacement for Rayleigh 
                 <p>parameters vS of the crust, density of the crust, minimum frequency, maximum frequency.</p>
               </div>
             </li>
+            <li>
+              <b><code>prefix</code></b>
+                  (<code>str</code>, default:
+                      <code>&#39;WW3-GLOB-30M&#39;</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>prefix of the ww3 p2l file.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>plot</code></b>
+                  (<code>bool</code>)
+              –
+              <div class="doc-md-description">
+                <p>plot maps.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>plot_hourly</code></b>
+                  (<code>bool</code>)
+              –
+              <div class="doc-md-description">
+                <p>plot maps every 3-hours default = False.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>plot_daily</code></b>
+                  (<code>bool</code>)
+              –
+              <div class="doc-md-description">
+                <p>plot maps every day, default = False.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>plot_monthly</code></b>
+                  (<code>bool</code>)
+              –
+              <div class="doc-md-description">
+                <p>plot maps every month, default = True.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>plot_yearly</code></b>
+                  (<code>bool</code>)
+              –
+              <div class="doc-md-description">
+                <p>plot map for the year average, default = False.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>save</code></b>
+                  (<code>bool</code>)
+              –
+              <div class="doc-md-description">
+                <p>save 3-hourly matrix, default = False.</p>
+              </div>
+            </li>
         </ul>
       </td>
     </tr>
   </tbody>
-</table>      <pre><code>prefix (str): prefix of the ww3 p2l file.
-        plot (Bool, optional)
-        plot_hourly (Bool, optional):  plot maps every 3-hours default = False
-        plot_daily (Bool, optional): plot maps every day, default = False
-        plot_monthly (Bool, optional): plot maps every month, default = True
-        plot_yearly (Bool, optional): plot map for the year average, default = False
-        save (Bool, optional), save 3-hourly matrix, default = False
-</code></pre>
-
+</table>
             <details class="quote">
               <summary>Source code in <code>wmsan/subfunctions_rayleigh_waves.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">184</span>
@@ -757,28 +806,26 @@ Saves in netcdf format power spectrum of the vertical displacement for Rayleigh 
 <span class="normal">477</span>
 <span class="normal">478</span>
 <span class="normal">479</span>
-<span class="normal">480</span>
-<span class="normal">481</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">loop_SDF</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="n">dpt1</span><span class="p">,</span> <span class="n">zlon</span><span class="p">,</span> <span class="n">zlat</span><span class="p">,</span> <span class="n">date_vec</span><span class="o">=</span><span class="p">[</span><span class="mi">2020</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]],</span> <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="o">-</span><span class="mi">90</span><span class="p">,</span> <span class="mi">90</span><span class="p">],</span><span class="n">parameters</span><span class="o">=</span> <span class="p">[</span><span class="mf">2.8</span><span class="p">,</span> <span class="mi">2830</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">12</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span> <span class="n">prefix</span> <span class="o">=</span> <span class="s2">&quot;WW3-GLOB-30M&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="normal">480</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">loop_SDF</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="n">dpt1</span><span class="p">,</span> <span class="n">zlon</span><span class="p">,</span> <span class="n">zlat</span><span class="p">,</span> <span class="n">date_vec</span><span class="o">=</span><span class="p">[</span><span class="mi">2020</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]],</span> <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="o">-</span><span class="mi">90</span><span class="p">,</span> <span class="mi">90</span><span class="p">],</span><span class="n">parameters</span><span class="o">=</span> <span class="p">[</span><span class="mf">2.8</span><span class="p">,</span> <span class="mi">2830</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">12</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span> <span class="n">prefix</span> <span class="o">=</span> <span class="s2">&quot;WW3-GLOB-30M&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Computes the power spectrum of the vertical displacement for Rayleigh waves in m.s.</span>
-<span class="sd">    Saves in netcdf format power spectrum of the vertical displacement for Rayleigh waves,</span>
-<span class="sd">	if save argument True.</span>
-<span class="sd">	Plots in PNG source maps of Rayleigh waves at given intervals depending on plot variables.</span>
+<span class="sd">    Saves in netcdf format if save argument True.</span>
+<span class="sd">    Plots in PNG source maps of Rayleigh waves at given intervals depending on plot variables.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">	    paths (list): [file_bathy, ww3_local_path, longuet_higgins_file]: paths of additional files bathymetry, ww3 p2l file and Longuet-Higgins coefficients</span>
-<span class="sd">	    dpt1 (xarray.DataArray): bathymetry grid in m (depth) with dimensions lon x lat</span>
-<span class="sd">	    zlon (xarray.DataArray): longitude of bathymetry file (°)</span>
-<span class="sd">	    zlat (xarray.DataArray): latitude of bathymetry file (°)</span>
-<span class="sd">	    date_vec (list): date vector [year, month, day, hour], with hour in [0, 3, 6, 9, 12, 15, 18, 21].</span>
-<span class="sd">	    extent (list, optional): spatial extent format [lon_min, lon_max, lat_min, lat_max].</span>
-<span class="sd">	    parameters (list, optional): parameters vS of the crust, density of the crust, minimum frequency, maximum frequency.</span>
-<span class="sd">        prefix (str): prefix of the ww3 p2l file.</span>
-<span class="sd">		plot (Bool, optional)</span>
-<span class="sd">		plot_hourly (Bool, optional):  plot maps every 3-hours default = False</span>
-<span class="sd">		plot_daily (Bool, optional): plot maps every day, default = False</span>
-<span class="sd">		plot_monthly (Bool, optional): plot maps every month, default = True</span>
-<span class="sd">		plot_yearly (Bool, optional): plot map for the year average, default = False</span>
-<span class="sd">		save (Bool, optional), save 3-hourly matrix, default = False</span>
+<span class="sd">        paths (list): [file_bathy, ww3_local_path, longuet_higgins_file]: paths of additional files bathymetry, ww3 p2l file and Longuet-Higgins coefficients</span>
+<span class="sd">        dpt1 (xarray.DataArray): bathymetry grid in m (depth) with dimensions lon x lat</span>
+<span class="sd">        zlon (xarray.DataArray): longitude of bathymetry file (°)</span>
+<span class="sd">        zlat (xarray.DataArray): latitude of bathymetry file (°)</span>
+<span class="sd">        date_vec (list): date vector [year, month, day, hour], with hour in [0, 3, 6, 9, 12, 15, 18, 21].</span>
+<span class="sd">        extent (list, optional): spatial extent format [lon_min, lon_max, lat_min, lat_max].</span>
+<span class="sd">        parameters (list, optional): parameters vS of the crust, density of the crust, minimum frequency, maximum frequency.</span>
+<span class="sd">        prefix (str, optional): prefix of the ww3 p2l file.</span>
+<span class="sd">        plot (bool, optional): plot maps.</span>
+<span class="sd">        plot_hourly (bool, optional):  plot maps every 3-hours default = False.</span>
+<span class="sd">        plot_daily (bool, optional): plot maps every day, default = False.</span>
+<span class="sd">        plot_monthly (bool, optional): plot maps every month, default = True.</span>
+<span class="sd">        plot_yearly (bool, optional): plot map for the year average, default = False.</span>
+<span class="sd">        save (bool, optional): save 3-hourly matrix, default = False.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">file_bathy</span> <span class="o">=</span> <span class="n">paths</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -1074,8 +1121,8 @@ Saves in netcdf format power spectrum of the vertical displacement for Rayleigh 
     <div class="doc doc-contents ">
 
       <p>Compute Rayleigh waves sources from ww3 p2l file as the equivalent vertical force on the seafloor.
-Saves in netcdf format the equivalent vertical force for each frequency if save argument True.
-    Plots in PNG source maps of P/S waves at given intervals depending on plot variables.</p>
+Saves in netcdf format the equivalent vertical force for each frequency if save argument is True.
+Plots in PNG source maps of P or S waves at given intervals depending on plot variables.</p>
 
 
 <table class="field-list">
@@ -1150,25 +1197,82 @@ Saves in netcdf format the equivalent vertical force for each frequency if save 
                 <p>parameters minimum frequency, maximum frequency.</p>
               </div>
             </li>
+            <li>
+              <b><code>c_file</code></b>
+                  (<code>str</code>, default:
+                      <code>&#39;../../data/C.nc&#39;</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>path to amplification coefficient file.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>prefix</code></b>
+                  (<code>str</code>, default:
+                      <code>&#39;WW3-GLOB-30M&#39;</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>prefix of the ww3 p2l file.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>plot</code></b>
+                  (<code>bool</code>)
+              –
+              <div class="doc-md-description">
+                <p>plot maps.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>plot_hourly</code></b>
+                  (<code>bool</code>)
+              –
+              <div class="doc-md-description">
+                <p>plot maps every 3-hours.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>plot_daily</code></b>
+                  (<code>bool</code>)
+              –
+              <div class="doc-md-description">
+                <p>plot maps every day.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>plot_monthly</code></b>
+                  (<code>bool</code>)
+              –
+              <div class="doc-md-description">
+                <p>plot maps every month.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>plot_yearly</code></b>
+                  (<code>bool</code>)
+              –
+              <div class="doc-md-description">
+                <p>plot map for the year average.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>save</code></b>
+                  (<code>bool</code>)
+              –
+              <div class="doc-md-description">
+                <p>save 3-hourly matrix.</p>
+              </div>
+            </li>
         </ul>
       </td>
     </tr>
   </tbody>
-</table>      <pre><code>c_file (str, optional): path to amplification coefficient file.
-prefix (str, optional): prefix of the ww3 p2l file.
-        plot (Bool, optional):
-        plot_hourly (Bool, optional):  plot maps every 3-hours.
-        plot_daily (Bool, optional): plot maps every day.
-        plot_monthly (Bool, optional): plot maps every month.
-        plot_yearly (Bool, optional): plot map for the year average.
-        save (Bool, optional): save 3-hourly matrix.
-</code></pre>
-
+</table>
             <details class="quote">
               <summary>Source code in <code>wmsan/subfunctions_rayleigh_waves.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">586</span>
-<span class="normal">587</span>
-<span class="normal">588</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">588</span>
 <span class="normal">589</span>
 <span class="normal">590</span>
 <span class="normal">591</span>
@@ -1484,27 +1588,29 @@ prefix (str, optional): prefix of the ww3 p2l file.
 <span class="normal">901</span>
 <span class="normal">902</span>
 <span class="normal">903</span>
-<span class="normal">904</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">loop_ww3_sources</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="n">dpt1</span><span class="p">,</span> <span class="n">zlon</span><span class="p">,</span> <span class="n">zlat</span><span class="p">,</span> <span class="n">date_vec</span><span class="o">=</span><span class="p">[</span><span class="mi">2020</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]],</span> <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="o">-</span><span class="mi">90</span><span class="p">,</span> <span class="mi">90</span><span class="p">],</span><span class="n">parameters</span><span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="mi">12</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="n">c_file</span> <span class="o">=</span> <span class="s1">&#39;../../data/C.nc&#39;</span><span class="p">,</span> <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;WW3-GLOB-30M&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="normal">904</span>
+<span class="normal">905</span>
+<span class="normal">906</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">loop_ww3_sources</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="n">dpt1</span><span class="p">,</span> <span class="n">zlon</span><span class="p">,</span> <span class="n">zlat</span><span class="p">,</span> <span class="n">date_vec</span><span class="o">=</span><span class="p">[</span><span class="mi">2020</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]],</span> <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="o">-</span><span class="mi">90</span><span class="p">,</span> <span class="mi">90</span><span class="p">],</span><span class="n">parameters</span><span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="mi">12</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="n">c_file</span> <span class="o">=</span> <span class="s1">&#39;../../data/C.nc&#39;</span><span class="p">,</span> <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;WW3-GLOB-30M&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Compute Rayleigh waves sources from ww3 p2l file as the equivalent vertical force on the seafloor.</span>
-<span class="sd">    Saves in netcdf format the equivalent vertical force for each frequency if save argument True.</span>
-<span class="sd">	Plots in PNG source maps of P/S waves at given intervals depending on plot variables.</span>
+<span class="sd">    Saves in netcdf format the equivalent vertical force for each frequency if save argument is True.</span>
+<span class="sd">    Plots in PNG source maps of P or S waves at given intervals depending on plot variables.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">	    paths (list): [file_bathy, ww3_local_path]: paths of additional files bathymetry, ww3 p2l file</span>
-<span class="sd">	    dpt1 (xarray.DataArray): bathymetry grid in m (depth) with dimensions lon x lat</span>
-<span class="sd">	    zlon (xarray.DataArray): longitude of bathymetry file (°)</span>
-<span class="sd">	    zlat (xarray.DataArray): latitude of bathymetry file (°)</span>
-<span class="sd">	    date_vec (list, optional): date vector [year, month, day, hour], with hour in [0, 3, 6, 9, 12, 15, 18, 21]</span>
-<span class="sd">	    extent (list, optional): spatial extent format [lon_min, lon_max, lat_min, lat_max].</span>
-<span class="sd">	    parameters (list, optional): parameters minimum frequency, maximum frequency.</span>
+<span class="sd">        paths (list): [file_bathy, ww3_local_path]: paths of additional files bathymetry, ww3 p2l file</span>
+<span class="sd">        dpt1 (xarray.DataArray): bathymetry grid in m (depth) with dimensions lon x lat</span>
+<span class="sd">        zlon (xarray.DataArray): longitude of bathymetry file (°)</span>
+<span class="sd">        zlat (xarray.DataArray): latitude of bathymetry file (°)</span>
+<span class="sd">        date_vec (list, optional): date vector [year, month, day, hour], with hour in [0, 3, 6, 9, 12, 15, 18, 21]</span>
+<span class="sd">        extent (list, optional): spatial extent format [lon_min, lon_max, lat_min, lat_max].</span>
+<span class="sd">        parameters (list, optional): parameters minimum frequency, maximum frequency.</span>
 <span class="sd">        c_file (str, optional): path to amplification coefficient file.</span>
 <span class="sd">        prefix (str, optional): prefix of the ww3 p2l file.</span>
-<span class="sd">		plot (Bool, optional):</span>
-<span class="sd">		plot_hourly (Bool, optional):  plot maps every 3-hours.</span>
-<span class="sd">		plot_daily (Bool, optional): plot maps every day.</span>
-<span class="sd">		plot_monthly (Bool, optional): plot maps every month.</span>
-<span class="sd">		plot_yearly (Bool, optional): plot map for the year average.</span>
-<span class="sd">		save (Bool, optional): save 3-hourly matrix.</span>
+<span class="sd">        plot (bool, optional): plot maps.</span>
+<span class="sd">        plot_hourly (bool, optional):  plot maps every 3-hours.</span>
+<span class="sd">        plot_daily (bool, optional): plot maps every day.</span>
+<span class="sd">        plot_monthly (bool, optional): plot maps every month.</span>
+<span class="sd">        plot_yearly (bool, optional): plot map for the year average.</span>
+<span class="sd">        save (bool, optional): save 3-hourly matrix.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -2153,11 +2259,11 @@ prefix (str, optional): prefix of the ww3 p2l file.
     <div class="doc doc-contents ">
 
       <p>Plot spectrogram for a given path to NetCDF file, dates, and optional station coordinates and constants.
-Attenuation Quality Factor used in Ardhuin et al. (2011) for 
-KIP (Hawaii) few reflections old crust, Q=580
-BORG (Iceland) few reflection young crust, Q=200
-BKS (California USA), Q=88
-SSB (France) respectively, Q=260</p>
+Attenuation Quality Factor used in Ardhuin et al. (2011) for
+KIP (Hawaii) few reflections old crust, Q=580</p>
+<p>BORG (Iceland) few reflection young crust, Q=200</p>
+<p>BKS (California USA), Q=88</p>
+<p>SSB (France) respectively, Q=260</p>
 
 
 <table class="field-list">
@@ -2243,7 +2349,8 @@ SSB (France) respectively, Q=260</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>wmsan/subfunctions_rayleigh_waves.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">485</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">484</span>
+<span class="normal">485</span>
 <span class="normal">486</span>
 <span class="normal">487</span>
 <span class="normal">488</span>
@@ -2341,12 +2448,17 @@ SSB (France) respectively, Q=260</p>
 <span class="normal">580</span>
 <span class="normal">581</span>
 <span class="normal">582</span>
-<span class="normal">583</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">spectrogram</span><span class="p">(</span><span class="n">path_netcdf</span><span class="p">,</span> <span class="n">dates</span><span class="p">,</span> <span class="n">lon_sta</span><span class="o">=-</span><span class="mf">21.3268</span><span class="p">,</span> <span class="n">lat_sta</span><span class="o">=</span><span class="mf">64.7474</span><span class="p">,</span> <span class="n">Q</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">U</span><span class="o">=</span><span class="mi">1800</span><span class="p">,</span> <span class="n">P</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="normal">583</span>
+<span class="normal">584</span>
+<span class="normal">585</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">spectrogram</span><span class="p">(</span><span class="n">path_netcdf</span><span class="p">,</span> <span class="n">dates</span><span class="p">,</span> <span class="n">lon_sta</span><span class="o">=-</span><span class="mf">21.3268</span><span class="p">,</span> <span class="n">lat_sta</span><span class="o">=</span><span class="mf">64.7474</span><span class="p">,</span> <span class="n">Q</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">U</span><span class="o">=</span><span class="mi">1800</span><span class="p">,</span> <span class="n">P</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot spectrogram for a given path to NetCDF file, dates, and optional station coordinates and constants.</span>
-<span class="sd">    Attenuation Quality Factor used in Ardhuin et al. (2011) for </span>
+<span class="sd">    Attenuation Quality Factor used in Ardhuin et al. (2011) for</span>
 <span class="sd">    KIP (Hawaii) few reflections old crust, Q=580</span>
+
 <span class="sd">    BORG (Iceland) few reflection young crust, Q=200</span>
+
 <span class="sd">    BKS (California USA), Q=88</span>
+
 <span class="sd">    SSB (France) respectively, Q=260</span>
 
 <span class="sd">    Args:</span>
@@ -2457,7 +2569,7 @@ SSB (France) respectively, Q=260</p>
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../body_waves/" class="btn btn-neutral float-left" title="Body Wave"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../body_waves/" class="btn btn-neutral float-left" title="Body Waves"><span class="icon icon-circle-arrow-left"></span> Previous</a>
         <a href="../temporal_variations/" class="btn btn-neutral float-right" title="Temporal Variations">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
