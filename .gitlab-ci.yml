@@ -2,7 +2,7 @@ pages:
   stage: deploy
   image: python:latest
   script:
-    - pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple wmsan
+    - pip install wmsan
     - pip install mkdocs
     - pip install mkdocs-material
     - pip install python-markdown-math
