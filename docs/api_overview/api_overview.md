@@ -16,7 +16,7 @@ Functions to compute body waves equivalent vertical force from secondary microse
 ## Rayleigh Waves Modeling
 Functions to compute Rayleigh waves equivalent vertical force from secondary microseismic ocean sources, synthetic cross-correlation functions, and synthetic spectrograms.
 
-[Rayleigh Waves](read_hs_p2l.md){: .btn}
+[Rayleigh Waves](rayleigh_waves.md){: .btn}
 
 ## Temporal Variations of Microseismic Sources
 Function to compute a time serie which correspond to the mean equivalent vertical force value over a given source area.
