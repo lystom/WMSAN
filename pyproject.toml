@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wmsan"
-version = "2024.0.2"
+version = "2024.0.3"
 authors = [
   { name="Lisa Tomasetto", email="lisa.tomasetto@gmail.com" },
 ]
@@ -35,6 +35,6 @@ dependencies = ["numpy<2.0",
                 "datetime"]
 
 [project.urls]
-Homepage = "https://github.com/lystom/WWSAN"
-Issues = "https://github.com/lystom/WWSAN/issues"
-Wiki = "https://github.com/lystom/WWSAN/wiki"
+Homepage = "https://gricad-gitlab.univ-grenoble-alpes.fr/tomasetl/ww3-source-maps/"
+Issues = "https://gricad-gitlab.univ-grenoble-alpes.fr/tomasetl/ww3-source-maps/-/issues"
+Documentation = "https://tomasetl.gricad-pages.univ-grenoble-alpes.fr/ww3-source-maps/"
