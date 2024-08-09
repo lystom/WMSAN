@@ -3,6 +3,9 @@
 ## Description
 This package is built to help computation of seismic ambient noise source maps and other products based on the WAVEWATCHIII hindcast output.
 
+## Documentation
+A detailed documentation is available [on this page](https://tomasetl.gricad-pages.univ-grenoble-alpes.fr/ww3-source-maps/). 
+
 ## Contents
 ```
 ww3-source-maps/
@@ -119,9 +122,6 @@ deactivate
 - [pandas](https://pandas.pydata.org/pandas-docs/version/2.1.4/index.html)
 - [dask](https://www.dask.org/)
 - [ipykernel](https://pypi.org/project/ipykernel/)
-
-# Documentation
-A detailed documentation is available [on this page](https://tomasetl.gricad-pages.univ-grenoble-alpes.fr/ww3-source-maps/). 
 
 ## Where should I start ?
 
