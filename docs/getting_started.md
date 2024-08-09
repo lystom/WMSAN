@@ -1,13 +1,11 @@
 # Getting Started
-Hello, here is where to start when using WMSAN. 
 
 ## Package Overview
-This scheme describes the different products one can compute using this package and how they interact.
+The following scheme describes the different products one can compute using this package and how they interact.
 
 ![Scheme showing the different codes and Notebooks present in this repository and how they connect.](img/package_archi.png)
 
-
-First let's install the package!
+First, let's install the package!
 
 ## Installation
 
@@ -84,4 +82,4 @@ The package is available on [PyPI](https://pypi.org/).
 
 ## Where Should I Start ?
 Congratulations ! You successfully installed WMSAN.
-Now feel free to browse the [Tutorial](user_guide.md) for examples. The Python functions details can be found in the [API Overview](api_overview/api_overview.md). 
+Now feel free to browse the [Tutorial](user_guide.md) for examples. The Python functions full descriptions can be found in the [API Overview](api_overview/api_overview.md). 

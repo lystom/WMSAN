@@ -9,8 +9,8 @@
 #__email__ = "lisa.tomasetto@univ-grenoble-alpes.fr"
 
 
-"""This set of functions aims at modeling the ambient noise source in the secondary microseismic range for Rayleigh waves.
-Using Longuet-Higgins site effect and WAVEWATCHIII model.
+"""This set of functions aims at modeling the ambient noise source in the secondary microseismic range for body waves.
+Using Lucia Gualtieri's site effect computation and WAVEWATCHIII model.
 
 It contains six functions:
 
@@ -22,7 +22,7 @@ It contains six functions:
 
 - `bathy(z, f, p, m)`: compute the amplification coefficient for P and S waves.
 
-- `ampli(dpt1, f, rp, layers, theta)`: compute the amplification coefficient for P and S waves.
+- `ampli(dpt1, f, rp, layers, theta)`: compute the amplification coefficient for P and S waves integrated over a range of takeoff angles.
 
 - `loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type, date_vec, extent, parameters, c_file, prefix, **kwargs)`: compute the equivalent vertical force.
 """
@@ -183,8 +183,8 @@ def subfcn_liquid_solid(p, mi, mt):
     return Rpp, Tpp, Tps
 
 def bathy(z, f, p=[], m= [1500, 1000, 55400, 3200, 2500]):
-    """Bathymetry secondary microseismic excitation coefficients(for P,S amplitude).
-    Based on LI Lei, ll.ynyf@gmail.com modified by Pierre Boue 23/11/2020
+    """Bathymetry secondary microseismic excitation coefficients (for P, S amplitude).
+    Based on LI Lei, ll.ynyf@gmail.com modified by Pierre Boue 23/11/2020.
     
     Examples:
         >>> z = np.linspace(0, 25000, 5001)
@@ -326,25 +326,25 @@ def ampli(dpt1, f, rp=[], layers=[1500, 1000, 5540, 3200, 2500], theta = radians
 def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [1/12, 1/2], c_file = "../../data/cP.nc", prefix = "WW3-GLOB-30M", **kwargs):
     """Compute the equivalent vertical force on the seafloor for a given wave type (P or S), given a path to the ww3 p2l file, the bathymetry, the wave type, the date vector and the spatial extent.
     Saves in netcdf format the equivalent vertical force for each frequency if save argument True.
-	Plots in PNG source maps of P/S waves at given intervals depending on plot variables.
- 
+    Plots in PNG source maps of P/S waves at given intervals depending on plot variables.
+
     Args:
-	    paths (list): [file_bathy, ww3_local_path]: paths of additional files bathymetry, ww3 p2l file
-	    dpt1 (xarray.ndarray): bathymetry grid in m (depth) with dimensions lon x lat
-	    zlon (xarray.ndarray): longitude of bathymetry file (°)
-	    zlat (xarray.ndarray): latitude of bathymetry file (°)
-	    wave_type (str, optional): P or S waves.
-        date_vect (list, optional): date vector [year, month, day, hour], with hour in [0, 3, 6, 9, 12, 15, 18, 21].
-	    extent (list, optional): spatial extent format [lon_min, lon_max, lat_min, lat_max].
-	    parameters (list, optional): parameters minimum frequency, maximum frequency.
+        paths (list): [file_bathy, ww3_local_path]: paths of additional files bathymetry, ww3 p2l file
+        dpt1 (xarray.ndarray): bathymetry grid in m (depth) with dimensions lon x lat
+        zlon (xarray.ndarray): longitude of bathymetry file (°)
+        zlat (xarray.ndarray): latitude of bathymetry file (°)
+        wave_type (str, optional): P or S waves.
+        date_vec (list, optional): date vector [year, month, day, hour], with hour in [0, 3, 6, 9, 12, 15, 18, 21].
+        extent (list, optional): spatial extent format [lon_min, lon_max, lat_min, lat_max].
+        parameters (list, optional): parameters minimum frequency, maximum frequency.
         c_file (str, optional): path to amplification coefficient file.
-	    prefix (str, optional) : prefix of ww3 p2l file.
-		plot (Bool, optional): default: True
-		plot_hourly (Bool, optional): plot maps every 3-hours default: False
-		plot_daily (Bool, optional): plot maps every day, default: False
-		plot_monthly (Bool, optional): plot maps every month, default : True
-		plot_yearly (Bool, optional): plot map for the year average, default: False
-		save (Bool, optional): save 3-hourly matrix, default: False
+        prefix (str, optional) : prefix of ww3 p2l file.
+        plot (bool, optional): default: True
+        plot_hourly (bool, optional): plot maps every 3-hours default: False
+        plot_daily (bool, optional): plot maps every day, default: False
+        plot_monthly (bool, optional): plot maps every month, default : True
+        plot_yearly (bool, optional): plot map for the year average, default: False
+        save (bool, optional): save 3-hourly matrix, default: False
 
     """
     

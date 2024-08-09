@@ -21,7 +21,7 @@ It contains five functions:
 
 - `get_approx_surface_elements(lon)`: Returns an array of ones with the same length as the input array `lon`, representing an approximation of surface elements.
 
-- `run(noise_source_file, grid_file, greens_function_file)`: Runs the computation to generate the WMSAN to NOISI secondary microseismic source distribution for the given noise source file, grid file, and greens function file.
+- `run(noise_source_file, grid_file, greens_function_file)`: Runs the computation to generate the secondary microseismic source distribution for noisi, given noise source file, grid file, and greens function file.
 
 """
 

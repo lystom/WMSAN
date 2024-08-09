@@ -9,12 +9,12 @@ Fonctions to read WAVEWATCHIII NetCDF4 files. Using xarray or basic Python packa
 [Read WW3 Files](read_hs_p2l.md){: .btn}
 
 ## Body Waves Modeling (P and SV)
-Functions to compute Body Wave equivalent vertical force from secondary microseismic ocean sources.
+Functions to compute body waves equivalent vertical force from secondary microseismic ocean sources and synthetic spectrograms.
 
 [Body Waves](body_waves.md){: .btn}
 
 ## Rayleigh Waves Modeling
-Functions to compute Rayleigh Wave equivalent vertical force from secondary microseismic ocean sources, synthetic cross-correlation functions, and synthetic spectrograms.
+Functions to compute Rayleigh waves equivalent vertical force from secondary microseismic ocean sources, synthetic cross-correlation functions, and synthetic spectrograms.
 
 [Rayleigh Waves](read_hs_p2l.md){: .btn}
 
@@ -24,7 +24,7 @@ Function to compute a time serie which correspond to the mean equivalent vertica
 [Temporal Variations](temporal_variations.md){: .btn}
 
 ## Synthetics Cross-Correlation Functions
-Functions to compute synthetic cross-correlations with a WW3 source distribution and a Green's Functions archive. 
+Functions to compute synthetic cross-correlations with a WW3 source distribution and a Green's functions archive. 
 
 [Synthetics](synthetics.md){: .btn}
 

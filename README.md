@@ -48,7 +48,7 @@ ww3-source-maps/
 ```
 - src/ : contains all Python scripts and subfunctions.
 - notebooks/ : contains Jupyter Notebooks with detailed examples on how to use this package. Rayleigh waves and body waves are separated.
-- data/ contains additional files used in computation.
+- data/: contains additional files used in computation.
 
 ## Installation
 

@@ -183,25 +183,24 @@ def open_bathy(file_bathy = '../../data/WW3-GLOB-30M_202002_p2l.nc', refined_bat
 
 def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [2.8, 2830, 1/12, 0.2], prefix = "WW3-GLOB-30M", **kwargs):
     """ Computes the power spectrum of the vertical displacement for Rayleigh waves in m.s.
-    Saves in netcdf format power spectrum of the vertical displacement for Rayleigh waves,
-	if save argument True.
-	Plots in PNG source maps of Rayleigh waves at given intervals depending on plot variables.
+    Saves in netcdf format if save argument True.
+    Plots in PNG source maps of Rayleigh waves at given intervals depending on plot variables.
     
     Args:
-	    paths (list): [file_bathy, ww3_local_path, longuet_higgins_file]: paths of additional files bathymetry, ww3 p2l file and Longuet-Higgins coefficients
-	    dpt1 (xarray.DataArray): bathymetry grid in m (depth) with dimensions lon x lat
-	    zlon (xarray.DataArray): longitude of bathymetry file (°)
-	    zlat (xarray.DataArray): latitude of bathymetry file (°)
-	    date_vec (list): date vector [year, month, day, hour], with hour in [0, 3, 6, 9, 12, 15, 18, 21].
-	    extent (list, optional): spatial extent format [lon_min, lon_max, lat_min, lat_max].
-	    parameters (list, optional): parameters vS of the crust, density of the crust, minimum frequency, maximum frequency.
-        prefix (str): prefix of the ww3 p2l file.
-		plot (Bool, optional)
-		plot_hourly (Bool, optional):  plot maps every 3-hours default = False
-		plot_daily (Bool, optional): plot maps every day, default = False
-		plot_monthly (Bool, optional): plot maps every month, default = True
-		plot_yearly (Bool, optional): plot map for the year average, default = False
-		save (Bool, optional), save 3-hourly matrix, default = False
+        paths (list): [file_bathy, ww3_local_path, longuet_higgins_file]: paths of additional files bathymetry, ww3 p2l file and Longuet-Higgins coefficients
+        dpt1 (xarray.DataArray): bathymetry grid in m (depth) with dimensions lon x lat
+        zlon (xarray.DataArray): longitude of bathymetry file (°)
+        zlat (xarray.DataArray): latitude of bathymetry file (°)
+        date_vec (list): date vector [year, month, day, hour], with hour in [0, 3, 6, 9, 12, 15, 18, 21].
+        extent (list, optional): spatial extent format [lon_min, lon_max, lat_min, lat_max].
+        parameters (list, optional): parameters vS of the crust, density of the crust, minimum frequency, maximum frequency.
+        prefix (str, optional): prefix of the ww3 p2l file.
+        plot (bool, optional): plot maps.
+        plot_hourly (bool, optional):  plot maps every 3-hours default = False.
+        plot_daily (bool, optional): plot maps every day, default = False.
+        plot_monthly (bool, optional): plot maps every month, default = True.
+        plot_yearly (bool, optional): plot map for the year average, default = False.
+        save (bool, optional): save 3-hourly matrix, default = False.
    
     """
     file_bathy = paths[0]
@@ -484,10 +483,13 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
     
 def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=1800, P=1, **kwargs):
     """Plot spectrogram for a given path to NetCDF file, dates, and optional station coordinates and constants.
-    Attenuation Quality Factor used in Ardhuin et al. (2011) for 
+    Attenuation Quality Factor used in Ardhuin et al. (2011) for
     KIP (Hawaii) few reflections old crust, Q=580
+    
     BORG (Iceland) few reflection young crust, Q=200
+    
     BKS (California USA), Q=88
+    
     SSB (France) respectively, Q=260
     
     Args:
@@ -498,7 +500,7 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
         Q (int, optional): attenuation factor constant.
         U (int, optional): group velocity of Rayleigh waves constant.
         P (int, optional): 3D propagation effect constant from Stutzmann et al. (2012).
-    
+   
     """
                 
     if 'vmin' in kwargs:
@@ -585,26 +587,26 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
 
 def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [1/12, 1/2], c_file = '../../data/C.nc', prefix = 'WW3-GLOB-30M', **kwargs):
     """ Compute Rayleigh waves sources from ww3 p2l file as the equivalent vertical force on the seafloor.
-    Saves in netcdf format the equivalent vertical force for each frequency if save argument True.
-	Plots in PNG source maps of P/S waves at given intervals depending on plot variables.
+    Saves in netcdf format the equivalent vertical force for each frequency if save argument is True.
+    Plots in PNG source maps of P or S waves at given intervals depending on plot variables.
  
     Args:
-	    paths (list): [file_bathy, ww3_local_path]: paths of additional files bathymetry, ww3 p2l file
-	    dpt1 (xarray.DataArray): bathymetry grid in m (depth) with dimensions lon x lat
-	    zlon (xarray.DataArray): longitude of bathymetry file (°)
-	    zlat (xarray.DataArray): latitude of bathymetry file (°)
-	    date_vec (list, optional): date vector [year, month, day, hour], with hour in [0, 3, 6, 9, 12, 15, 18, 21]
-	    extent (list, optional): spatial extent format [lon_min, lon_max, lat_min, lat_max].
-	    parameters (list, optional): parameters minimum frequency, maximum frequency.
+        paths (list): [file_bathy, ww3_local_path]: paths of additional files bathymetry, ww3 p2l file
+        dpt1 (xarray.DataArray): bathymetry grid in m (depth) with dimensions lon x lat
+        zlon (xarray.DataArray): longitude of bathymetry file (°)
+        zlat (xarray.DataArray): latitude of bathymetry file (°)
+        date_vec (list, optional): date vector [year, month, day, hour], with hour in [0, 3, 6, 9, 12, 15, 18, 21]
+        extent (list, optional): spatial extent format [lon_min, lon_max, lat_min, lat_max].
+        parameters (list, optional): parameters minimum frequency, maximum frequency.
         c_file (str, optional): path to amplification coefficient file.
         prefix (str, optional): prefix of the ww3 p2l file.
-		plot (Bool, optional):
-		plot_hourly (Bool, optional):  plot maps every 3-hours.
-		plot_daily (Bool, optional): plot maps every day.
-		plot_monthly (Bool, optional): plot maps every month.
-		plot_yearly (Bool, optional): plot map for the year average.
-		save (Bool, optional): save 3-hourly matrix.
-    
+        plot (bool, optional): plot maps.
+        plot_hourly (bool, optional):  plot maps every 3-hours.
+        plot_daily (bool, optional): plot maps every day.
+        plot_monthly (bool, optional): plot maps every month.
+        plot_yearly (bool, optional): plot map for the year average.
+        save (bool, optional): save 3-hourly matrix.
+
     """
     
     file_bathy = paths[0]

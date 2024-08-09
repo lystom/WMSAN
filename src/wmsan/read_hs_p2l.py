@@ -253,7 +253,7 @@ def read_hs(file_path, time_vect, lon1 = (-180, 180), lat1 = (-90, 90)):
     return hs
     
 def read_p2l(file_path, time_vect, lon1 = (-180, 180), lat1 = (-90, 90)):
-    """Read netcdf _p2l.nc file and return latitude, longitude, frequenc, p2l data which is the base 10 logarithm of power specral density of equivalent surface pressure and the units of p2l.
+    """Read netcdf _p2l.nc file and return latitude, longitude, frequency, p2l data which is the base 10 logarithm of power specral density of equivalent surface pressure and the units of p2l.
  
     Examples:
         >>> file_path = '../data/ftp.ifremer.fr/ifremer/ww3/HINDCAST/SISMO/GLOBAL05_2006_REF102040/WW3-GLOB-30M_200609_p2l.nc'
