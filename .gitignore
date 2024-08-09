@@ -2,6 +2,7 @@
 ############
 *.png
 *.jpg
+!docs/img/*
 !package_archi.png
 !sumup.png
 # Packages #
