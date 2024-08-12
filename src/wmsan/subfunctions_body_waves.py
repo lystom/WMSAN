@@ -229,8 +229,8 @@ def bathy(z, f, p=[], m= [1500, 1000, 55400, 3200, 2500]):
         p = np.linspace(0, 0.995, 200)/vpc
         m = np.array([vpw, rhow, vpc, vsc, rhoc])
         a = np.arcsin(vpw*p)
-        cP = np.zeros((np.size(f), np.size(z)), dtype="complex_")
-        cS = np.zeros((np.size(f), np.size(z)), dtype="complex_")
+        cP = np.zeros((np.size(f), np.size(z)), dtype=np.complex128)
+        cS = np.zeros((np.size(f), np.size(z)), dtype=np.complex128)
         for i in range(np.size(f)):
             if np.size(f) == 1:
                 c_P, c_S = bathy(z, f, p, m)
@@ -242,12 +242,12 @@ def bathy(z, f, p=[], m= [1500, 1000, 55400, 3200, 2500]):
         return cP, cS
     
     elif (p != np.linspace(0, 0.995, 200)/vpc).all():
-        c_P = np.empty((np.size(p), np.size(f), np.size(z)), dtype="complex_")
+        c_P = np.empty((np.size(p), np.size(f), np.size(z)), dtype=np.complex128)
         c_P[:] = np.nan
-        c_S = np.empty((np.size(p), np.size(f), np.size(z)), dtype="complex_")
+        c_S = np.empty((np.size(p), np.size(f), np.size(z)), dtype=np.complex128)
         c_S[:] = np.nan
-        cP = np.zeros((np.size(f), np.size(z)), dtype="complex_")
-        cS = np.zeros((np.size(f), np.size(z)), dtype="complex_")
+        cP = np.zeros((np.size(f), np.size(z)), dtype=np.complex128)
+        cS = np.zeros((np.size(f), np.size(z)), dtype=np.complex128)
         Rpp, Tpp, Tps = subfcn_liquid_solid(p, [vpw, rhow], [vpc, vsc, rhoc])
         qw = csqrt(1/vpw**2 - p**2)
         if np.size(f) == 1:
@@ -273,7 +273,7 @@ def bathy(z, f, p=[], m= [1500, 1000, 55400, 3200, 2500]):
         phi = 4*np.pi*f*(z.flatten('F')).T
     else:
         phi = 4*np.pi*np.dot(f.flatten('F'), (z.flatten('F')).T)
-    cP = np.empty((np.size(p), np.size(f), np.size(z)), dtype="complex_")
+    cP = np.empty((np.size(p), np.size(f), np.size(z)), dtype=np.complex128)
     cP[:] = np.nan
     cS = cP.copy()
     for i in range(np.size(p)):
