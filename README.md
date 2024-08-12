@@ -111,6 +111,7 @@ deactivate
 ```
 
 ### Dependencies
+
 - [numpy](https://numpy.org/doc/stable/)
 - [matplotlib](https://matplotlib.org/stable/)
 - [cartopy](https://scitools.org.uk/cartopy/docs/latest/index.html)
@@ -122,6 +123,10 @@ deactivate
 - [pandas](https://pandas.pydata.org/pandas-docs/version/2.1.4/index.html)
 - [dask](https://www.dask.org/)
 - [ipykernel](https://pypi.org/project/ipykernel/)
+- [pyproj](https://pyproj4.github.io/pyproj/stable/)
+- [h5py](https://docs.h5py.org/en/stable/)
+- [tqdm](https://tqdm.github.io/)
+- [notebook](https://jupyter-notebook.readthedocs.io/en/stable/)
 
 ## Where should I start ?
 

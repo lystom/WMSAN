@@ -10,7 +10,7 @@ First, let's install the package!
 ## Installation
 
 ### PyPI
-The package is available on [PyPI](https://pypi.org/).
+The package is available on [PyPI](https://pypi.org/project/wmsan).
 
 - Create an environment and install
 
@@ -40,7 +40,7 @@ The package is available on [PyPI](https://pypi.org/).
 1. Clone the repository
 
         cd path_to_your_wmsan_directory/
-        git clone https://gricad-gitlab.univ-grenoble-  alpes.fr/tomasetl/ww3-source-maps.git 
+        git clone https://gricad-gitlab.univ-grenoble-alpes.fr/tomasetl/ww3-source-maps.git 
         cd ww3-source-maps/
 
 
@@ -79,6 +79,10 @@ The package is available on [PyPI](https://pypi.org/).
 - [pandas](https://pandas.pydata.org/pandas-docs/version/2.1.4/index.html)
 - [dask](https://www.dask.org/)
 - [ipykernel](https://pypi.org/project/ipykernel/)
+- [pyproj](https://pyproj4.github.io/pyproj/stable/)
+- [h5py](https://docs.h5py.org/en/stable/)
+- [tqdm](https://tqdm.github.io/)
+- [notebook](https://jupyter-notebook.readthedocs.io/en/stable/)
 
 ## Where Should I Start ?
 Congratulations ! You successfully installed WMSAN.
