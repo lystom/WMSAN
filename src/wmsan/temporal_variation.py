@@ -86,15 +86,25 @@ def temporal_evolution(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], ext
     lat_min = extent[2]
     lat_max = extent[3]
     
+    ## Work on the pacific ocean
+    if lon_min > lon_max:
+        ## work on the pacific ocean
+        lon_min = ((360 + (lon_min % 360)) % 360)
+        lon_max = ((360 + (lon_max % 360)) % 360)
+        
     ## Open bathymetry
     dpt1 = dpt1.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
     zlat = zlat.sel(latitude = slice(lat_min, lat_max))
     zlon = zlon.sel(longitude = slice(lon_min, lon_max))
-    
     ## Open Amplification Coefficient
     # check for refined bathymetry
     res_bathy = abs(zlon[1] - zlon[0])
     amplification_coeff = xr.open_dataarray(c_file)
+    ## Work on the pacific ocean and amplification isn't already in the right coordinate system
+    if (extent[0] > extent[1]) and max(amplification_coeff.longitude) < 180:
+        amplification_coeff = amplification_coeff.assign_coords(longitude=((360 + (amplification_coeff.longitude % 360)) % 360))
+        amplification_coeff = amplification_coeff.roll(longitude=int(len(amplification_coeff['longitude']) / 2),roll_coords=True)
+    
     if res_bathy == 0.5:
         refined = False
     else:
@@ -154,7 +164,7 @@ def temporal_evolution(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], ext
                 for ih in HOUR:
                     
                     ## Open F_p3D 
-                    (lati, longi, freq_ocean, p2l, unit1) = read_p2l(filename_p2l, [iyear, imonth, iday, ih], [lon_min, lon_max], [lat_min, lat_max])
+                    (lati, longi, freq_ocean, p2l, unit1) = read_p2l(filename_p2l, [iyear, imonth, iday, ih], [extent[0], extent[1]], [lat_min, lat_max])
                     nf = len(freq_ocean)  # number of frequencies 
                     xfr = np.exp(np.log(freq_ocean[-1]/freq_ocean[0])/(nf-1))  # determines the xfr geometric progression factor
                     df = freq_ocean*0.5*(xfr-1/xfr)  # frequency interval in wave model times 2

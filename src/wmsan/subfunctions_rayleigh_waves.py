@@ -160,6 +160,12 @@ def open_bathy(file_bathy = '../../data/WW3-GLOB-30M_202002_p2l.nc', refined_bat
     """
     [lon_min, lon_max, lat_min, lat_max] = extent
     ds = xr.open_mfdataset(file_bathy, combine='by_coords')
+    if lon_min > lon_max:
+        ## work on the pacific ocean
+        ds = ds.assign_coords(longitude=((360 + (ds.longitude % 360)) % 360))
+        ds = ds.roll(longitude=int(len(ds['longitude']) / 2),roll_coords=True)
+        lon_min = ((360 + (lon_min % 360)) % 360)
+        lon_max = ((360 + (lon_max % 360)) % 360)
     dpt1 = ds['dpt'].squeeze(dim='time', drop=True)
     dpt1 = dpt1.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
     if refined_bathymetry or file_bathy == '../../data/ETOPO_2022_v1_60s_N90W180_bed.nc':
@@ -168,6 +174,10 @@ def open_bathy(file_bathy = '../../data/WW3-GLOB-30M_202002_p2l.nc', refined_bat
         try:
             ds = xr.open_mfdataset(file_bathy, combine='by_coords')
             ds  = ds.rename({'lon':'longitude', 'lat': 'latitude'})
+            if extent[0] > extent[1]:
+                ## work on the pacific ocean
+                ds = ds.assign_coords(longitude=((360 + (ds.longitude % 360)) % 360))
+                ds = ds.roll(longitude=int(len(ds['longitude']) / 2),roll_coords=True)
             z = ds['z']
             z *= -1 # ETOPOv2 to Depth
             z = z.where(z>0, other=np.nan)
@@ -667,6 +677,14 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
     lat_min = extent[2]
     lat_max = extent[3]
     
+    central_longitude = 0
+    
+    if lon_min > lon_max:
+        ## work on the pacific ocean
+        lon_min = ((360 + (lon_min % 360)) % 360)
+        lon_max = ((360 + (lon_max % 360)) % 360)
+        central_longitude = 180
+    
     dpt1 = dpt1.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
     zlat = zlat.sel(latitude = slice(lat_min, lat_max))
     zlon = zlon.sel(longitude = slice(lon_min, lon_max))
@@ -681,7 +699,11 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
         print("Refined bathymetry grid \n PLEASE RUN amplification_coefficients.ipynb before running this script")
         amplification_coeff = xr.open_dataarray(c_file)
         refined = True
-        
+    
+    if extent[0] > extent[1]:
+        amplification_coeff = amplification_coeff.assign_coords(longitude=((360 + (amplification_coeff.longitude % 360)) % 360))
+        amplification_coeff = amplification_coeff.roll(longitude=int(len(amplification_coeff['longitude']) / 2),roll_coords=True)
+    
     ## Surface Element
     msin = np.array([np.sin(np.pi/2 - np.radians(zlat))]).T
     ones = np.ones((1, len(zlon)))
@@ -732,7 +754,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
                 for ih in HOUR:
                     
                     ## Open F_p3D 
-                    (lati, longi, freq_ocean, p2l, unit1) = read_p2l(filename_p2l, [iyear, imonth, iday, ih], [lon_min, lon_max], [lat_min, lat_max])
+                    (lati, longi, freq_ocean, p2l, unit1) = read_p2l(filename_p2l, [iyear, imonth, iday, ih], [extent[0], extent[1]], [lat_min, lat_max])
                     nf = len(freq_ocean)  # number of frequencies 
                     xfr = np.exp(np.log(freq_ocean[-1]/freq_ocean[0])/(nf-1))  # determines the xfr geometric progression factor
                     df = freq_ocean*0.5*(xfr-1/xfr)  # frequency interval in wave model times 2
@@ -830,7 +852,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
                                                 name = 'Equivalent Force. Rayleigh waves.\nFrequency %.3f-%.3f Hz.%d-%02d-%02dT%02d'%(f1, f2, iyear, imonth, iday, ih))
                         fig = plt.figure(figsize=(9,6))
                         fig.suptitle('Equivalent Force. Rayleigh waves.\nFrequency %.3f-%.3f Hz.%d-%02d-%02dT%02d'%(f1, f2, iyear, imonth, iday, ih))
-                        ax = plt.axes(projection=ccrs.Robinson())
+                        ax = plt.axes(projection=ccrs.Robinson(central_longitude=central_longitude))
                         ax.coastlines()
                         gl = ax.gridlines()
                         gl.xformatter = LONGITUDE_FORMATTER
@@ -855,7 +877,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
                         name = 'Equivalent Force. Rayleigh waves.Frequency %.3f-%.3f Hz.%d-%02d-%02d'%(f1, f2, iyear, imonth, iday))
                     fig = plt.figure(figsize=(9,6))
                     fig.suptitle('Equivalent Force. Rayleigh waves.\nFrequency %.3f-%.3f Hz.%d-%02d-%02d'%(f1, f2, iyear, imonth, iday))
-                    ax = plt.axes(projection=ccrs.Robinson())
+                    ax = plt.axes(projection=ccrs.Robinson(central_longitude=central_longitude))
                     ax.coastlines()
                     gl = ax.gridlines()
                     gl.xformatter = LONGITUDE_FORMATTER
@@ -873,7 +895,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
                     name = 'Equivalent Force. Rayleigh waves. Frequency %.3f-%.3f Hz.%d-%02d'%(f1, f2, iyear, imonth))
                 fig = plt.figure(figsize=(9,6))
                 fig.suptitle('Equivalent Force. Rayleigh waves.\nFrequency %.3f-%.3f Hz.%d-%02d'%(f1, f2, iyear, imonth))
-                ax = plt.axes(projection=ccrs.Robinson())
+                ax = plt.axes(projection=ccrs.Robinson(central_longitude=central_longitude))
                 ax.coastlines()
                 gl = ax.gridlines()
                 gl.xformatter = LONGITUDE_FORMATTER
@@ -892,7 +914,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
                                 name = 'Equivalent Force. %s waves.\nFrequency %.3f-%.3f Hz.%d'%(f1, f2, iyear))
             fig = plt.figure(figsize=(9,6))
             fig.suptitle('Equivalent Force. Rayleigh waves.\nFrequency %.3f-%.3f Hz.%d'%(f1, f2, iyear))
-            ax = plt.axes(projection=ccrs.Robinson())
+            ax = plt.axes(projection=ccrs.Robinson(central_longitude=central_longitude))
             ax.coastlines()
             gl = ax.gridlines()
             gl.xformatter = LONGITUDE_FORMATTER

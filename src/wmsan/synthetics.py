@@ -366,8 +366,11 @@ def open_model(path_file_WW3, date_vect, N, fe, lon_slice=slice(-180, 180), lat_
 
     ## Open WW3 model 
     ds = xr.open_dataset(path_file_WW3)
+    if lon_slice.start > lon_slice.stop:
+        ds = ds.assign_coords(longitude=((360 + (amplification_coeff.longitude % 360)) % 360))
+        ds = ds.roll(longitude=int(len(ds['longitude']) / 2),roll_coords=True)
+        lon_slice = slice(((360 + (lon_slice.start % 360)) % 360), ((360 + (lon_slice.stop % 360)) % 360))
     ww3_data = ds.F_f.sel(longitude=lon_slice, latitude=lat_slice)
-
     ww3_data = ww3_data.dropna(dim='longitude', how='all').dropna(dim='latitude', how='all')
     del ds
     ww3_data = ww3_data.where(np.isfinite(ww3_data))
@@ -434,15 +437,16 @@ def matrix_GF(spectrum_axi, lon, lat, N, distance_s, comp = 'Z', conjugate = Fal
     distance_synth = 0.1*np.arange(0, len(spectrum_axi), 1)
     for dist in distance:
         dist = np.round(dist, decimals=1)
-        index = np.squeeze(np.argwhere(abs(distance_s.data - dist) < 0.09))
+        index = abs(distance_s.data - dist) < 0.09
         try:
             trace = spectrum_axi[np.squeeze(np.argmin(abs(distance_synth - dist))),0:N//2].astype(complex)
         except:
             raise
         if conjugate:
-            S_synth[index, :] = np.squeeze(np.conj(trace))
+            trace = np.squeeze(np.conj(trace))
         else:
-            S_synth[index, :] = np.squeeze((trace))
+            trace = np.squeeze((trace))
+        S_synth[index,:] = trace
     return S_synth
 
 def compute_model_chunk(lon_inf, lon_sup, lat_inf, lat_sup, N, fe, date_vect, spectrum_axi, file_model, lon_staA, lat_staA, lon_staB, lat_staB, comp):
@@ -472,6 +476,7 @@ def compute_model_chunk(lon_inf, lon_sup, lat_inf, lat_sup, N, fe, date_vect, sp
     psd_model.data = psd_model.data.astype(complex)
     lon = psd_model.longitude
     lat = psd_model.latitude
+
     ## Distances
     distance_staA = distance_to_station(lon, lat, lon_s = lon_staA, lat_s = lat_staA)
     distance_staB = distance_to_station(lon, lat, lon_s = lon_staB, lat_s = lat_staB)

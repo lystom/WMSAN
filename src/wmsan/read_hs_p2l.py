@@ -203,7 +203,7 @@ def read_hs(file_path, time_vect, lon1 = (-180, 180), lat1 = (-90, 90)):
     """Read netcdf significant wave height (_hs.nc) file and return latitude, longitude, frequenc, hs data units are m. The output is an xarray of shape (lat, lon)
     
     Examples:
-        >>> file_path = '../data/ftp.ifremer.fr/ifremer/ww3/HINDCAST/SISMO/GLOBAL05_2006_REF102040/WW3-GLOB-30M_200609_hs.nc'
+        >>> file_path = '../data/2006/WW3-GLOB-30M_200609_hs.nc'
         >>> year = 2006
         >>> month = 9
         >>> day = 4
@@ -245,18 +245,28 @@ def read_hs(file_path, time_vect, lon1 = (-180, 180), lat1 = (-90, 90)):
     timestep = datetime(year, month, day, hour)
     
     # spatial extent
+
+    # check longitude
+    if lon1[0] > lon1[1]:
+        ## working near pacific
+        print("pacific")
+        ds = ds.assign_coords(longitude=((360 + (ds.longitude % 360)) % 360))
+        ds = ds.roll(longitude=int(len(ds['longitude']) / 2),roll_coords=True)
+        lon1[0] = ((360 + (lon1[0] % 360)) % 360)
+        lon1[1] = ((360 + (lon1[1] % 360)) % 360)
     lon = ds.longitude[np.logical_and(ds.longitude >= lon1[0], ds.longitude <= lon1[1])]
     lat = ds.latitude[np.logical_and(ds.latitude >= lat1[0], ds.latitude <= lat1[1])]
     
     # extract data
     hs = ds.hs.sel(time= timestep, longitude = lon, latitude= lat, method = 'nearest')
+    
     return hs
     
 def read_p2l(file_path, time_vect, lon1 = (-180, 180), lat1 = (-90, 90)):
     """Read netcdf _p2l.nc file and return latitude, longitude, frequency, p2l data which is the base 10 logarithm of power specral density of equivalent surface pressure and the units of p2l.
  
     Examples:
-        >>> file_path = '../data/ftp.ifremer.fr/ifremer/ww3/HINDCAST/SISMO/GLOBAL05_2006_REF102040/WW3-GLOB-30M_200609_p2l.nc'
+        >>> file_path = '../data/2006/WW3-GLOB-30M_200609_p2l.nc'
         >>> year = 2006
         >>> month = 9
         >>> day = 4
@@ -264,7 +274,7 @@ def read_p2l(file_path, time_vect, lon1 = (-180, 180), lat1 = (-90, 90)):
         >>> lon1 = []
         >>> lat1 = []
         >>> time_vect = [year, month, day, hour]
-        >>> (lat, lon, freq, p2l, unit1) = read_WWNCf(file_path, time_vect, lon1, lat1)
+        >>> (lat, lon, freq, p2l, unit1) = read_p2l(file_path, time_vect, lon1, lat1)
     
     Args:
         file_path (str): path of the netcdf file _p2l.nc
@@ -295,13 +305,22 @@ def read_p2l(file_path, time_vect, lon1 = (-180, 180), lat1 = (-90, 90)):
     day = time_vect[2]
     hour = time_vect[3]
     timestep = datetime(year, month, day, hour)
+
     # spatial extent
+    if lon1[0] > lon1[1]:
+        print("pacific")
+        ds = ds.assign_coords(longitude=((360 + (ds.longitude % 360)) % 360))
+        ds = ds.roll(longitude=int(len(ds['longitude']) / 2),roll_coords=True)
+        lon1[0] = ((360 + (lon1[0] % 360)) % 360)
+        lon1[1] = ((360 + (lon1[1] % 360)) % 360)
+        lon = ds.longitude[np.logical_and(ds.longitude >= lon1[0], ds.longitude <= lon1[1])]
     lon = ds.longitude[np.logical_and(ds.longitude >= lon1[0], ds.longitude <= lon1[1])]
     lat = ds.latitude[np.logical_and(ds.latitude >= lat1[0], ds.latitude <= lat1[1])]
     # frequency range
     freq = ds.frequency
     # extract data
     p2l = ds.p2l.sel(time= timestep, frequency = freq, longitude = lon, latitude= lat, method = 'nearest')
+
     # units
     unit1 = ds.p2l.units
     return lat, lon, freq, p2l, unit1
@@ -316,23 +335,33 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     
-    file_path_p2l = ".../../data/2021/WW3-GLOB-30M_202107_p2l.nc"
-    file_path_hs = "../../data/2021/WW3-GLOB-30M_202107_hs.nc"
+    file_path_p2l = "/Volumes/LaCie/data/2021/WW3-GLOB-30M_202107_p2l.nc"
+    file_path_hs = "/Volumes/LaCie/data/2021/WW3-GLOB-30M_202107_hs.nc"
     year = int(args.year)
     month = int(args.month)
     day = int(args.day)
     hour = int(args.hour)
     time_vect = [year, month, day, hour]
-    lon_min, lon_max = -8, 40
-    lat_min, lat_max = 30, 48
+    lon_min, lon_max = 150, -150
+    lat_min, lat_max = -90, 90
     
     ## read p2l.nc
     ### xarray
     lat , lon, freq, p2l, unit1 = read_p2l(file_path_p2l, time_vect, [lon_min, lon_max], [lat_min, lat_max])
     p2l_f = p2l.sel(frequency= 0.3, method = 'nearest')
     fig = plt.figure(figsize=(9,6))
-    ax = plt.axes(projection=ccrs.Robinson())
+    ax = plt.axes(projection=ccrs.PlateCarree(central_longitude=180))
+    p2l_f.plot(ax = ax, transform=ccrs.PlateCarree(), cbar_kwargs={'shrink': 0.4})
     ax.coastlines()
     ax.gridlines()
-    p2l_f.plot(ax=ax, transform=ccrs.PlateCarree(), cbar_kwargs={'shrink': 0.4})
+    plt.show()
+
+    ## read hs
+    hs = read_hs(file_path_hs, time_vect, [lon_min, lon_max], [lat_min, lat_max])
+    
+    fig = plt.figure(figsize=(9,6))
+    ax = plt.axes(projection=ccrs.PlateCarree(central_longitude=180))
+    hs.plot(ax=ax, transform=ccrs.PlateCarree(), cbar_kwargs={'shrink': 0.4})
+    ax.coastlines()
+    ax.gridlines()
     plt.show()
