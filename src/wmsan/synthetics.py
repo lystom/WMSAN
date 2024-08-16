@@ -133,7 +133,7 @@ def open_axisem(dist, path_file_axisem='../../data/NOISE_vertforce_dirac_0-ak135
         return None
     return trace_synth
 
-def taper_axisem_archive(time, distance, archive_name='../../data/NOISE_vertforce_dirac_0-ak135f_1.s_3600s.h5', umin = 2.5, umax = 3.5):
+def taper_axisem_archive(time, distance, archive_name='../../data/NOISE_vertforce_dirac_0-ak135f_1.s_3600s.h5', umin = 2.5, umax = 3.5, comp='Z'):
     """Taper an AxiSEM .h5 archive in a 1D model given its path and distances as well as minimum and maximum Rayleigh wave velocity,and saves and returns the tapered archive.
     
     Args:
@@ -165,10 +165,10 @@ def taper_axisem_archive(time, distance, archive_name='../../data/NOISE_vertforc
         index = np.argmin(np.abs(time - (tmax + tmin)//2))
         dirac[index] = 1
         taper = signal.fftconvolve(dirac, tukey, mode='same')
-        W = open_axisem(dist, archive_name)
+        W = open_axisem(dist, archive_name, comp=comp)
         tapered_archive[i, :] = W*taper
     ## Save tapered archive as h5 file
-    h5_name_tapered = archive_name.replace('s.h5', '_tapered.s.h5')
+    h5_name_tapered = archive_name.replace('s.h5', '_tapered_%s.h5'%comp)
     h5_file = h5py.File(h5_name_tapered, 'w')
     h5_file.create_dataset('WAVEFORMS', data=tapered_archive)
     h5_file.create_dataset('time', data=time)
@@ -176,7 +176,7 @@ def taper_axisem_archive(time, distance, archive_name='../../data/NOISE_vertforc
     h5_file.close()
     return tapered_archive
 
-def taper_axisem_archive_body_waves(time, distance, archive_name='../../data/NOISE_vertforce_dirac_0-ak135f_1.s_3600s.h5', phase1 = 'P', phase2 = 'PP', model='ak135', **kwargs):
+def taper_axisem_archive_body_waves(time, distance, archive_name='../../data/NOISE_vertforce_dirac_0-ak135f_1.s_3600s.h5', phase1 = 'P', phase2 = 'PP', model='ak135', comp='Z', **kwargs):
     """Taper an AxiSEM .h5 archive around two body wave phases in a 1D model given its path and a distance,
     and returns the tapered archive.
     
@@ -226,11 +226,11 @@ def taper_axisem_archive_body_waves(time, distance, archive_name='../../data/NOI
             index = int(t_phase2*fe)
         dirac[index] = 1
         window = signal.fftconvolve(dirac, tukey_window, mode='same')
-        W = open_axisem(d, archive_name)
+        W = open_axisem(d, archive_name, comp=comp)
         tapered_archive[i, :] = W*window
         
     ## Save tapered archive as h5 file
-    h5_name_tapered = archive_name.replace('s.h5', '_tapered_%s_%s.h5'%(phase1, phase2))
+    h5_name_tapered = archive_name.replace('s.h5', '_tapered_%s_%s_%s.h5'%(phase1, phase2, comp))
     h5_file = h5py.File(h5_name_tapered, 'w')
     h5_file.create_dataset('WAVEFORMS', data=tapered_archive)
     h5_file.create_dataset('time', data=time)
@@ -367,7 +367,7 @@ def open_model(path_file_WW3, date_vect, N, fe, lon_slice=slice(-180, 180), lat_
     ## Open WW3 model 
     ds = xr.open_dataset(path_file_WW3)
     if lon_slice.start > lon_slice.stop:
-        ds = ds.assign_coords(longitude=((360 + (amplification_coeff.longitude % 360)) % 360))
+        ds = ds.assign_coords(longitude=((360 + (ds.longitude % 360)) % 360))
         ds = ds.roll(longitude=int(len(ds['longitude']) / 2),roll_coords=True)
         lon_slice = slice(((360 + (lon_slice.start % 360)) % 360), ((360 + (lon_slice.stop % 360)) % 360))
     ww3_data = ds.F_f.sel(longitude=lon_slice, latitude=lat_slice)
@@ -413,7 +413,7 @@ def distance_to_station(lon, lat, lon_s=0, lat_s=90, radius_earth=6371e3):
     distanceS = xr.DataArray(distanceS, coords={'longitude': lon, 'latitude': lat}, name = 'distance', attrs={'units': '°'})
     return distanceS
 
-def matrix_GF(spectrum_axi, lon, lat, N, distance_s, comp = 'Z', conjugate = False):
+def matrix_GF(spectrum_axi, lon, lat, N, distance_s, conjugate = False):
     """Generates a synthetic seismogram (Green's Functions) matrix in frequency domain
     using the given lon, lat, N, path_file_axisem, distance_s, and optional conjugate flag.
     Returns the synthetic seismogram matrix.
@@ -424,7 +424,6 @@ def matrix_GF(spectrum_axi, lon, lat, N, distance_s, comp = 'Z', conjugate = Fal
         lat (numpy.ndarray): latitude of the grid
         N (int): number of samples
         distance_s (numpy.ndarray): distance matrix
-        comp (str, optional): component
         conjugate (bool, optional): conjugate flag
 
     Returns:
@@ -482,10 +481,10 @@ def compute_model_chunk(lon_inf, lon_sup, lat_inf, lat_sup, N, fe, date_vect, sp
     distance_staB = distance_to_station(lon, lat, lon_s = lon_staB, lat_s = lat_staB)
 
     ## Green's Functions spectrum
-    psd_model.values *= matrix_GF(spectrum_axi, lon=lon, lat=lat, N=N, distance_s=distance_staA, conjugate=True, comp=comp).astype(complex)
+    psd_model.values *= matrix_GF(spectrum_axi, lon=lon, lat=lat, N=N, distance_s=distance_staA, conjugate=True).astype(complex)
             
     ## Green's Functions spectrum
-    psd_model.values *= matrix_GF(spectrum_axi, lon=lon, lat=lat, N=N, distance_s=distance_staB, conjugate=False, comp=comp).astype(complex)
+    psd_model.values *= matrix_GF(spectrum_axi, lon=lon, lat=lat, N=N, distance_s=distance_staB, conjugate=False).astype(complex)
             
     del distance_staA, distance_staB, lon, lat 
     ## Sum along coordinates latitude and longitude
@@ -537,6 +536,104 @@ def ccf_computation(coords_staA, coords_staB, path_model, date_vect, spectrum_ax
     
     corr_f = np.zeros((N)).astype(complex)
     res = compute_model_chunk(lon_inf, lon_sup, lat_inf, lat_sup, N, fe, date_vect, spectrum_axi, file_model, lon_staA, lat_staA, lon_staB, lat_staB, comp)
+    
+    corr_f[0:N//2] = res
+    if N%2 == 0:
+        corr_f[N//2::] = np.flip(np.conjugate(corr_f[0:N//2])).astype(complex)
+    else:
+        corr_f[N//2+1::] = np.flip(np.conjugate(corr_f[0:N//2])).astype(complex)
+    ## Correlation in Time Domain
+    corr = ifft(corr_f.data).real
+    corr = np.fft.fftshift(corr)
+    corr *= 1e-40
+    time_corr = np.arange(-N//2, N//2)*1/fe
+
+    corr = xr.DataArray(corr, dims=['time'], coords={'time': time_corr}, name='synthetic correlation')
+    del corr_f    
+    return corr, time_corr
+
+
+### Single Station Cross Component Correlation ###
+
+def compute_model_chunk_autocorr(lon_inf, lon_sup, lat_inf, lat_sup, N, fe, date_vect, spectrum_axi_R, spectrum_axi_Z, file_model, lon_sta, lat_sta):
+    """Computes auto-correlation function for a given station coordinates for a chunk of the www3 model source.   
+    
+    Args:
+        lon_inf (float): Lower longitude bound.
+        lon_sup (float): Upper longitude bound.
+        lat_inf (float): Lower latitude bound.
+        lat_sup (float): Upper latitude bound.
+        N (int): Number of points.
+        fe (float): Sampling frequency.
+        date_vect (array): Vector of dates.
+        spectrum_axi_R (np.ndarray): Axisem archive spectrum for radial component.
+        spectrum_axi_Z (np.ndarray): Axisem archive spectrum for vertical component.
+        file_model (str): WW3 PSD file.
+        lon_sta (float): Longitude of station.
+        lat_sta (float): Latitude of station.
+
+    Returns:
+        corr_f (np.ndarray): Computed correlation function as a single precision complex array.
+    """
+    ## Open model
+    psd_model = open_model(path_file_WW3=file_model, date_vect=date_vect, N=N, fe=fe, lon_slice=slice(lon_inf, lon_sup), lat_slice=slice(lat_inf, lat_sup))
+    psd_model.data = psd_model.data.astype(complex)
+    lon = psd_model.longitude
+    lat = psd_model.latitude
+
+    ## Distances
+    distance_sta = distance_to_station(lon, lat, lon_s = lon_sta, lat_s = lat_sta)
+
+    ## Green's Functions spectrum for vertical component
+    psd_model.values *= matrix_GF(spectrum_axi_Z, lon=lon, lat=lat, N=N, distance_s=distance_sta, conjugate=True).astype(complex)
+            
+    ## Green's Functions spectrum for radial component
+    psd_model.values *= matrix_GF(spectrum_axi_R, lon=lon, lat=lat, N=N, distance_s=distance_sta, conjugate=False).astype(complex)
+            
+    del distance_sta, lon, lat 
+    ## Sum along coordinates latitude and longitude
+    return psd_model.sum(dim=['longitude', 'latitude']).data.astype(complex)
+
+def ccf_computation_autocorr(coords_sta,path_model, date_vect, spectrum_axi_R, spectrum_axi_Z, fe=4., N=14400, extent = [-180, 181, -80, 81]):
+    """Computes the auto-correlation function for a single station.
+    It takes the coordinates of the station, the path to the AxiSEM archive, the path to the model, 
+    a vector of dates, a normalization factor, and a component parameter. 
+    It returns the computed auto-correlation function and the corresponding time array.
+
+    Args:
+        coords_sta (tuple): Coordinates of station (longitude, latitude).
+        path_model (str): Path to the WW3 PSD model.
+        date_vect (list): Vector of dates (year, month, day, hour).
+        spectrum_axi (array): AxiSEM spectrum.
+        fe (float, optional): Sampling frequency.
+        N (int, optional): Number of points.
+        extent (list, optional): Longitude and latitude slices.
+
+    Returns:
+        corr (xarray.DataArray): Synthetic correlation in time domain.
+        time_corr (numpy.ndarray): Time array.
+    """
+
+    ## Coordinates of station
+    lon_sta = coords_sta[0]
+    lat_sta = coords_sta[1]
+
+    ## Open WW3 PSD
+    YEAR = date_vect[0]
+    MONTH = date_vect[1]
+    DAY = date_vect[2]
+    HOUR = date_vect[3]
+
+    file_model = path_model + 'F_%d%02d%02d%02d.nc'%(YEAR, MONTH, DAY, HOUR)
+    paramlist = []
+
+    ## Define longitude and latitude slices
+    number_of_cpu = os.cpu_count()
+    lon_inf, lon_sup = extent[0], extent[1]
+    lat_inf, lat_sup = extent[2], extent[3]
+    
+    corr_f = np.zeros((N)).astype(complex)
+    res = compute_model_chunk_autocorr(lon_inf, lon_sup, lat_inf, lat_sup, N, fe, date_vect, spectrum_axi_R, spectrum_axi_Z, file_model, lon_sta, lat_sta)
     
     corr_f[0:N//2] = res
     if N%2 == 0:
