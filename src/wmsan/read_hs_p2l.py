@@ -13,22 +13,26 @@
 
 It contains four functions read_WWNC, read_WWNCf, read_hs and read_p2l:
 
-- `read_WWNC (file_path, time_vect, lon1, lat1)`: Read netcdf _hs.nc file and return a matrix with dimension lon x lat of significant height of wind and swell waves in meters.
+- `read_WWNC (file_path, time_vect, lon1, lat1)`: 
+    Read netcdf _hs.nc file and return a matrix with dimension lon x lat of significant wave height in meters.
 
-- `read_WWNCf (file_path, time_vect, lon1, lat1)`: Read netcdf _p2l.nc file and return latitude, longitude, frequenc, p2l data which is the base 10 logarithm of power specral density of equivalent surface pressure and the units of p2l.
+- `read_WWNCf (file_path, time_vect, lon1, lat1)`: 
+    Read netcdf _p2l.nc file and return latitude, longitude, frequency,
+    p2l data which is the base 10 logarithm of power specral density of equivalent surface pressure and the units of p2l.
 
-- `read_hs (file_path, time_vect, lon1, lat1)`: Read netcdf significant wave height (_hs.nc) file and return latitude, longitude, frequenc, hs data. Uses xarray.
+- `read_hs (file_path, time_vect, lon1, lat1)`:
+    Read netcdf significant wave height (_hs.nc) file and
+    return latitude, longitude, frequenc, hs data. Uses xarray.
 
-- `read_p2l (file_path, time_vect, lon1, lat1)`: Read netcdf _p2l.nc file and return latitude, longitude, frequenc, p2l data the units of p2l. Uses xarray.
+- `read_p2l (file_path, time_vect, lon1, lat1)`: 
+    Read netcdf _p2l.nc file and return latitude, longitude, frequency, p2l data the units of p2l. Uses xarray.
 """
-
-import argparse
-import sys
-import os
 import numpy as np
 import matplotlib.pyplot as plt
 import xarray as xr
 import cartopy.crs as ccrs
+import argparse
+
 from datetime import date
 from datetime import datetime
 from netCDF4 import Dataset
@@ -103,7 +107,7 @@ def read_WWNC(file_path, time_vect, lon1, lat1):
         nj = ny
 
     # Extract data
-    scale = f.variables['hs'].scale_factor
+
     hs = f.variables['hs'][KK:KK+nk][JJ:JJ+nj][II:II+ni]
    
     f.close()

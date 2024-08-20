@@ -28,26 +28,24 @@ It contains six functions:
 ##################################################################################
 
 ##Libraries
-import os.path
-import cartopy
 import cartopy.crs as ccrs
 import numpy as np
 import matplotlib.pyplot as plt
 import xarray as xr
 import pandas as pd
-
+import os.path
+import cartopy
 
 from netCDF4 import Dataset, date2num
 from math import radians, log
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
-from obspy.geodetics.base import gps2dist_azimuth
 from datetime import datetime
 from scipy.interpolate import interp1d
 from tqdm import tqdm
 from calendar import monthrange
 from pyproj import Geod
 
-from wmsan.read_hs_p2l import read_hs, read_p2l
+from wmsan.read_hs_p2l import read_p2l
 
 ## Set font size parameters to make readable figures
 plt.style.use("ggplot")
@@ -213,12 +211,12 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
         save (bool, optional): save 3-hourly matrix, default = False.
    
     """
-    file_bathy = paths[0]
+    
     ww3_local_path = paths[1]
     path_longuet_higgins = paths[2]
     
     # Constants
-    radius = 6.371*1e6 # radius of the earth in meters
+
     lg10 = log(10) # log of 10
     vs_crust = parameters[0]
     rho_s = parameters[1]
@@ -227,10 +225,8 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
     ## Initialize variables
     if 'plot_type' in kwargs:
         plot_type = kwargs['plot_type']
-        plot = True
         if plot_type == 'hourly':
             plot_hourly = True
-            SDF_hourly =  np.zeros(dpt1.shape)
         else:
             plot_hourly = False
         if plot_type == 'daily':
@@ -248,8 +244,7 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
             SDF_yearly =  np.zeros(dpt1.shape)
         else:
             plot_yearly = False
-    else:
-        plot = True
+
     
     if 'save' in kwargs:
         save = kwargs['save']
@@ -286,7 +281,6 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
         else:
             MONTH = np.array(MONTH)
         for imonth in MONTH:
-            TOTAL_month = np.zeros(dpt1.shape)  # Initiate monthly source of Rayleigh wave matrix
             daymax = monthrange(iyear,imonth)[1]
             filename_p2l = '%s/%s_%d%02d_p2l.nc'%(ww3_local_path, prefix, iyear, imonth)
             print("File WW3 ", filename_p2l)
@@ -357,7 +351,7 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                          
                     ## Single frequency
                     elif f1 == f2:
-                        index_freq = np.squeeze(np.argmin(abs(freq-f1)))
+                        index_freq = np.squeeze(np.argmin(abs(freq_seismic-f1)))
                         print('unique frequency ', f1)
                         Fp = p2l[:, :, index_freq]
                         C = site_effect(dpt1, f1, vs_crust, path_longuet_higgins)
@@ -370,7 +364,7 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                         return
 
                     ## Save SDF to file
-                    if save == True:
+                    if save :
                         ## Save SDF to file
                         path_out = './SDF/'
                         if not os.path.exists(path_out):
@@ -407,7 +401,7 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                         ncfile.close()
                         
                     ## Plot SDF
-                    if plot_hourly == True:
+                    if plot_hourly :
                         plt.close('all') 
                         SDF_plot = xr.DataArray(SDF, 
                                                 coords={'latitude': zlat,'longitude': zlon}, 
@@ -425,14 +419,14 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                         plt.savefig('rayleigh_SDF_%d%02d%02dT%02d.png'%(iyear, imonth, iday, ih), dpi = 300, bbox_inches='tight')
 
                     ## Sum SDF
-                    if plot_daily == True:
+                    if plot_daily :
                         SDF_daily += SDF
-                    if plot_monthly == True:
+                    if plot_monthly :
                         SDF_monthly += SDF
-                    if plot_yearly == True:
+                    if plot_yearly :
                         SDF_yearly += SDF
                    
-                if plot_daily == True:
+                if plot_daily :
                     plt.close('all')
                     SDF_plot = xr.DataArray(SDF_daily,
                                             coords={'latitude': zlat,'longitude': zlon}, 
@@ -450,7 +444,7 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                     plt.close('all')
                     SDF_daily = np.zeros((dpt1.shape))
                     
-            if plot_monthly == True:
+            if plot_monthly :
                     plt.close('all')
                     SDF_plot = xr.DataArray(SDF_monthly,
                                             coords={'latitude': zlat,'longitude': zlon}, 
@@ -469,7 +463,7 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                     plt.close('all')
                     SDF_monthly = np.zeros((dpt1.shape))
 
-        if plot_yearly == True:
+        if plot_yearly :
                     plt.close('all')
                     SDF_plot = xr.DataArray(SDF_yearly,
                                             coords={'latitude': zlat,'longitude': zlon}, 
@@ -619,7 +613,6 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
 
     """
     
-    file_bathy = paths[0]
     ww3_local_path = paths[1]
     
     # Constants
@@ -632,10 +625,8 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
     ## Initialize variables
     if 'plot_type' in kwargs:
         plot_type = kwargs['plot_type']
-        plot = True
         if plot_type == 'hourly':
             plot_hourly = True
-            F_hourly =  np.zeros(dpt1.shape)
         else:
             plot_hourly = False
         if plot_type == 'daily':
@@ -653,8 +644,6 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
             F_yearly =  np.zeros(dpt1.shape)
         else:
             plot_yearly = False
-    else:
-        plot = True
     
     if 'save' in kwargs:
         save = kwargs['save']
@@ -694,11 +683,9 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
     res_bathy = abs(zlon[1] - zlon[0])
     if res_bathy == 0.5:
         amplification_coeff = xr.open_dataarray('../../data/C.nc')
-        refined = False
     else:
         print("Refined bathymetry grid \n PLEASE RUN amplification_coefficients.ipynb before running this script")
         amplification_coeff = xr.open_dataarray(c_file)
-        refined = True
     
     if extent[0] > extent[1]:
         amplification_coeff = amplification_coeff.assign_coords(longitude=((360 + (amplification_coeff.longitude % 360)) % 360))
@@ -724,7 +711,6 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
         else:
             MONTH = np.array(MONTH)
         for imonth in MONTH:
-            TOTAL_month = np.zeros(dpt1.shape)  # Initiate monthly source of Rayleigh wave matrix
             daymax = monthrange(iyear,imonth)[1]
             filename_p2l = '%s/%s_%d%02d_p2l.nc'%(ww3_local_path, prefix, iyear, imonth)
             print("File WW3 ", filename_p2l)
@@ -798,7 +784,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
                         F = 2*np.pi*np.sqrt(F.sum(axis = 0))
                     ## Single frequency
                     elif f1 == f2:
-                        index_freq = np.squeeze(np.argmin(abs(freq-f1)))
+                        index_freq = np.squeeze(np.argmin(abs(freq_seismic-f1)))
                         print('unique frequency ', f1)
                         return
                         
@@ -808,7 +794,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
                         return
 
                     ## Save F to file
-                    if save == True:
+                    if save :
                         path_out = './F/'
                         if not os.path.exists(path_out):
                             print("make directory %s"%path_out)
@@ -844,7 +830,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
                         ncfile.close()
                         
                     ## Plot F
-                    if plot_hourly == True:
+                    if plot_hourly :
                         plt.close('all') 
                         F_plot = xr.DataArray(F, 
                                                 coords={'latitude': zlat,'longitude': zlon}, 
@@ -862,14 +848,14 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
                         plt.savefig('F_R_%d%02d%02dT%02d.png'%(iyear, imonth, iday, ih), dpi = 300, bbox_inches='tight')
 
                     ## Sum F
-                    if plot_daily == True:
+                    if plot_daily :
                         F_daily += F
-                    if plot_monthly == True:
+                    if plot_monthly :
                         F_monthly += F
-                    if plot_yearly == True:
+                    if plot_yearly :
                         F_yearly += F
                    
-                if plot_daily == True:
+                if plot_daily :
                     plt.close('all') 
                     F_plot = xr.DataArray(F_daily, 
                         coords={'latitude': zlat,'longitude': zlon}, 
@@ -887,7 +873,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
                     plt.savefig('F_R_%d%02d%02d.png'%(iyear, imonth, iday), dpi = 300, bbox_inches='tight')
                     F_daily = np.zeros((dpt1.shape))
                     
-            if plot_monthly == True:
+            if plot_monthly :
                 plt.close('all')
                 F_plot = xr.DataArray(F_monthly, 
                     coords={'latitude': zlat,'longitude': zlon}, 
@@ -906,12 +892,12 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
                 F_monthly = np.zeros((dpt1.shape))
                     
 
-        if plot_yearly == True:
+        if plot_yearly :
             plt.close('all')
             F_plot = xr.DataArray(F_yearly,
                                 coords={'latitude': zlat,'longitude': zlon}, 
                                 dims=["latitude", "longitude"],
-                                name = 'Equivalent Force. %s waves.\nFrequency %.3f-%.3f Hz.%d'%(f1, f2, iyear))
+                                name = 'Equivalent Force. Rayleigh waves.\nFrequency %.3f-%.3f Hz.%d'%(f1, f2, iyear))
             fig = plt.figure(figsize=(9,6))
             fig.suptitle('Equivalent Force. Rayleigh waves.\nFrequency %.3f-%.3f Hz.%d'%(f1, f2, iyear))
             ax = plt.axes(projection=ccrs.Robinson(central_longitude=central_longitude))

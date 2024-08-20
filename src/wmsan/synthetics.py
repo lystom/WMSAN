@@ -46,24 +46,17 @@ It contains fourteen functions:
 ## Librairies
 import numpy as np
 import matplotlib.pyplot as plt
-plt.style.use("ggplot")
-import obspy
-
-import h5py 
 import xarray as xr
-import os
-import multiprocessing
+import scipy.signal as signal
+import h5py 
 
 from scipy.fftpack import fftfreq,ifft, fft
-import scipy.signal as signal
-from datetime import datetime
 from pyproj import Geod
 from tqdm import tqdm
-from obspy.core.utcdatetime import UTCDateTime
 from obspy.taup import TauPyModel
 from obspy.taup.taup_geo import calc_dist as calc_dist
 
-multiprocessing.set_start_method('fork')
+plt.style.use("ggplot")
 ## Constants
 radius_earth = 6371e3  # Earth's Radius in meters
 
@@ -193,16 +186,12 @@ def taper_axisem_archive_body_waves(time, distance, archive_name='../../data/NOI
         time_iasp (numpy.ndarray): time vector of the archive.
         trace_synth (numpy.ndarray): synthetic trace at the given distance.
     """
-    
-    R = radius_earth*1e-3  # Radius of the Earth in km
     dt = time[1] - time[0]
     fe = 1/dt
     tapered_archive = np.zeros((len(distance), len(time)))
     
     ## IASP travel times TauP
     model_1D = TauPyModel(model='%s'%model)
-    tP_IASP = []
-    tPP_IASP = []
     dist = np.arange(0, 180.1, 0.1)
     for i, d in enumerate(dist):
         try:
@@ -216,7 +205,6 @@ def taper_axisem_archive_body_waves(time, distance, archive_name='../../data/NOI
             t_phase2 = arr_phase2[0].time
         except:
             t_phase2 = np.nan
-        dist_in_km = dist*np.pi*R/180
         # Window around TauP
         tukey_window = signal.windows.tukey(int(50*fe), alpha=0.3, sym=True)
         dirac = np.zeros(len(time))
@@ -315,7 +303,6 @@ def open_spectrum_axisem(path_file_axisem='./spectrum_vertforce_iasp91_1.s_256c_
     h5_file = h5py.File(path_file_axisem, mode = 'r')
     fe_iasp = h5_file['_metadata']['fe'][()].astype(np.single)
     time_iasp = h5_file['_metadata']['time'][:].astype(np.single)
-    N = len(time_iasp)
     freq_iasp = h5_file['_metadata']['freq'][:].astype(np.single)
     index_freq = np.squeeze(np.argwhere(np.logical_and(freq_iasp>=0, freq_iasp<=2.)))
     freq_iasp = freq_iasp[index_freq]
@@ -344,7 +331,7 @@ def create_date_vect(dates):
         date_vect[i] = [year, month, day, hour]
     return date_vect
 
-def open_model(path_file_WW3, date_vect, N, fe, lon_slice=slice(-180, 180), lat_slice=slice(-78, 80)):
+def open_model(path_file_WW3, N, fe, lon_slice=slice(-180, 180), lat_slice=slice(-78, 80)):
     """Open WW3 model for ambient noise sources at a specific time and date. 
     Returns the PSD of the given model in N^2.s with dimensions (dim_lon, dim_lat, 2*dim_freq+1).
 
@@ -359,10 +346,6 @@ def open_model(path_file_WW3, date_vect, N, fe, lon_slice=slice(-180, 180), lat_
     Returns:
         force_spectrum (xarray.DataArray): Hermitian PSD of the given model in N^2.s with dimensions (dim_lon, dim_lat, 2*dim_freq+1).
     """
-    year = date_vect[0]
-    month = date_vect[1]
-    day = date_vect[2]
-    hour = date_vect[3]
 
     ## Open WW3 model 
     ds = xr.open_dataset(path_file_WW3)
@@ -448,7 +431,7 @@ def matrix_GF(spectrum_axi, lon, lat, N, distance_s, conjugate = False):
         S_synth[index,:] = trace
     return S_synth
 
-def compute_model_chunk(lon_inf, lon_sup, lat_inf, lat_sup, N, fe, date_vect, spectrum_axi, file_model, lon_staA, lat_staA, lon_staB, lat_staB, comp):
+def compute_model_chunk(lon_inf, lon_sup, lat_inf, lat_sup, N, fe, spectrum_axi, file_model, lon_staA, lat_staA, lon_staB, lat_staB, comp):
     """Computes correlation function between stations A and B for a chunk of the www3 model source.   
     
     Args:
@@ -471,7 +454,7 @@ def compute_model_chunk(lon_inf, lon_sup, lat_inf, lat_sup, N, fe, date_vect, sp
         corr_f (np.ndarray): Computed correlation function as a single precision complex array.
     """
     ## Open model
-    psd_model = open_model(path_file_WW3=file_model, date_vect=date_vect, N=N, fe=fe, lon_slice=slice(lon_inf, lon_sup), lat_slice=slice(lat_inf, lat_sup))
+    psd_model = open_model(path_file_WW3=file_model, N=N, fe=fe, lon_slice=slice(lon_inf, lon_sup), lat_slice=slice(lat_inf, lat_sup))
     psd_model.data = psd_model.data.astype(complex)
     lon = psd_model.longitude
     lat = psd_model.latitude
@@ -527,15 +510,13 @@ def ccf_computation(coords_staA, coords_staB, path_model, date_vect, spectrum_ax
     HOUR = date_vect[3]
 
     file_model = path_model + 'F_%d%02d%02d%02d.nc'%(YEAR, MONTH, DAY, HOUR)
-    paramlist = []
 
     ## Define longitude and latitude slices
-    number_of_cpu = os.cpu_count()
     lon_inf, lon_sup = extent[0], extent[1]
     lat_inf, lat_sup = extent[2], extent[3]
     
     corr_f = np.zeros((N)).astype(complex)
-    res = compute_model_chunk(lon_inf, lon_sup, lat_inf, lat_sup, N, fe, date_vect, spectrum_axi, file_model, lon_staA, lat_staA, lon_staB, lat_staB, comp)
+    res = compute_model_chunk(lon_inf, lon_sup, lat_inf, lat_sup, N, fe,spectrum_axi, file_model, lon_staA, lat_staA, lon_staB, lat_staB, comp)
     
     corr_f[0:N//2] = res
     if N%2 == 0:
@@ -555,7 +536,7 @@ def ccf_computation(coords_staA, coords_staB, path_model, date_vect, spectrum_ax
 
 ### Single Station Cross Component Correlation ###
 
-def compute_model_chunk_autocorr(lon_inf, lon_sup, lat_inf, lat_sup, N, fe, date_vect, spectrum_axi_R, spectrum_axi_Z, file_model, lon_sta, lat_sta):
+def compute_model_chunk_autocorr(lon_inf, lon_sup, lat_inf, lat_sup, N, fe, spectrum_axi_R, spectrum_axi_Z, file_model, lon_sta, lat_sta):
     """Computes auto-correlation function for a given station coordinates for a chunk of the www3 model source.   
     
     Args:
@@ -576,7 +557,7 @@ def compute_model_chunk_autocorr(lon_inf, lon_sup, lat_inf, lat_sup, N, fe, date
         corr_f (np.ndarray): Computed correlation function as a single precision complex array.
     """
     ## Open model
-    psd_model = open_model(path_file_WW3=file_model, date_vect=date_vect, N=N, fe=fe, lon_slice=slice(lon_inf, lon_sup), lat_slice=slice(lat_inf, lat_sup))
+    psd_model = open_model(path_file_WW3=file_model, N=N, fe=fe, lon_slice=slice(lon_inf, lon_sup), lat_slice=slice(lat_inf, lat_sup))
     psd_model.data = psd_model.data.astype(complex)
     lon = psd_model.longitude
     lat = psd_model.latitude
@@ -625,15 +606,13 @@ def ccf_computation_autocorr(coords_sta,path_model, date_vect, spectrum_axi_R, s
     HOUR = date_vect[3]
 
     file_model = path_model + 'F_%d%02d%02d%02d.nc'%(YEAR, MONTH, DAY, HOUR)
-    paramlist = []
 
     ## Define longitude and latitude slices
-    number_of_cpu = os.cpu_count()
     lon_inf, lon_sup = extent[0], extent[1]
     lat_inf, lat_sup = extent[2], extent[3]
     
     corr_f = np.zeros((N)).astype(complex)
-    res = compute_model_chunk_autocorr(lon_inf, lon_sup, lat_inf, lat_sup, N, fe, date_vect, spectrum_axi_R, spectrum_axi_Z, file_model, lon_sta, lat_sta)
+    res = compute_model_chunk_autocorr(lon_inf, lon_sup, lat_inf, lat_sup, N, fe, spectrum_axi_R, spectrum_axi_Z, file_model, lon_sta, lat_sta)
     
     corr_f[0:N//2] = res
     if N%2 == 0:

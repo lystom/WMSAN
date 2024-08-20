@@ -1,23 +1,12 @@
-import os.path
-import cartopy
-import cartopy.crs as ccrs
+#!/usr/bin/env python3
 import numpy as np
-import matplotlib.pyplot as plt
 import xarray as xr
-import pandas as pd
 
-
-from netCDF4 import Dataset, date2num
 from math import radians, log
-from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
-from obspy.geodetics.base import gps2dist_azimuth
 from datetime import datetime
-from scipy.interpolate import interp1d
-from tqdm import tqdm
 from calendar import monthrange
-from pyproj import Geod
 
-from wmsan.read_hs_p2l import read_hs, read_p2l
+from wmsan.read_hs_p2l import read_p2l
 
 __author__ = "Reza D.D. Esfahani" # mod. by Lisa Tomasetto 07/2024
 __copyright__ = "Copyright 2024, UGA"
@@ -44,8 +33,6 @@ def temporal_evolution(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], ext
         time (list): A list of datetime objects representing the time of each computation.
         temporal_variation (ndarray): An array containing the temporal variation of force of the seismic sources.
     """
-    
-    file_bathy = paths[0]
     ww3_local_path = paths[1]
 
     # Constants
@@ -105,11 +92,8 @@ def temporal_evolution(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], ext
         amplification_coeff = amplification_coeff.assign_coords(longitude=((360 + (amplification_coeff.longitude % 360)) % 360))
         amplification_coeff = amplification_coeff.roll(longitude=int(len(amplification_coeff['longitude']) / 2),roll_coords=True)
     
-    if res_bathy == 0.5:
-        refined = False
-    else:
+    if res_bathy != 0.5:
         print("Refined bathymetry grid \n PLEASE RUN amplification_coefficients.ipynb before running this script")
-        refined = True
 
     ## Surface Element
     msin = np.array([np.sin(np.pi/2 - np.radians(zlat))]).T
@@ -134,7 +118,6 @@ def temporal_evolution(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], ext
         else:
             MONTH = np.array(MONTH)
         for imonth in MONTH:
-            TOTAL_month = np.zeros(dpt1.shape)  # Initiate monthly source of Rayleigh wave matrix
             daymax = monthrange(iyear,imonth)[1]
             filename_p2l = '%s/%s_%d%02d_p2l.nc'%(ww3_local_path, prefix, iyear, imonth)
             print("File WW3 ", filename_p2l)
@@ -183,7 +166,7 @@ def temporal_evolution(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], ext
                         index_freq = np.logical_and(f1 <= freq_seismic, freq_seismic <= f2)
                                         ## Single frequency
                     elif f1 == f2:
-                        index_freq = np.squeeze(np.argmin(abs(freq-f1)))
+                        index_freq = np.squeeze(np.argmin(abs(freq_seismic-f1)))
                         print('unique frequency ', f1)
                         
                     ## Exception in parametrization of frequencies
@@ -192,7 +175,6 @@ def temporal_evolution(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], ext
                         
                     df = df[index_freq]
                     freq_seismic = freq_seismic[index_freq]
-                    n_freq = len(df)
                     Fp = p2l.sel(frequency = freq_ocean[index_freq], latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
                     Fp = Fp.where(np.isfinite(Fp))
                     Fp = Fp.assign_coords({"freq": freq_seismic})

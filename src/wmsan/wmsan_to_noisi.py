@@ -27,17 +27,16 @@ It contains five functions:
 
 ##############################################################################
 ## Imports ##
-import h5py
 import numpy as np
+import xarray as xr
+import h5py
+import warnings
 import re
 import os
-import xarray as xr
-from scipy.fftpack import next_fast_len
-import matplotlib.pyplot as plt
-from sklearn.neighbors import BallTree
-from math import sin
 
-import warnings ## to ignore warnings due to scikit learn see below
+from scipy.fftpack import next_fast_len
+from sklearn.neighbors import BallTree
+ ## to ignore warnings due to scikit learn see below
 # https://stackoverflow.com/questions/40845304/runtimewarning-numpy-dtype-size-changed-may-indicate-binary-incompatibility
 warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
@@ -81,6 +80,7 @@ def get_nearest_neighbour_index(tree, query_point, n):
     Returns:
         values_out (array-like): An array of indices of the nearest neighbors.
     """
+    pt = np.radians(query_point)
     distances, indices = tree.query([pt], k=n)
     return(indices)
 
@@ -152,8 +152,7 @@ def run(noise_source_file, grid_file, greens_function_file):
 
     Returns:
         None (NoneType): This function does not return anything.
-    """
-    fmin = 0.0    
+    """   
     microseism_model = xr.load_dataset(noise_source_file)
     microseism_model = microseism_model.fillna(0.0)
     source_grid = np.load(grid_file)
