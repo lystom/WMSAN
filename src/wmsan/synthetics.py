@@ -536,7 +536,23 @@ def ccf_computation(coords_staA, coords_staB, path_model, date_vect, spectrum_ax
 
 ### Single Station Cross Component Correlation ###
 
-def compute_model_chunk_autocorr(lon_inf, lon_sup, lat_inf, lat_sup, N, fe, spectrum_axi_R, spectrum_axi_Z, file_model, lon_sta, lat_sta):
+def amplitude_modulator(lon, lat, N, lon_s, lat_s, comp = 'E'):
+    
+    geoid = Geod(ellps="WGS84")  # set reference ellipsoid
+    (lat_grid, lon_grid) = np.meshgrid(lat, lon)  # grid used
+
+    lonSTA = np.ones(lon_grid.shape)*lon_s
+    latSTA = np.ones(lat_grid.shape)*lat_s
+    (_, baz, _) = geoid.inv(lon_grid, lat_grid, lonSTA, latSTA, radians=False)
+    
+    if comp == 'E':
+        return np.repeat(-np.sin(baz)[:,:, np.newaxis], N//2, axis=2)
+    if comp == 'N':
+        return np.repeat(np.cos(baz)[:,:, np.newaxis], N//2, axis=2)
+    if comp == 'Z':
+        return np.ones(lon_grid.shape[0], lon_grid.shape[1], N//2)
+
+def compute_model_chunk_autocorr(lon_inf, lon_sup, lat_inf, lat_sup, N, fe, spectrum_axi_R, spectrum_axi_Z, file_model, lon_sta, lat_sta, comp='ZE'):
     """Computes auto-correlation function for a given station coordinates for a chunk of the www3 model source.   
     
     Args:
@@ -565,17 +581,29 @@ def compute_model_chunk_autocorr(lon_inf, lon_sup, lat_inf, lat_sup, N, fe, spec
     ## Distances
     distance_sta = distance_to_station(lon, lat, lon_s = lon_sta, lat_s = lat_sta)
 
-    ## Green's Functions spectrum for vertical component
-    psd_model.values *= matrix_GF(spectrum_axi_Z, lon=lon, lat=lat, N=N, distance_s=distance_sta, conjugate=True).astype(complex)
-            
-    ## Green's Functions spectrum for radial component
-    psd_model.values *= matrix_GF(spectrum_axi_R, lon=lon, lat=lat, N=N, distance_s=distance_sta, conjugate=False).astype(complex)
-            
+    ## Amplitude modulator
+    ## Green's Functions spectrum
+    if comp[0] == 'Z':
+        ## Green's Functions spectrum for vertical component
+        psd_model.values *= matrix_GF(spectrum_axi_Z, lon=lon, lat=lat, N=N, distance_s=distance_sta, conjugate=True).astype(complex)
+    else:
+        ## Green's Functions spectrum for radial component
+        psd_model.values *= matrix_GF(spectrum_axi_R, lon=lon, lat=lat, N=N, distance_s=distance_sta, conjugate=True).astype(complex)
+        psd_model.values *= amplitude_modulator(lon, lat, lon_s = lon_sta, lat_s = lat_sta, N=N, comp = comp[0]).astype(complex)
+    
+    if comp[1] == 'Z':
+        ## Green's Functions spectrum for vertical component
+        psd_model.values *= matrix_GF(spectrum_axi_Z, lon=lon, lat=lat, N=N, distance_s=distance_sta, conjugate=False).astype(complex)
+    else:
+        ## Green's Functions spectrum for radial component
+        psd_model.values *= matrix_GF(spectrum_axi_R, lon=lon, lat=lat, N=N, distance_s=distance_sta, conjugate=False).astype(complex)
+        psd_model.values *= amplitude_modulator(lon, lat, lon_s = lon_sta, lat_s = lat_sta, N=N, comp = comp[1]).astype(complex)
+      
     del distance_sta, lon, lat 
     ## Sum along coordinates latitude and longitude
     return psd_model.sum(dim=['longitude', 'latitude']).data.astype(complex)
 
-def ccf_computation_autocorr(coords_sta,path_model, date_vect, spectrum_axi_R, spectrum_axi_Z, fe=4., N=14400, extent = [-180, 181, -80, 81]):
+def ccf_computation_autocorr(coords_sta,path_model, date_vect, spectrum_axi_R, spectrum_axi_Z, fe=4., N=14400, extent = [-180, 181, -80, 81], comp='ZE'):
     """Computes the auto-correlation function for a single station.
     It takes the coordinates of the station, the path to the AxiSEM archive, the path to the model, 
     a vector of dates, a normalization factor, and a component parameter. 
@@ -612,7 +640,7 @@ def ccf_computation_autocorr(coords_sta,path_model, date_vect, spectrum_axi_R, s
     lat_inf, lat_sup = extent[2], extent[3]
     
     corr_f = np.zeros((N)).astype(complex)
-    res = compute_model_chunk_autocorr(lon_inf, lon_sup, lat_inf, lat_sup, N, fe, spectrum_axi_R, spectrum_axi_Z, file_model, lon_sta, lat_sta)
+    res = compute_model_chunk_autocorr(lon_inf, lon_sup, lat_inf, lat_sup, N, fe, spectrum_axi_R, spectrum_axi_Z, file_model, lon_sta, lat_sta, comp=comp)
     
     corr_f[0:N//2] = res
     if N%2 == 0:
