@@ -9,6 +9,18 @@ and this project adheres to [Calendar Versioning](https://calver.org/).
 
 ### Added
 
+- New version with autocorr
+- Release to host on Zenodo
+
+### Changed
+
+- Increase patch in version 2024.1.0
+
+
+## [2014.0.6] - 2024-08-26
+
+### Added
+
 - Add functions to compute single station auto-correlations
 - Add possibility to work on Pacific ocean.
 
