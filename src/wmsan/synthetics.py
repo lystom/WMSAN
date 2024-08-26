@@ -33,12 +33,17 @@ It contains fourteen functions:
 
 - `distance_to_station(lon, lat, lon_s, lat_s, radius_earth)`: Computes the distance of every point of the model to station of coordinates (lonS, latS).
 
-- `matrix_GF(spectrum_axi, lon, lat, N, distance_s, comp, conjugate)`: Generates a synthetic seismogram (Green's Functions) matrix to a specific station in frequency domain using the given lon, lat, N, path_file_axisem, distance_s, and optional conjugate flag.
+- `matrix_GF(spectrum_axi, lon, lat, N, distance_s, conjugate)`: Generates a synthetic seismogram (Green's Functions) matrix to a specific station in frequency domain using the given lon, lat, N, path_file_axisem, distance_s, and optional conjugate flag.
 
-- `compute_model_chunk(lon_inf, lon_sup, lat_inf, lat_sup, N, fe, date_vect, spectrum_axi, file_model, lon_staA, lat_staA, lon_staB, lat_staB, comp)`: Compute correlation function in frequency domain between stations A and B for a chunk of the www3 model source.
+- `compute_model_chunk(lon_inf, lon_sup, lat_inf, lat_sup, N, fe, date_vect, spectrum_axi, file_model, lon_staA, lat_staA, lon_staB, lat_staB)`: Compute correlation function in frequency domain between stations A and B for a chunk of the www3 model source.
 
 - `ccf_computation(coords_staA, coords_staB, path_model, date_vect, spectrum_axi, fe, N, extent, comp)`: Compute the cross-correlation function between two seismic stations.
 
+- `amplitude_modulator(lon, lat, N, lon_s, lat_s, comp)`: amplitude modulation depending on the component. 
+
+- `compute_model_chunk_autocorr(lon_inf, lon_sup, lat_inf, lat_sup, N, fe, spectrum_axi_R, spectrum_axi_Z, file_model, lon_sta, lat_sta, comp)`: Compute auto-correlation cross-component function in frequency domain for a chunk of the www3 model source.
+
+- `ccf_computation_autocorr(coords_sta,path_model, date_vect, spectrum_axi_R, spectrum_axi_Z, fe, N, extent, comp)`: Compute auto-correlation function between radial and vertical components for a single station.
 """
 
 ##########################################################################
@@ -431,7 +436,7 @@ def matrix_GF(spectrum_axi, lon, lat, N, distance_s, conjugate = False):
         S_synth[index,:] = trace
     return S_synth
 
-def compute_model_chunk(lon_inf, lon_sup, lat_inf, lat_sup, N, fe, spectrum_axi, file_model, lon_staA, lat_staA, lon_staB, lat_staB, comp):
+def compute_model_chunk(lon_inf, lon_sup, lat_inf, lat_sup, N, fe, spectrum_axi, file_model, lon_staA, lat_staA, lon_staB, lat_staB):
     """Computes correlation function between stations A and B for a chunk of the www3 model source.   
     
     Args:
@@ -474,7 +479,7 @@ def compute_model_chunk(lon_inf, lon_sup, lat_inf, lat_sup, N, fe, spectrum_axi,
     return psd_model.sum(dim=['longitude', 'latitude']).data.astype(complex)
 
 
-def ccf_computation(coords_staA, coords_staB, path_model, date_vect, spectrum_axi, fe=4., N=14400, extent = [-180, 181, -80, 81], comp='Z'):
+def ccf_computation(coords_staA, coords_staB, path_model, date_vect, spectrum_axi, fe=4., N=14400, extent = [-180, 181, -80, 81]):
     """Computes the cross-correlation function between two seismic stations.
     It takes the coordinates of the stations, the path to the AxiSEM archive, the path to the model, 
     a vector of dates, a normalization factor, and a component parameter. 
@@ -489,7 +494,6 @@ def ccf_computation(coords_staA, coords_staB, path_model, date_vect, spectrum_ax
         fe (float, optional): Sampling frequency.
         N (int, optional): Number of points.
         extent (list, optional): Longitude and latitude slices.
-        comp (str, optional): Component parameter.
 
     Returns:
         corr (xarray.DataArray): Synthetic correlation in time domain.
@@ -516,7 +520,7 @@ def ccf_computation(coords_staA, coords_staB, path_model, date_vect, spectrum_ax
     lat_inf, lat_sup = extent[2], extent[3]
     
     corr_f = np.zeros((N)).astype(complex)
-    res = compute_model_chunk(lon_inf, lon_sup, lat_inf, lat_sup, N, fe,spectrum_axi, file_model, lon_staA, lat_staA, lon_staB, lat_staB, comp)
+    res = compute_model_chunk(lon_inf, lon_sup, lat_inf, lat_sup, N, fe,spectrum_axi, file_model, lon_staA, lat_staA, lon_staB, lat_staB)
     
     corr_f[0:N//2] = res
     if N%2 == 0:
@@ -537,7 +541,16 @@ def ccf_computation(coords_staA, coords_staB, path_model, date_vect, spectrum_ax
 ### Single Station Cross Component Correlation ###
 
 def amplitude_modulator(lon, lat, N, lon_s, lat_s, comp = 'E'):
+    """Modulates the source PSD amplitude depending on the source point backazimuth and horizontal component  
     
+    Args:
+        lon (np.ndarray): Longitude vector
+        lat (np.ndarray): Latitude vector
+        N (int): Number of points in frequency domain
+        lon_s (float): Source longitude 
+        lat_s (float): Source latitude
+        comp (str): Horizontal component to compute amplification for, default 'E'.
+    """
     geoid = Geod(ellps="WGS84")  # set reference ellipsoid
     (lat_grid, lon_grid) = np.meshgrid(lat, lon)  # grid used
 

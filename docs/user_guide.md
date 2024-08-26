@@ -53,6 +53,7 @@ If you want to see the temporal evolution of the source intensity in a specific 
 To compute synthetic cross-correlations with a WW3 model based source distribution.
 
 [Rayleigh Waves](notebooks/rayleigh_waves/synthetic_CCF.ipynb){: .btn}
+[Auto-Correlation](notebooks/rayleigh_waves/synthetic_CCF_autocorr.ipynb){: .bn}
 [Body Waves](notebooks/body_waves/synthetic_CCF.ipynb){: .btn}
 
 ## WMSAN to noisi
