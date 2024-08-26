@@ -23,6 +23,7 @@ nav:
     - 'Synthetic Cross-Correlation Functions': 
       - 'Rayleigh Waves': notebooks/rayleigh_waves/synthetic_CCF.ipynb
       - 'Body Waves': notebooks/body_waves/synthetic_CCF.ipynb
+      - 'Auto-correlation': notebooks/rayleigh_waves/synthetic_CCF_autocorr.ipynb
     - 'To noisi': notebooks/rayleigh_waves/wmsan_to_noisi.ipynb
     - 'Synthetic Spectrograms':
       - 'Source Distribution': notebooks/rayleigh_waves/rayleigh_source.ipynb

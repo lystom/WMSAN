@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wmsan"
-version = "2024.0.6"
+version = "2024.1.0"
 authors = [
   { name="Lisa Tomasetto", email="lisa.tomasetto@gmail.com" },
 ]
@@ -16,7 +16,8 @@ requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
-    "Operating System :: MacOS, Unix",
+    "Operating System :: MacOS",
+    "Operating System :: Unix",
 ]
 dependencies = ["numpy<2.0.0",  # until obspy 1.5 is released
                 "pandas",
