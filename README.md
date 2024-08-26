@@ -1,4 +1,5 @@
 # WMSAN Python Package
+[![DOI](https://zenodo.org/badge/793568997.svg)](https://zenodo.org/doi/10.5281/zenodo.13374110)
 
 ## Description
 This package is built to help computation of seismic ambient noise source maps and other products based on the WAVEWATCHIII hindcast output.
