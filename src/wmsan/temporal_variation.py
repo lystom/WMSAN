@@ -191,7 +191,7 @@ def temporal_evolution(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], ext
                     amplification_coeff = amplification_coeff.reindex_like(Fp, method='nearest', tolerance=0.01)
                     F_f = Fp*amplification_coeff**2
 
-                    ## Compute Equivalent Vertical Force
+                    ## Compute Proxy for the Source Force
                     F = F_f
                     # Integrate over the frequency band
                     for ifq, fq in enumerate(freq_seismic.values):

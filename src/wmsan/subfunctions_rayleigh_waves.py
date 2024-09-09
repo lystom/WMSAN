@@ -23,7 +23,7 @@ It contains six functions:
 
 - `spectrogram(path_netcdf, dates, lon_sta, lat_sta, Q, U, P, **kwargs)`: Plot spectrogram for a given path to NetCDF file, dates, and optional station coordinates and constants.
 
-- `loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type, date_vec, extent, parameters, c_file, prefix, **kwargs)`: compute the equivalent vertical force.
+- `loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type, date_vec, extent, parameters, c_file, prefix, **kwargs)`: compute the Proxy for the Source Force.
 """
 ##################################################################################
 
@@ -377,7 +377,7 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                         time_dim = ncfile.createDimension('time', daymax*8)  # unlimited axis (can be appended to).
                         freq_dim = ncfile.createDimension('frequency', n_freq)
                         ncfile.title='Rayleigh waves power spectrum of vertical displacement on %d-%02d-%02d-%02d'%(iyear, imonth, iday, ih)
-                        ncfile.subtitle='Equivalent Force maps every 3 hours for the secondary microseismic peak'
+                        ncfile.subtitle='Proxy for the Source Force maps every 3 hours for the secondary microseismic peak'
                         lat = ncfile.createVariable('latitude', np.float32, ('latitude',))
                         lat.units = 'degrees_north'
                         lat.long_name = 'latitude'
@@ -590,8 +590,8 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
 
 
 def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [1/12, 1/2], c_file = '../../data/C.nc', prefix = 'WW3-GLOB-30M', **kwargs):
-    """ Compute Rayleigh waves sources from ww3 p2l file as the equivalent vertical force on the seafloor.
-    Saves in netcdf format the equivalent vertical force for each frequency if save argument is True.
+    """ Compute Rayleigh waves sources from ww3 p2l file as the Proxy for the Source Force on the seafloor.
+    Saves in netcdf format the Proxy for the Source Force for each frequency if save argument is True.
     Plots in PNG source maps of P or S waves at given intervals depending on plot variables.
  
     Args:
@@ -805,8 +805,8 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
                         lon_dim = ncfile.createDimension('longitude', len(zlon))  # longitude axis
                         time_dim = ncfile.createDimension('time', daymax*8)  # unlimited axis (can be appended to).
                         freq_dim = ncfile.createDimension('frequency', n_freq)
-                        ncfile.title='Equivalent Vertical Force on %d-%02d-%02d-%02d'%(iyear, imonth, iday, ih)
-                        ncfile.subtitle='Equivalent Force every 3 hours for the secondary microseismic peak'
+                        ncfile.title='Proxy for the Source Force on %d-%02d-%02d-%02d'%(iyear, imonth, iday, ih)
+                        ncfile.subtitle='Proxy for the Source Force every 3 hours for the secondary microseismic peak'
                         lat = ncfile.createVariable('latitude', np.float32, ('latitude',))
                         lat.units = 'degrees_north'
                         lat.long_name = 'latitude'
@@ -821,7 +821,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
                         freq_nc.long_name = 'frequency'
                         F_freq = ncfile.createVariable('F_f', np.float32, ('frequency','latitude', 'longitude'))
                         F_freq.units = 'N.s^{1/2}'
-                        F_freq.long_name = 'Equivalent Vertical Force spectrum'
+                        F_freq.long_name = 'Proxy for the Source Force spectrum'
                         lat[:] = zlat
                         lon[:] = zlon
                         freq_nc[:] = freq_seismic
@@ -835,16 +835,16 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
                         F_plot = xr.DataArray(F, 
                                                 coords={'latitude': zlat,'longitude': zlon}, 
                                                 dims=["latitude", "longitude"],
-                                                name = 'Equivalent Force. Rayleigh waves.\nFrequency %.3f-%.3f Hz.%d-%02d-%02dT%02d'%(f1, f2, iyear, imonth, iday, ih))
+                                                name = 'Proxy for the Source Force. Rayleigh waves.\nFrequency %.3f-%.3f Hz.%d-%02d-%02dT%02d'%(f1, f2, iyear, imonth, iday, ih))
                         fig = plt.figure(figsize=(9,6))
-                        fig.suptitle('Equivalent Force. Rayleigh waves.\nFrequency %.3f-%.3f Hz.%d-%02d-%02dT%02d'%(f1, f2, iyear, imonth, iday, ih))
+                        fig.suptitle('Proxy for the Source Force. Rayleigh waves.\nFrequency %.3f-%.3f Hz.%d-%02d-%02dT%02d'%(f1, f2, iyear, imonth, iday, ih))
                         ax = plt.axes(projection=ccrs.Robinson(central_longitude=central_longitude))
                         ax.coastlines()
                         gl = ax.gridlines()
                         gl.xformatter = LONGITUDE_FORMATTER
                         gl.yformatter = LATITUDE_FORMATTER
                         ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
-                        F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax)
+                        F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'$F_{prox}$ (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax)
                         plt.savefig('F_R_%d%02d%02dT%02d.png'%(iyear, imonth, iday, ih), dpi = 300, bbox_inches='tight')
 
                     ## Sum F
@@ -860,9 +860,9 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
                     F_plot = xr.DataArray(F_daily, 
                         coords={'latitude': zlat,'longitude': zlon}, 
                         dims=["latitude", "longitude"],
-                        name = 'Equivalent Force. Rayleigh waves.Frequency %.3f-%.3f Hz.%d-%02d-%02d'%(f1, f2, iyear, imonth, iday))
+                        name = 'Proxy for the Source Force. Rayleigh waves.Frequency %.3f-%.3f Hz.%d-%02d-%02d'%(f1, f2, iyear, imonth, iday))
                     fig = plt.figure(figsize=(9,6))
-                    fig.suptitle('Equivalent Force. Rayleigh waves.\nFrequency %.3f-%.3f Hz.%d-%02d-%02d'%(f1, f2, iyear, imonth, iday))
+                    fig.suptitle('Proxy for the Source Force. Rayleigh waves.\nFrequency %.3f-%.3f Hz.%d-%02d-%02d'%(f1, f2, iyear, imonth, iday))
                     ax = plt.axes(projection=ccrs.Robinson(central_longitude=central_longitude))
                     ax.coastlines()
                     gl = ax.gridlines()
@@ -878,9 +878,9 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
                 F_plot = xr.DataArray(F_monthly, 
                     coords={'latitude': zlat,'longitude': zlon}, 
                     dims=["latitude", "longitude"],
-                    name = 'Equivalent Force. Rayleigh waves. Frequency %.3f-%.3f Hz.%d-%02d'%(f1, f2, iyear, imonth))
+                    name = 'Proxy for the Source Force. Rayleigh waves. Frequency %.3f-%.3f Hz.%d-%02d'%(f1, f2, iyear, imonth))
                 fig = plt.figure(figsize=(9,6))
-                fig.suptitle('Equivalent Force. Rayleigh waves.\nFrequency %.3f-%.3f Hz.%d-%02d'%(f1, f2, iyear, imonth))
+                fig.suptitle('Proxy for the Source Force. Rayleigh waves.\nFrequency %.3f-%.3f Hz.%d-%02d'%(f1, f2, iyear, imonth))
                 ax = plt.axes(projection=ccrs.Robinson(central_longitude=central_longitude))
                 ax.coastlines()
                 gl = ax.gridlines()
@@ -897,9 +897,9 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
             F_plot = xr.DataArray(F_yearly,
                                 coords={'latitude': zlat,'longitude': zlon}, 
                                 dims=["latitude", "longitude"],
-                                name = 'Equivalent Force. Rayleigh waves.\nFrequency %.3f-%.3f Hz.%d'%(f1, f2, iyear))
+                                name = 'Proxy for the Source Force. Rayleigh waves.\nFrequency %.3f-%.3f Hz.%d'%(f1, f2, iyear))
             fig = plt.figure(figsize=(9,6))
-            fig.suptitle('Equivalent Force. Rayleigh waves.\nFrequency %.3f-%.3f Hz.%d'%(f1, f2, iyear))
+            fig.suptitle('Proxy for the Source Force. Rayleigh waves.\nFrequency %.3f-%.3f Hz.%d'%(f1, f2, iyear))
             ax = plt.axes(projection=ccrs.Robinson(central_longitude=central_longitude))
             ax.coastlines()
             gl = ax.gridlines()
@@ -911,4 +911,4 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
             F_daily = np.zeros((dpt1.shape))
             F_yearly = np.zeros((dpt1.shape))
         plt.close('all')
-    print('Equivalent Vertical Force source maps done!')
+    print('Proxy for the Source Force source maps done!')

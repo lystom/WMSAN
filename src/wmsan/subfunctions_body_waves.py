@@ -24,7 +24,7 @@ It contains six functions:
 
 - `ampli(dpt1, f, rp, layers, theta)`: compute the amplification coefficient for P and S waves integrated over a range of takeoff angles.
 
-- `loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type, date_vec, extent, parameters, c_file, prefix, **kwargs)`: compute the equivalent vertical force.
+- `loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type, date_vec, extent, parameters, c_file, prefix, **kwargs)`: compute the proxy for the source force amplitude.
 """
 ##################################################################################
 
@@ -328,8 +328,8 @@ def ampli(dpt1, f, rp=[], layers=[1500, 1000, 5540, 3200, 2500], theta = radians
 ##################################################################################
 
 def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [1/12, 1/2], c_file = "../../data/cP.nc", prefix = "WW3-GLOB-30M", **kwargs):
-    """Compute the equivalent vertical force on the seafloor for a given wave type (P or S), given a path to the ww3 p2l file, the bathymetry, the wave type, the date vector and the spatial extent.
-    Saves in netcdf format the equivalent vertical force for each frequency if save argument True.
+    """Compute the Proxy for the Source Force on the seafloor for a given wave type (P or S), given a path to the ww3 p2l file, the bathymetry, the wave type, the date vector and the spatial extent.
+    Saves in netcdf format the Proxy for the Source Force for each frequency if save argument True.
     Plots in PNG source maps of P/S waves at given intervals depending on plot variables.
 
     Args:
@@ -542,7 +542,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
                         lon_dim = ncfile.createDimension('longitude', len(zlon))  # longitude axis
                         time_dim = ncfile.createDimension('time', daymax*8)  # unlimited axis (can be appended to).
                         freq_dim = ncfile.createDimension('frequency', n_freq)
-                        ncfile.title='Equivalent Vertical Force on %d-%02d-%02d-%02d'%(iyear, imonth, iday, ih)
+                        ncfile.title='Proxy for the Source Force on %d-%02d-%02d-%02d'%(iyear, imonth, iday, ih)
                         ncfile.subtitle='Equivalent Force every 3 hours for the secondary microseismic peak'
                         lat = ncfile.createVariable('latitude', np.float64, ('latitude',))
                         lat.units = 'degrees_north'
@@ -558,7 +558,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
                         freq_nc.long_name = 'frequency'
                         F_freq = ncfile.createVariable('F_f', np.float64, ('frequency','latitude', 'longitude'))
                         F_freq.units = 'N.s^{1/2}'
-                        F_freq.long_name = 'Equivalent Vertical Force spectrum'
+                        F_freq.long_name = 'Proxy for the Source Force spectrum'
                         lat[:] = zlat
                         lon[:] = zlon
                         freq_nc[:] = freq_seismic

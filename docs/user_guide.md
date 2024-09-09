@@ -37,7 +37,7 @@ Secondary microseisms generation results from the interaction of oceanic waves o
 [Rayleigh Waves](notebooks/rayleigh_waves/amplification_coeff.ipynb){: .btn}
 [Body Waves](notebooks/body_waves/amplification_coeff.ipynb){: .btn}
 
-## Equivalent Vertical Force - Source Maps
+## Proxy for the Source Force - Source Maps
 
 Once the site effect is quantified, let's make source distribution maps based on the WW3 outputs which can be compared to seismic data based source maps (e.g., [SANS](https://sans.ethz.ch/science/), backprojection, ...).
 
@@ -57,7 +57,7 @@ To compute synthetic cross-correlations with a WW3 model based source distributi
 [Body Waves](notebooks/body_waves/synthetic_CCF.ipynb){: .btn}
 
 ## WMSAN to noisi
-To use the equivalent vertical force as a starting model for [noisi](https://github.com/lermert/noisi).
+To use the Proxy for the Source Force as a starting model for [noisi](https://github.com/lermert/noisi).
 
 [Rayleigh Waves](notebooks/rayleigh_waves/wmsan_to_noisi.ipynb){: .btn}
 
