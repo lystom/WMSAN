@@ -122,7 +122,6 @@ deactivate
 - [datetime](https://docs.python.org/3/library/datetime.html)
 - [scipy](https://scipy.org/)
 - [pandas](https://pandas.pydata.org/pandas-docs/version/2.1.4/index.html)
-- [dask](https://www.dask.org/)
 - [ipykernel](https://pypi.org/project/ipykernel/)
 - [pyproj](https://pyproj4.github.io/pyproj/stable/)
 - [h5py](https://docs.h5py.org/en/stable/)
