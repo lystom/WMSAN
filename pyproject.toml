@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wmsan"
-version = "2024.1.0"
+version = "2024.1.1"
 authors = [
   { name="Lisa Tomasetto", email="lisa.tomasetto@gmail.com" },
 ]
@@ -24,16 +24,16 @@ dependencies = ["numpy<2.0.0",  # until obspy 1.5 is released
                 "scipy",
                 "h5py",
                 "xarray",
-                "dask",
                 "matplotlib",
                 "pyproj",
                 "tqdm",
                 "netcdf4",
                 "cartopy",
                 "obspy",
+                "datetime",
                 "ipykernel",
-                "notebook",
-                "datetime"]
+                "notebook"
+]
 
 [project.urls]
 Homepage = "https://gricad-gitlab.univ-grenoble-alpes.fr/tomasetl/ww3-source-maps/"
