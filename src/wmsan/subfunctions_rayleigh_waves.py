@@ -681,7 +681,9 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
     ## Open Amplification Coefficient
     # check for refined bathymetry
     res_bathy = abs(zlon[1] - zlon[0])
-    if res_bathy == 0.5:
+    if c_file != '../../data/C.nc':
+        amplification_coeff = xr.open_dataarray(c_file)
+    elif res_bathy == 0.5:
         amplification_coeff = xr.open_dataarray('../../data/C.nc')
     else:
         print("Refined bathymetry grid \n PLEASE RUN amplification_coefficients.ipynb before running this script")
