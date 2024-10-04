@@ -6,7 +6,7 @@ from math import radians, log
 from datetime import datetime
 from calendar import monthrange
 
-from synthetics import distance_to_station
+from wmsan.synthetics import distance_to_station
 from wmsan.read_hs_p2l import read_p2l
 
 __author__ = "Reza D.D. Esfahani" # mod. by Lisa Tomasetto 07/2024
