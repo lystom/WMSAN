@@ -56,3 +56,6 @@ data/*.nc
 !data/cS.nc
 !data/LOPS_WW3-GLOB-30M_dataref_dpt.nc 
 !stations_pair.txt
+
+# TEST #
+./TEST_CCF/
