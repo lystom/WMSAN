@@ -10,7 +10,7 @@ and this project adheres to [Calendar Versioning](https://calver.org/).
 
 ### Changed
 
-## [2014.1.1] - 2024-09-09
+## [2014.1.2] - 2024-10-07
 
 ### Added
 
