@@ -6,12 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Calendar Versioning](https://calver.org/).
 
 ## Unpublished
-
 ### Added
 
 ### Changed
 
-- add exponential decay to temporal_variations 
+## [2014.1.1] - 2024-09-09
+
+### Added
+
+### Changed
+- fix expression formula for spectrogram in documentation. 
+- add exponential decay to temporal_variations.
 
 
 ## [2014.1.1] - 2024-09-09

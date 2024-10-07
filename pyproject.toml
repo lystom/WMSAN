@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wmsan"
-version = "2024.1.1"
+version = "2024.1.2"
 authors = [
   { name="Lisa Tomasetto", email="lisa.tomasetto@gmail.com" },
 ]
