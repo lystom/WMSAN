@@ -6,6 +6,7 @@ from math import radians, log
 from datetime import datetime
 from calendar import monthrange
 
+from wmsan.synthetics import distance_to_station
 from wmsan.read_hs_p2l import read_p2l
 
 __author__ = "Reza D.D. Esfahani" # mod. by Lisa Tomasetto 07/2024
@@ -15,10 +16,27 @@ __version__ = "0.1"
 __maintainer__ = "Lisa Tomasetto"
 __email__ = "lisa.tomasetto@univ-grenoble-alpes.fr"
 
-def temporal_evolution(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [1/12, 1/2],  c_file = '../../data/C.nc', prefix = 'WW3-GLOB-30M', **kwargs):
+
+def rayleigh_wave_temporal_evolution(
+        lon_s: float, 
+        lat_s: float,
+        paths: str,
+        dpt1: np.ndarray,
+        zlon: np.ndarray,
+        zlat: np.ndarray,
+        date_vec: list= [2020, [], [], []],
+        extent: list= [-180, 180, -90, 90],
+        parameters: list = [1/12, 1/2],
+        c_file: str = '../../data/C.nc',
+        prefix: str = 'WW3-GLOB-30M',
+        **kwargs
+        ) -> tuple:
+    
     """Compute the temporal evolution of the seismic sources in a given region.
 
     Args:
+        lon_s (float): The longitude of the seismic station.
+        lat_s (float): The latitude of the seismic station.
         paths (list): A list containing the paths to the file with bathymetry data and the local path for WW3 data.
         dpt1 (xarray.DataArray): The bathymetry data.
         zlon (xarray.DataArray): The longitude values of the bathymetry data.
@@ -78,11 +96,14 @@ def temporal_evolution(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], ext
         ## work on the pacific ocean
         lon_min = ((360 + (lon_min % 360)) % 360)
         lon_max = ((360 + (lon_max % 360)) % 360)
-        
+    
     ## Open bathymetry
     dpt1 = dpt1.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
     zlat = zlat.sel(latitude = slice(lat_min, lat_max))
     zlon = zlon.sel(longitude = slice(lon_min, lon_max))
+
+    dist  = distance_to_station(lon = zlon.data, lat = zlat.data, lon_s = lon_s, lat_s = lat_s).values.T
+
     ## Open Amplification Coefficient
     # check for refined bathymetry
     res_bathy = abs(zlon[1] - zlon[0])
@@ -189,6 +210,8 @@ def temporal_evolution(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], ext
                     amplification_coeff = amplification_coeff.sel(frequency = freq_seismic, method='nearest')
                     amplification_coeff = amplification_coeff.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
                     amplification_coeff = amplification_coeff.reindex_like(Fp, method='nearest', tolerance=0.01)
+                    
+                    # 
                     F_f = Fp*amplification_coeff**2
 
                     ## Compute Proxy for the Source Force
@@ -199,8 +222,9 @@ def temporal_evolution(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], ext
                         F_fi = F_f[ifq, :, :]
                         F_fi *= dA
                         F[ifq, :, :] = F_fi*df_fq
-                    # Force
-                    F = 2*np.pi*np.sqrt(F.sum(axis = 0))
+
+                    # Average of force correct for distance
+                    F = 2*np.pi*np.sqrt(F.sum(axis = 0)) * np.exp(-dist)
 
                     if temporal_resol_hourly:
                         time.append(datetime(iyear, imonth, iday, ih))
