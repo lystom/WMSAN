@@ -59,3 +59,5 @@ SOFTWARE.
 [Reza D. D. Esfahani](https://github.com/resfahani)
 
 [Laura Ermert](https://lermert.github.io/)
+
+[Lei Li](https://orcid.org/0000-0002-9012-4853)
