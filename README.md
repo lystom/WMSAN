@@ -127,6 +127,7 @@ deactivate
 - [h5py](https://docs.h5py.org/en/stable/)
 - [tqdm](https://tqdm.github.io/)
 - [notebook](https://jupyter-notebook.readthedocs.io/en/stable/)
+- [dask](https://www.dask.org/) 
 
 ## Where should I start ?
 
