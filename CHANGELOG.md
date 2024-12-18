@@ -10,6 +10,12 @@ and this project adheres to [Calendar Versioning](https://calver.org/).
 
 ### Changed
 
+## [2024.1.3] - 2024-12-18
+### Added
+
+### Changed
+- fix dependency to dask in pyproject.tomland README 
+
 ## [2014.1.2] - 2024-10-07
 
 ### Added
