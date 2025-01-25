@@ -147,8 +147,8 @@ def open_bathy(file_bathy = '../../data/WW3-GLOB-30M_202002_p2l.nc', refined_bat
     """Open bathymetry file and optionally refine bathymetry using ETOPOv2 dataset. 
 
     Args:
-        file_bathy (str, optional): Path to the bathymetry file.
-        refined_bathymetry (bool, optional): Whether to use the refined ETOPOv2 dataset.
+        file_bathy (str): Path to the bathymetry file.
+        refined_bathymetry (bool, optional): Whether to use the refined ETOPOv2 dataset. Defaults to False.
         extent (list, optional): The geographical extent of the bathymetry data in the format [lon_min, lon_max, lat_min, lat_max].
 
     Returns:
@@ -158,31 +158,47 @@ def open_bathy(file_bathy = '../../data/WW3-GLOB-30M_202002_p2l.nc', refined_bat
     """
     [lon_min, lon_max, lat_min, lat_max] = extent
     ds = xr.open_mfdataset(file_bathy, combine='by_coords')
-    if lon_min > lon_max:
-        ## work on the pacific ocean
-        ds = ds.assign_coords(longitude=((360 + (ds.longitude % 360)) % 360))
-        ds = ds.roll(longitude=int(len(ds['longitude']) / 2),roll_coords=True)
-        lon_min = ((360 + (lon_min % 360)) % 360)
-        lon_max = ((360 + (lon_max % 360)) % 360)
-    dpt1 = ds['dpt'].squeeze(dim='time', drop=True)
-    dpt1 = dpt1.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
     if refined_bathymetry or file_bathy == '../../data/ETOPO_2022_v1_60s_N90W180_bed.nc':
-        # load refined bathymetry ETOPOv2
-        file_bathy = '../../data/ETOPO_2022_v1_60s_N90W180_bed.nc'
         try:
-            ds = xr.open_mfdataset(file_bathy, combine='by_coords')
             ds  = ds.rename({'lon':'longitude', 'lat': 'latitude'})
             if extent[0] > extent[1]:
                 ## work on the pacific ocean
                 ds = ds.assign_coords(longitude=((360 + (ds.longitude % 360)) % 360))
                 ds = ds.roll(longitude=int(len(ds['longitude']) / 2),roll_coords=True)
+                lon_min = ((360 + (lon_min % 360)) % 360)
+                lon_max = ((360 + (lon_max % 360)) % 360)
             z = ds['z']
             z *= -1 # ETOPOv2 to Depth
             z = z.where(z>0, other=np.nan)
             dpt1 = z.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))         
         except:
-            print("Refined bathymetry ETOPOv2 not found. \nYou can download it from:\n https://www.ngdc.noaa.gov/thredds/catalog/global/ETOPO2022/60s/60s_bed_elev_netcdf/catalog.html?dataset=globalDatasetScan/ETOPO2022/60s/60s_bed_elev_netcdf/ETOPO_2022_v1_60s_N90W180_bed.nc\nSave in ../data/")
+            try:
+                # load refined bathymetry ETOPOv2
+                file_bathy = '../../data/ETOPO_2022_v1_60s_N90W180_bed.nc'
+                ds = xr.open_mfdataset(file_bathy, combine='by_coords')
+                ds  = ds.rename({'lon':'longitude', 'lat': 'latitude'})
+                if extent[0] > extent[1]:
+                    ## work on the pacific ocean
+                    ds = ds.assign_coords(longitude=((360 + (ds.longitude % 360)) % 360))
+                    ds = ds.roll(longitude=int(len(ds['longitude']) / 2),roll_coords=True)
+                    lon_min = ((360 + (lon_min % 360)) % 360)
+                    lon_max = ((360 + (lon_max % 360)) % 360)
+                z = ds['z']
+                z *= -1 # ETOPOv2 to Depth
+                z = z.where(z>0, other=np.nan)
+                dpt1 = z.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))    
+            except:
+                print("Refined bathymetry ETOPOv2 not found. \nYou can download it from:\n https://www.ngdc.noaa.gov/thredds/catalog/global/ETOPO2022/60s/60s_bed_elev_netcdf/catalog.html?dataset=globalDatasetScan/ETOPO2022/60s/60s_bed_elev_netcdf/ETOPO_2022_v1_60s_N90W180_bed.nc\nSave in ../data/")
             return None, None, None
+    else:
+        if lon_min > lon_max:
+            ## work on the pacific ocean
+            ds = ds.assign_coords(longitude=((360 + (ds.longitude % 360)) % 360))
+            ds = ds.roll(longitude=int(len(ds['longitude']) / 2),roll_coords=True)
+            lon_min = ((360 + (lon_min % 360)) % 360)
+            lon_max = ((360 + (lon_max % 360)) % 360)
+        dpt1 = ds['dpt'].squeeze(dim = 'time', drop=True)
+        dpt1 = dpt1.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
     ## Mask nan values    
     dpt1_mask = dpt1.where(np.isfinite(dpt1))
     zlon = dpt1_mask.longitude
