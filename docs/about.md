@@ -1,5 +1,9 @@
 # About 
 
+## How to Cite WMSAN ?
+
+- [Tomasetto, L., Boué, P., Ardhuin, F., Stutzman, E., Xu, Z., De Plaen, R., & Stehly, L. (2024). WMSAN Python Package: From Oceanic Forcing to Synthetic Cross-correlations of Microseismic Noise. EathArXiv.](https://doi.org/10.31223/X5CB08)
+
 ## References
 
 - [Ardhuin, F., Stutzmann, E., Schimmel, M., & Mangeney, A. (2011). Ocean wave sources of seismic noise. Journal of Geophysical Research: Oceans, 116(C9).](https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2011JC006952)

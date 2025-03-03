@@ -136,3 +136,7 @@ deactivate
 ## Architecture of WMSAN Python Package
 
 ![Scheme showing the different codes and Notebooks present in this repository and how they connect.](https://gricad-gitlab.univ-grenoble-alpes.fr/tomasetl/ww3-source-maps/-/raw/main/package_archi.png)
+
+## How to Cite WMSAN ?
+
+- [Tomasetto, L., Boué, P., Ardhuin, F., Stutzman, E., Xu, Z., De Plaen, R., & Stehly, L. (2024). WMSAN Python Package: From Oceanic Forcing to Synthetic Cross-correlations of Microseismic Noise. EathArXiv.](https://doi.org/10.31223/X5CB08)
