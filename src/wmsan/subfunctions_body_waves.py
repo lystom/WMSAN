@@ -123,9 +123,13 @@ def open_bathy(file_bathy = '../../data/WW3-GLOB-30M_202002_p2l.nc', refined_bat
         zlat (xarray.DataArray): Latitude coordinates.
     """
     [lon_min, lon_max, lat_min, lat_max] = extent
-    ds = xr.open_mfdataset(file_bathy, combine='by_coords')
+    if np.abs(lat_min) > 90 or np.abs(lat_max) > 90:
+        print("Latitude not correct, absolute value > 90")
+        return
+    
     if refined_bathymetry or file_bathy == '../../data/ETOPO_2022_v1_60s_N90W180_bed.nc':
         try:
+            ds = xr.open_mfdataset(file_bathy, combine='by_coords')
             ds  = ds.rename({'lon':'longitude', 'lat': 'latitude'})
             if extent[0] > extent[1]:
                 ## work on the pacific ocean
@@ -155,8 +159,9 @@ def open_bathy(file_bathy = '../../data/WW3-GLOB-30M_202002_p2l.nc', refined_bat
                 dpt1 = z.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))    
             except:
                 print("Refined bathymetry ETOPOv2 not found. \nYou can download it from:\n https://www.ngdc.noaa.gov/thredds/catalog/global/ETOPO2022/60s/60s_bed_elev_netcdf/catalog.html?dataset=globalDatasetScan/ETOPO2022/60s/60s_bed_elev_netcdf/ETOPO_2022_v1_60s_N90W180_bed.nc\nSave in ../data/")
-            return None, None, None
+                return None, None, None
     else:
+        ds = xr.open_mfdataset(file_bathy, combine='by_coords')
         if lon_min > lon_max:
             ## work on the pacific ocean
             ds = ds.assign_coords(longitude=((360 + (ds.longitude % 360)) % 360))
@@ -421,6 +426,9 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
     lat_max = extent[3]
     
     central_longitude = 0
+    if np.abs(lat_min) > 90 or np.abs(lat_max) > 90:
+        print("Latitude not correct, absolute value > 90")
+        return
     
     if lon_min > lon_max:
         ## work on the pacific ocean

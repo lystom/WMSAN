@@ -90,7 +90,9 @@ def rayleigh_wave_temporal_evolution(
     lon_max = extent[1]
     lat_min = extent[2]
     lat_max = extent[3]
-    
+    if np.abs(lat_min) > 90 or np.abs(lat_max) > 90:
+        print("Latitude not correct, absolute value > 90")
+        return
     ## Work on the pacific ocean
     if lon_min > lon_max:
         ## work on the pacific ocean
@@ -112,6 +114,8 @@ def rayleigh_wave_temporal_evolution(
     if (extent[0] > extent[1]) and max(amplification_coeff.longitude) < 180:
         amplification_coeff = amplification_coeff.assign_coords(longitude=((360 + (amplification_coeff.longitude % 360)) % 360))
         amplification_coeff = amplification_coeff.roll(longitude=int(len(amplification_coeff['longitude']) / 2),roll_coords=True)
+    
+    amplification_coeff = np.sqrt(amplification_coeff)
     
     if res_bathy != 0.5:
         print("Refined bathymetry grid \n PLEASE RUN amplification_coefficients.ipynb before running this script")

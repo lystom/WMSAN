@@ -157,6 +157,9 @@ def open_bathy(file_bathy = '../../data/WW3-GLOB-30M_202002_p2l.nc', refined_bat
         zlat (xarray.DataArray): Latitude coordinates.
     """
     [lon_min, lon_max, lat_min, lat_max] = extent
+    if np.abs(lat_min) > 90 or np.abs(lat_max) > 90:
+        print("Latitude not correct, absolute value > 90")
+        return
     ds = xr.open_mfdataset(file_bathy, combine='by_coords')
     if refined_bathymetry or file_bathy == '../../data/ETOPO_2022_v1_60s_N90W180_bed.nc':
         try:
@@ -189,7 +192,7 @@ def open_bathy(file_bathy = '../../data/WW3-GLOB-30M_202002_p2l.nc', refined_bat
                 dpt1 = z.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))    
             except:
                 print("Refined bathymetry ETOPOv2 not found. \nYou can download it from:\n https://www.ngdc.noaa.gov/thredds/catalog/global/ETOPO2022/60s/60s_bed_elev_netcdf/catalog.html?dataset=globalDatasetScan/ETOPO2022/60s/60s_bed_elev_netcdf/ETOPO_2022_v1_60s_N90W180_bed.nc\nSave in ../data/")
-            return None, None, None
+                return None, None, None
     else:
         if lon_min > lon_max:
             ## work on the pacific ocean
@@ -232,7 +235,6 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
     path_longuet_higgins = paths[2]
     
     # Constants
-
     lg10 = log(10) # log of 10
     vs_crust = parameters[0]
     rho_s = parameters[1]
@@ -279,6 +281,11 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
     
     ## Adapt latitude and longitude to values in parameters file
     lon_min, lon_max, lat_min, lat_max = extent[0], extent[1], extent[2], extent[3]
+    
+    if np.abs(lat_min) > 90 or np.abs(lat_max) > 90:
+        print("Latitude not correct, absolute value > 90")
+        return
+    
     dpt1 = dpt1.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
     zlat = zlat.sel(latitude = slice(lat_min, lat_max))
     zlon = zlon.sel(longitude = slice(lon_min, lon_max))
@@ -461,41 +468,41 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                     SDF_daily = np.zeros((dpt1.shape))
                     
             if plot_monthly :
-                    plt.close('all')
-                    SDF_plot = xr.DataArray(SDF_monthly,
-                                            coords={'latitude': zlat,'longitude': zlon}, 
-                                            dims=["latitude", "longitude"])
-                    fig = plt.figure(figsize=(9,6))
-                    fig.suptitle('Source of the power spectrum for the vertical displacement. Rayleigh waves.\nFrequency %.3f-%.3f Hz %d-%02d'%(f1, f2, iyear, imonth))
-                    ax = plt.axes(projection=ccrs.Robinson())
-                    ax.coastlines()
-                    gl = ax.gridlines()
-                    gl.xformatter = LONGITUDE_FORMATTER
-                    gl.yformatter = LATITUDE_FORMATTER
-                    ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
-                    SDF_plot.plot(ax=ax, transform=ccrs.PlateCarree(), vmin = vmin, vmax = vmax, cbar_kwargs={'label':'SDF (m)','orientation': 'horizontal'})
-                    plt.savefig('rayleigh_SDF_monthly_%d%02d.png'%(iyear, imonth), dpi = 300, bbox_inches='tight')
-                    #plt.show()
-                    plt.close('all')
-                    SDF_monthly = np.zeros((dpt1.shape))
+                plt.close('all')
+                SDF_plot = xr.DataArray(SDF_monthly,
+                                        coords={'latitude': zlat,'longitude': zlon}, 
+                                        dims=["latitude", "longitude"])
+                fig = plt.figure(figsize=(9,6))
+                fig.suptitle('Source of the power spectrum for the vertical displacement. Rayleigh waves.\nFrequency %.3f-%.3f Hz %d-%02d'%(f1, f2, iyear, imonth))
+                ax = plt.axes(projection=ccrs.Robinson())
+                ax.coastlines()
+                gl = ax.gridlines()
+                gl.xformatter = LONGITUDE_FORMATTER
+                gl.yformatter = LATITUDE_FORMATTER
+                ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
+                SDF_plot.plot(ax=ax, transform=ccrs.PlateCarree(), vmin = vmin, vmax = vmax, cbar_kwargs={'label':'SDF (m)','orientation': 'horizontal'})
+                plt.savefig('rayleigh_SDF_monthly_%d%02d.png'%(iyear, imonth), dpi = 300, bbox_inches='tight')
+                #plt.show()
+                plt.close('all')
+                SDF_monthly = np.zeros((dpt1.shape))
 
         if plot_yearly :
-                    plt.close('all')
-                    SDF_plot = xr.DataArray(SDF_yearly,
-                                            coords={'latitude': zlat,'longitude': zlon}, 
-                                            dims=["latitude", "longitude"])
-                    fig = plt.figure(figsize=(9,6))
-                    ax = plt.axes(projection=ccrs.Robinson())
-                    ax.coastlines()
-                    gl = ax.gridlines()
-                    gl.xformatter = LONGITUDE_FORMATTER
-                    gl.yformatter = LATITUDE_FORMATTER
-                    ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
-                    fig.suptitle('Source of the power spectrum for the vertical displacement.Rayleigh waves.\nFrequency %.3f-%.3f Hz %d'%(f1, f2, iyear))
-                    SDF_plot.plot(ax=ax, transform=ccrs.PlateCarree(), vmin = vmin, vmax = vmax, cbar_kwargs={'label':'SDF (m)','orientation': 'horizontal'})
-                    plt.savefig('rayleigh_SDF_yearly_%d.png'%(iyear), dpi = 300, bbox_inches='tight')
-                    plt.close('all')
-                    SDF_yearly = np.zeros((dpt1.shape))
+            plt.close('all')
+            SDF_plot = xr.DataArray(SDF_yearly,
+                                    coords={'latitude': zlat,'longitude': zlon}, 
+                                    dims=["latitude", "longitude"])
+            fig = plt.figure(figsize=(9,6))
+            ax = plt.axes(projection=ccrs.Robinson())
+            ax.coastlines()
+            gl = ax.gridlines()
+            gl.xformatter = LONGITUDE_FORMATTER
+            gl.yformatter = LATITUDE_FORMATTER
+            ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
+            fig.suptitle('Source of the power spectrum for the vertical displacement.Rayleigh waves.\nFrequency %.3f-%.3f Hz %d'%(f1, f2, iyear))
+            SDF_plot.plot(ax=ax, transform=ccrs.PlateCarree(), vmin = vmin, vmax = vmax, cbar_kwargs={'label':'SDF (m)','orientation': 'horizontal'})
+            plt.savefig('rayleigh_SDF_yearly_%d.png'%(iyear), dpi = 300, bbox_inches='tight')
+            plt.close('all')
+            SDF_yearly = np.zeros((dpt1.shape))
         plt.close('all')
     print('Rayleigh source maps done!')
     
@@ -522,7 +529,12 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
         P (int, optional): 3D propagation effect constant from Stutzmann et al. (2012).
    
     """
-                
+    if np.abs(lat_sta) > 90:
+        print("Latitude not correct, absolute value > 90")
+        return
+    if np.abs(lat_sta) > 180:
+        print("Longitude not correct, absolute value > 180")
+        return
     if 'vmin' in kwargs:
         vmin = kwargs['vmin']
     else:
@@ -682,6 +694,9 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
     lat_min = extent[2]
     lat_max = extent[3]
     
+    if np.abs(lat_min) > 90 or np.abs(lat_max) > 90:
+        print("Latitude not correct, absolute value > 90")
+        return
     central_longitude = 0
     
     if lon_min > lon_max:
@@ -708,6 +723,9 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
     if extent[0] > extent[1]:
         amplification_coeff = amplification_coeff.assign_coords(longitude=((360 + (amplification_coeff.longitude % 360)) % 360))
         amplification_coeff = amplification_coeff.roll(longitude=int(len(amplification_coeff['longitude']) / 2),roll_coords=True)
+    
+    ## Square Root of C
+    amplification_coeff = np.sqrt(amplification_coeff)
     
     ## Surface Element
     msin = np.array([np.sin(np.pi/2 - np.radians(zlat))]).T

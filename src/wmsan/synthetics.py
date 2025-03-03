@@ -507,6 +507,12 @@ def ccf_computation(coords_staA, coords_staB, path_model, date_vect, spectrum_ax
     lon_staB = coords_staB[0]
     lat_staB = coords_staB[1]
 
+    if np.abs(lat_staA) > 90:
+        print("Latitude A not correct, absolute value > 90")
+        return
+    if np.abs(lat_staB) > 90:
+        print("Latitude B not correct, absolute value > 90")
+        return
     ## Open WW3 PSD
     YEAR = date_vect[0]
     MONTH = date_vect[1]

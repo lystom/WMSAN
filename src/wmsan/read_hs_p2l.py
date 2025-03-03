@@ -249,7 +249,10 @@ def read_hs(file_path, time_vect, lon1 = (-180, 180), lat1 = (-90, 90)):
     timestep = datetime(year, month, day, hour)
     
     # spatial extent
-
+    ## Check latitude within -90 90
+    if np.abs(lat1[0]) > 90 or np.abs(lat1[1]) > 90:
+        print("Latitude not correct, absolute value > 90")
+        return 
     # check longitude
     if lon1[0] > lon1[1]:
         ## working near pacific
@@ -311,6 +314,9 @@ def read_p2l(file_path, time_vect, lon1 = (-180, 180), lat1 = (-90, 90)):
     timestep = datetime(year, month, day, hour)
 
     # spatial extent
+    if np.abs(lat1[0]) > 90 or np.abs(lat1[1]) > 90:
+        print("Latitude not correct, absolute value > 90")
+        return
     if lon1[0] > lon1[1]:
         print("pacific")
         ds = ds.assign_coords(longitude=((360 + (ds.longitude % 360)) % 360))
