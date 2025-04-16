@@ -45,7 +45,7 @@ notebooks/rayleigh_waves/SDF/
 notebooks/AMPHAN/
 notebooks/G.PPTF/
 notebooks/COURSE_MUIFA/
-
+notebooks/LA_BERARDE/
 # Heavy Files #
 ###############
 data/*.h5
@@ -62,3 +62,4 @@ data/*.nc
 
 # TEST #
 ./TEST_CCF/
+.qodo
