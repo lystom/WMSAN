@@ -37,7 +37,6 @@ from datetime import date
 from datetime import datetime
 from netCDF4 import Dataset
 import netCDF4 as nc
-import h5py
 import os, fnmatch, glob, shutil
 
 def read_WWNC(file_path, time_vect, lon1, lat1):
@@ -334,6 +333,11 @@ def read_p2l(file_path, time_vect, lon1 = (-180, 180), lat1 = (-90, 90)):
     return lat, lon, freq, p2l, unit1
 
 def read_p2l_from_url(url, time_vect, lon1 = (-180, 180), lat1 = (-90, 90)):
+    try:
+        nc_ds.close()
+        extract_ds.close()
+    except:
+        pass
     (lat_min, lat_max) = lat1
     (lon_min, lon_max) = lon1
     #load netcdf from url as netCDF4 dataset
@@ -344,8 +348,7 @@ def read_p2l_from_url(url, time_vect, lon1 = (-180, 180), lat1 = (-90, 90)):
     extract_ds=nc_ds.sel(time=datetime(time_vect[0], time_vect[1], time_vect[2], time_vect[3]))
     extract_ds = extract_ds.sel(latitude=slice(lat_min, lat_max), longitude=slice(lon_min, lon_max))
     extract_ds = extract_ds.rename({'f':'frequency'})
-    nc_ds.close()
-    extract_ds.close()
+
     return extract_ds.latitude, extract_ds.longitude, extract_ds.frequency, extract_ds.p2l, 'log10(Pa2 m2 s+1E-12)'
 
 def read_hs_from_url(url, time_vect, lon1 = (-180, 180), lat1 = (-90, 90)):

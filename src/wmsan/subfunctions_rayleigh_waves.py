@@ -407,8 +407,8 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                                                 coords={'latitude': zlat,'longitude': zlon}, 
                                                 dims=["latitude", "longitude"],
                                                 name = 'Source of the power spectrum for the vertical displacement.\nRayleigh waves.\nFrequency %.3f-%.3f Hz.%d-%02d-%02dT%02d'%(f1, f2, iyear, imonth, iday, ih))
-                        fig = plt.figure(figsize=(9,6))
-                        fig.suptitle('Source of the power spectrum for the vertical displacement. Rayleigh waves.\nFrequency %.3f-%.3f Hz. %d-%02d-%02dT%02d'%(f1, f2, iyear, imonth, iday, ih))
+                        fig = plt.figure(figsize=(16,9))
+                        fig.suptitle('Source of the power spectrum for the vertical displacement.\n Rayleigh waves.\nFrequency %.3f-%.3f Hz. %d-%02d-%02dT%02d'%(f1, f2, iyear, imonth, iday, ih))
                         ax = plt.axes(projection=ccrs.Robinson())
                         ax.coastlines()
                         gl = ax.gridlines()
@@ -569,11 +569,11 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
         F_delta = np.zeros((sdf_f.shape))
         for ifreq, f in enumerate(freq):
             SDF_freq = sdf_f.sel(frequency = freq[ifreq]).data
-            EXP = np.exp(-2*np.pi*f.data*radius_earth/(U*Q)*np.radians(distance))
+            EXP = np.exp(-2*np.pi*f.data**np.radians(distance)*radius_earth/(U*Q))
             denominateur = 1/(radius_earth*np.sin(np.radians(distance)))
             facteur = EXP*denominateur
             F_delta[ifreq, :, :] = facteur.T*SDF_freq*dA*P
-        disp_RMS = 10*np.log(np.sqrt(np.nansum(F_delta, axis = (1,2))))
+        disp_RMS = 10*np.log10(np.nansum(F_delta, axis = (1,2)))
         try:
             spectro[idate, :] = disp_RMS
         except:
@@ -587,7 +587,7 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
     plt.ylabel('Frequency [Hz]')
     plt.gcf().autofmt_xdate()
     plt.ylim(0.1, 0.5)
-    plt.colorbar(label='$m^2/Hz$ [dB]')
+    plt.colorbar(label='$10.log_{10}(m^2/Hz) [dB]$')
     plt.savefig('spectrogram_ww3.png', dpi=300, bbox_inches='tight')
     return dates, freq, spectro
 
