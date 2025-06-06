@@ -2,6 +2,7 @@
 ############
 *.png
 *.jpg
+*.mp4
 !docs/img/*
 !package_archi.png
 !sumup.png
@@ -46,6 +47,9 @@ notebooks/AMPHAN/
 notebooks/G.PPTF/
 notebooks/COURSE_MUIFA/
 notebooks/LA_BERARDE/
+notebooks/GILLIAN/
+notebooks/CAETANO/
+
 # Heavy Files #
 ###############
 data/*.h5

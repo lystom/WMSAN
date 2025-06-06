@@ -430,8 +430,8 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                                                 coords={'latitude': zlat,'longitude': zlon}, 
                                                 dims=["latitude", "longitude"],
                                                 name = 'Source of the power spectrum for the vertical displacement.\nRayleigh waves.\nFrequency %.3f-%.3f Hz.%d-%02d-%02dT%02d'%(f1, f2, iyear, imonth, iday, ih))
-                        fig = plt.figure(figsize=(9,6))
-                        fig.suptitle('Source of the power spectrum for the vertical displacement. Rayleigh waves.\nFrequency %.3f-%.3f Hz. %d-%02d-%02dT%02d'%(f1, f2, iyear, imonth, iday, ih))
+                        fig = plt.figure(figsize=(16,9))
+                        fig.suptitle('Source of the power spectrum for the vertical displacement\n Rayleigh waves.Frequency %.3f-%.3f Hz. %d-%02d-%02dT%02d'%(f1, f2, iyear, imonth, iday, ih))
                         ax = plt.axes(projection=ccrs.Robinson())
                         ax.coastlines()
                         gl = ax.gridlines()
@@ -454,8 +454,8 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                     SDF_plot = xr.DataArray(SDF_daily,
                                             coords={'latitude': zlat,'longitude': zlon}, 
                                             dims=["latitude", "longitude"])
-                    fig = plt.figure(figsize=(9,6))
-                    fig.suptitle('Source of the power spectrum for the vertical displacement. Rayleigh waves.\nFrequency %.3f-%.3f Hz %d-%02d-%02d'%(f1, f2, iyear, imonth, iday))
+                    fig = plt.figure(figsize=(16,9))
+                    fig.suptitle('Source of the power spectrum for the vertical displacement.\n Rayleigh waves.\nFrequency %.3f-%.3f Hz %d-%02d-%02d'%(f1, f2, iyear, imonth, iday))
                     ax = plt.axes(projection=ccrs.Robinson())
                     ax.coastlines()
                     gl = ax.gridlines()
@@ -472,8 +472,8 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                 SDF_plot = xr.DataArray(SDF_monthly,
                                         coords={'latitude': zlat,'longitude': zlon}, 
                                         dims=["latitude", "longitude"])
-                fig = plt.figure(figsize=(9,6))
-                fig.suptitle('Source of the power spectrum for the vertical displacement. Rayleigh waves.\nFrequency %.3f-%.3f Hz %d-%02d'%(f1, f2, iyear, imonth))
+                fig = plt.figure(figsize=(16,9))
+                fig.suptitle('Source of the power spectrum for the vertical displacement.\n Rayleigh waves.\nFrequency %.3f-%.3f Hz %d-%02d'%(f1, f2, iyear, imonth))
                 ax = plt.axes(projection=ccrs.Robinson())
                 ax.coastlines()
                 gl = ax.gridlines()
