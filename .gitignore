@@ -37,6 +37,9 @@ documentation/
 
 # Additionnal Directories #
 ###########################
+src/wmsan/.qodo/
+
+
 notebooks/body_waves/F/
 notebooks/body_waves/CCF/
 notebooks/rayleigh_waves/F/
@@ -46,6 +49,8 @@ notebooks/AMPHAN/
 notebooks/G.PPTF/
 notebooks/COURSE_MUIFA/
 notebooks/LA_BERARDE/
+notebooks/GILLIAN/
+notebooks/CAETANO/
 
 # Heavy Files #
 ###############

@@ -45,7 +45,7 @@ from tqdm import tqdm
 from calendar import monthrange
 from pyproj import Geod
 
-from wmsan.read_hs_p2l import read_p2l_from_url
+from wmsan.read_hs_p2l import read_p2l_from_url, read_p2l
 
 ## Set font size parameters to make readable figures
 plt.style.use("ggplot")
@@ -745,7 +745,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
                 for ih in HOUR:
                     
                     ## Open F_p3D 
-                    (lati, longi, freq_ocean, p2l, unit1) = read_p2l_from_url(filename_p2l, [iyear, imonth, iday, ih], [extent[0], extent[1]], [lat_min, lat_max])
+                    (lati, longi, freq_ocean, p2l, unit1) = read_p2l(filename_p2l, [iyear, imonth, iday, ih], [extent[0], extent[1]], [lat_min, lat_max])
                     nf = len(freq_ocean)  # number of frequencies 
                     xfr = np.exp(np.log(freq_ocean[-1]/freq_ocean[0])/(nf-1))  # determines the xfr geometric progression factor
                     df = freq_ocean*0.5*(xfr-1/xfr)  # frequency interval in wave model times 2
