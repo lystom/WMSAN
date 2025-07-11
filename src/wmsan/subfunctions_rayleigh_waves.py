@@ -65,7 +65,7 @@ plt.rcParams['xtick.direction'] = 'inout'
 plt.rcParams['ytick.direction'] = 'inout'
 plt.rcParams['font.family'] = "serif"
 
-def site_effect(z, f, zlat, zlon, vs_crust=2.8, path='../../data/longuet_higgins.txt'):
+def site_effect(z, f, zlat, zlon, vs_crust=2800, path='../../data/longuet_higgins.txt'):
     """ Bathymetry secondary microseismic excitation coefficients (Rayleigh waves).
     
     Args:
@@ -89,7 +89,7 @@ def site_effect(z, f, zlat, zlon, vs_crust=2.8, path='../../data/longuet_higgins
         y = z.shape[0]
         C = np.empty((n, y, x))
         for i, fq in enumerate(f):
-            fh_v = 2*np.pi*fq*z/(vs_crust*1e3)
+            fh_v = 2*np.pi*fq*z/(vs_crust)
             C[i, :, :] = fc1(fh_v)**2 + fc2(fh_v)**2 + fc3(fh_v)**2 + fc4(fh_v)**2
     except:
         raise
@@ -310,7 +310,7 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                 for ih in HOUR:
                     
                     ## Open F_p3D 
-                    (lati, longi, freq_ocean, p2l, unit1) = read_p2l_from_url(filename_p2l, [iyear, imonth, iday, ih], [lon_min, lon_max], [lat_min, lat_max])
+                    (lati, longi, freq_ocean, p2l, unit1) = read_p2l(filename_p2l, [iyear, imonth, iday, ih], [lon_min, lon_max], [lat_min, lat_max])
                     nf = len(freq_ocean)  # number of frequencies 
                     xfr = np.exp(np.log(freq_ocean[-1]/freq_ocean[0])/(nf-1))  # determines the xfr geometric progression factor
                     df = freq_ocean*0.5*(xfr-1/xfr)  # frequency interval in wave model times 2
@@ -333,10 +333,10 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                         Fp = p2l.sel(frequency = freq_ocean[index_freq], latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
                         C = site_effect(dpt1, freq_seismic, zlat, zlon,vs_crust, path_longuet_higgins)  # computes Longuet-Higgins site effect given the bathymetryint(Fp.shape)
                         if C.shape == Fp.shape:
-                            SDF_f = 2*np.pi/(rho_s**2*(vs_crust*1e3)**5)*C.data*Fp.data
+                            SDF_f = 2*np.pi/(rho_s**2*vs_crust**5)*C.data*Fp.data
                         else:
                             Fp = Fp.interp(latitude = zlat, longitude = zlon)
-                            SDF_f = 2*np.pi/(rho_s**2*(vs_crust*1e3)**5)*C.data*Fp.data
+                            SDF_f = 2*np.pi/(rho_s**2*vs_crust**5)*C.data*Fp.data
                         if SDF_f.shape != C.shape:
                             print('SDF shape', SDF_f.shape)
                             return
@@ -355,7 +355,7 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                         print('unique frequency ', f1)
                         Fp = p2l[:, :, index_freq]
                         C = site_effect(dpt1, f1, vs_crust, path_longuet_higgins)
-                        SDF_f = 2*np.pi*f1/(rho_s**2*(vs_crust*1e3)**5)*Fp.data*C.data
+                        SDF_f = 2*np.pi*f1/(rho_s**2*(vs_crust)**5)*Fp.data*C.data
                         SDF = SDF_f
                         
                     ## Exception in parametrization of frequencies
@@ -536,7 +536,7 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
     # calculate spherical surface elementary elements
     msin = np.array([np.sin(np.pi/2 - np.radians(zlat))]).T
     ones = np.ones((1, len(zlon)))
-    dA = radius_earth**2*res_mod**2*np.dot(msin,ones)
+    dA = radius_earth**2*np.radians(res_mod)**2*np.dot(msin,ones)
     
     # Compute distance of each gridpoint to station
     geoid = Geod(ellps='WGS84')
@@ -569,7 +569,7 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
         F_delta = np.zeros((sdf_f.shape))
         for ifreq, f in enumerate(freq):
             SDF_freq = sdf_f.sel(frequency = freq[ifreq]).data
-            EXP = np.exp(-2*np.pi*f.data**np.radians(distance)*radius_earth/(U*Q))
+            EXP = np.exp(-2*np.pi*f.data*np.radians(distance)*radius_earth/(U*Q))
             denominateur = 1/(radius_earth*np.sin(np.radians(distance)))
             facteur = EXP*denominateur
             F_delta[ifreq, :, :] = facteur.T*SDF_freq*dA*P
