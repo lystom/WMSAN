@@ -69,9 +69,9 @@ def site_effect(z, f, zlat, zlon, vs_crust=2800, path='../../data/longuet_higgin
     """ Bathymetry secondary microseismic excitation coefficients (Rayleigh waves).
     
     Args:
-        z (np.ndarray): thickness of water layer.
-        f (np.ndarray): seismic frequency in Hertz.
-        vs_crust (float, optional): shear waves velocity in the crust (sea bed).
+        z (np.ndarray): thickness of water layer, in m.
+        f (np.ndarray): seismic frequency, in Hertz.
+        vs_crust (float, optional): shear waves velocity in the crust (sea bed), in m/s.
         path (str, optional): the path to the Longuet Higgins file containing tabulated values of site effect coefficient for the 4th first modes.
 
     Returns:
@@ -333,10 +333,10 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                         Fp = p2l.sel(frequency = freq_ocean[index_freq], latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
                         C = site_effect(dpt1, freq_seismic, zlat, zlon,vs_crust, path_longuet_higgins)  # computes Longuet-Higgins site effect given the bathymetryint(Fp.shape)
                         if C.shape == Fp.shape:
-                            SDF_f = 2*np.pi/(rho_s**2*vs_crust**5)*C.data*Fp.data
+                            SDF_f = 2*np.pi/((rho_s**2)*((vs_crust)**5))*C.data*Fp.data
                         else:
                             Fp = Fp.interp(latitude = zlat, longitude = zlon)
-                            SDF_f = 2*np.pi/(rho_s**2*vs_crust**5)*C.data*Fp.data
+                            SDF_f = 2*np.pi/((rho_s**2)*((vs_crust)**5))*C.data*Fp.data
                         if SDF_f.shape != C.shape:
                             print('SDF shape', SDF_f.shape)
                             return
@@ -355,7 +355,7 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                         print('unique frequency ', f1)
                         Fp = p2l[:, :, index_freq]
                         C = site_effect(dpt1, f1, vs_crust, path_longuet_higgins)
-                        SDF_f = 2*np.pi*f1/(rho_s**2*(vs_crust)**5)*Fp.data*C.data
+                        SDF_f = 2*np.pi*f1/((rho_s**2)*(vs_crust)**5)*Fp.data*C.data
                         SDF = SDF_f
                         
                     ## Exception in parametrization of frequencies
