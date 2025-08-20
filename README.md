@@ -150,4 +150,4 @@ The package is available on [PyPI](https://pypi.org/).
 
 ## How to Cite WMSAN ?
 
-- [Tomasetto, L., Boué, P., Ardhuin, F., Stutzman, E., Xu, Z., De Plaen, R., & Stehly, L. (2024). WMSAN Python Package: From Oceanic Forcing to Synthetic Cross-correlations of Microseismic Noise. EathArXiv.](https://doi.org/10.31223/X5CB08)
+- [Tomasetto, L., Boué, P., Ardhuin, F., Stutzman, E., Xu, Z., De Plaen, R., & Stehly, L. (2024). WMSAN Python Package: From Oceanic Forcing to Synthetic Cross-correlations of Microseismic Noise. EathArXiv.](https://doi.org/10.26443/seismica.v4i1.1483)

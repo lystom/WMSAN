@@ -6,7 +6,7 @@
 
 ## Funding
 This research was funded by the French National Research Agency (ANR) under the project TERRACORR (ANR-20-CE49-0003)
-[https://gricad-gitlab.univ-grenoble-alpes.fr/tomasetl/ww3-source-maps/-/raw/main/ANR-logo-2021-complet.jpg]
+![ANR logo](https://gricad-gitlab.univ-grenoble-alpes.fr/tomasetl/ww3-source-maps/-/raw/main/ANR-logo-2021-complet.jpg)
 
 ## References
 
