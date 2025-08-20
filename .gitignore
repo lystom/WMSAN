@@ -6,6 +6,8 @@
 !docs/img/*
 !package_archi.png
 !sumup.png
+!ANR-logo-2021-complet.jpg
+
 # Packages #
 ############
 # it's better to unpack these files and commit the raw source
@@ -38,6 +40,9 @@ documentation/
 
 # Additionnal Directories #
 ###########################
+src/wmsan/.qodo/
+
+
 notebooks/body_waves/F/
 notebooks/body_waves/CCF/
 notebooks/rayleigh_waves/F/

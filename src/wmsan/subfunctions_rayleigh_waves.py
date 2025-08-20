@@ -4,7 +4,7 @@
 #__author__ = "Lisa Tomasetto"
 #__copyright__ = "Copyright 2024, UGA"
 #__credits__ = ["Lisa Tomasetto"]
-#__version__ = "1.0"
+#__version__ = "2025.0.0"
 #__maintainer__ = "Lisa Tomasetto"
 #__email__ = "lisa.tomasetto@univ-grenoble-alpes.fr"
 
@@ -45,7 +45,7 @@ from tqdm import tqdm
 from calendar import monthrange
 from pyproj import Geod
 
-from wmsan.read_hs_p2l import read_p2l
+from wmsan.read_hs_p2l import read_p2l_from_url, read_p2l
 
 ## Set font size parameters to make readable figures
 plt.style.use("ggplot")
@@ -65,13 +65,13 @@ plt.rcParams['xtick.direction'] = 'inout'
 plt.rcParams['ytick.direction'] = 'inout'
 plt.rcParams['font.family'] = "serif"
 
-def site_effect(z, f, zlat, zlon, vs_crust=2.8, path='../../data/longuet_higgins.txt'):
+def site_effect(z, f, zlat, zlon, vs_crust=2800, path='../../data/longuet_higgins.txt'):
     """ Bathymetry secondary microseismic excitation coefficients (Rayleigh waves).
     
     Args:
-        z (np.ndarray): thickness of water layer.
-        f (np.ndarray): seismic frequency in Hertz.
-        vs_crust (float, optional): shear waves velocity in the crust (sea bed).
+        z (np.ndarray): thickness of water layer, in m.
+        f (np.ndarray): seismic frequency, in Hertz.
+        vs_crust (float, optional): shear waves velocity in the crust (sea bed), in m/s.
         path (str, optional): the path to the Longuet Higgins file containing tabulated values of site effect coefficient for the 4th first modes.
 
     Returns:
@@ -89,7 +89,7 @@ def site_effect(z, f, zlat, zlon, vs_crust=2.8, path='../../data/longuet_higgins
         y = z.shape[0]
         C = np.empty((n, y, x))
         for i, fq in enumerate(f):
-            fh_v = 2*np.pi*fq*z/(vs_crust*1e3)
+            fh_v = 2*np.pi*fq*z/(vs_crust)
             C[i, :, :] = fc1(fh_v)**2 + fc2(fh_v)**2 + fc3(fh_v)**2 + fc4(fh_v)**2
     except:
         raise
@@ -356,10 +356,10 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                         Fp = p2l.sel(frequency = freq_ocean[index_freq], latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
                         C = site_effect(dpt1, freq_seismic, zlat, zlon,vs_crust, path_longuet_higgins)  # computes Longuet-Higgins site effect given the bathymetryint(Fp.shape)
                         if C.shape == Fp.shape:
-                            SDF_f = 2*np.pi/(rho_s**2*(vs_crust*1e3)**5)*C.data*Fp.data
+                            SDF_f = 2*np.pi/((rho_s**2)*((vs_crust)**5))*C.data*Fp.data
                         else:
                             Fp = Fp.interp(latitude = zlat, longitude = zlon)
-                            SDF_f = 2*np.pi/(rho_s**2*(vs_crust*1e3)**5)*C.data*Fp.data
+                            SDF_f = 2*np.pi/((rho_s**2)*((vs_crust)**5))*C.data*Fp.data
                         if SDF_f.shape != C.shape:
                             print('SDF shape', SDF_f.shape)
                             return
@@ -378,7 +378,7 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                         print('unique frequency ', f1)
                         Fp = p2l[:, :, index_freq]
                         C = site_effect(dpt1, f1, vs_crust, path_longuet_higgins)
-                        SDF_f = 2*np.pi*f1/(rho_s**2*(vs_crust*1e3)**5)*Fp.data*C.data
+                        SDF_f = 2*np.pi*f1/((rho_s**2)*(vs_crust)**5)*Fp.data*C.data
                         SDF = SDF_f
                         
                     ## Exception in parametrization of frequencies
@@ -431,7 +431,7 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                                                 dims=["latitude", "longitude"],
                                                 name = 'Source of the power spectrum for the vertical displacement.\nRayleigh waves.\nFrequency %.3f-%.3f Hz.%d-%02d-%02dT%02d'%(f1, f2, iyear, imonth, iday, ih))
                         fig = plt.figure(figsize=(16,9))
-                        fig.suptitle('Source of the power spectrum for the vertical displacement\n Rayleigh waves.Frequency %.3f-%.3f Hz. %d-%02d-%02dT%02d'%(f1, f2, iyear, imonth, iday, ih))
+                        fig.suptitle('Source of the power spectrum for the vertical displacement.\n Rayleigh waves.\nFrequency %.3f-%.3f Hz. %d-%02d-%02dT%02d'%(f1, f2, iyear, imonth, iday, ih))
                         ax = plt.axes(projection=ccrs.Robinson())
                         ax.coastlines()
                         gl = ax.gridlines()
@@ -564,7 +564,7 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
     # calculate spherical surface elementary elements
     msin = np.array([np.sin(np.pi/2 - np.radians(zlat))]).T
     ones = np.ones((1, len(zlon)))
-    dA = radius_earth**2*res_mod**2*np.dot(msin,ones)
+    dA = radius_earth**2*np.radians(res_mod)**2*np.dot(msin,ones)
     
     # Compute distance of each gridpoint to station
     geoid = Geod(ellps='WGS84')
@@ -597,13 +597,16 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
         F_delta = np.zeros((sdf_f.shape))
         for ifreq, f in enumerate(freq):
             SDF_freq = sdf_f.sel(frequency = freq[ifreq]).data
-            EXP = np.exp(-2*np.pi*f.data*radius_earth/(U*Q)*np.radians(distance))
+            EXP = np.exp(-2*np.pi*f.data*np.radians(distance)*radius_earth/(U*Q))
             denominateur = 1/(radius_earth*np.sin(np.radians(distance)))
             facteur = EXP*denominateur
             F_delta[ifreq, :, :] = facteur.T*SDF_freq*dA*P
-        disp_RMS = 10*np.log(np.sqrt(np.nansum(F_delta, axis = (1,2))))
-        spectro[idate, :] = disp_RMS
-    
+        disp_RMS = 10*np.log10(np.nansum(F_delta, axis = (1,2)))
+        try:
+            spectro[idate, :] = disp_RMS
+        except:
+            print(date)
+            continue
     ## Plot
     plt.figure(figsize=(16,9))
     plt.title("spectrogram")
@@ -612,7 +615,7 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
     plt.ylabel('Frequency [Hz]')
     plt.gcf().autofmt_xdate()
     plt.ylim(0.1, 0.5)
-    plt.colorbar(label='$m^2/Hz$ [dB]')
+    plt.colorbar(label='$10.log_{10}(m^2/Hz) [dB]$')
     plt.savefig('spectrogram_ww3.png', dpi=300, bbox_inches='tight')
     return dates, freq, spectro
 

@@ -5,7 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Calendar Versioning](https://calver.org/).
 
-## [2024.1.4] - 2024-12-18
+## [2025.0.0] - 2025-08-18
+
+### Added 
+- Temporal variations notebook for body waves
+- Funding reference in About section + ANR logo
+
+### Changed
+- modified the code for Rayleigh waves amplification coefficients,
+so that all parameters are in SI units (m/s instead of km/s).
+- Revise Documentation to fix bugs and units in SI in all notebooks and descriptions.
+
+### Fixed Bugs
+- radians of the model resolution in the surface element for synthetic spectrograms computation, fixed.
+
+
+## [2024.1.4] - 2025-03-03
 ### Added
 - Condition on input latitudes : returns an error in absolute value higher than 90.
 
@@ -13,11 +28,15 @@ and this project adheres to [Calendar Versioning](https://calver.org/).
 - Rayleigh waves amplification coefficient in F_prox (microseismic_sources.ipynb) modified. We use C instead of C^2 previously. This matches with the cP coefficients use.
 - fix bugs when reading refined bathymetry. 
 
+
 ## [2024.1.3] - 2024-12-18
 ### Added
+- read from url function (to be implemented by default later)
+
 
 ### Changed
-- fix dependency to dask in pyproject.tomland README 
+- dependency to dask in install, README, pyproject.toml
+- modified try except in subfunction_rayleigh_waves.spectrogram
 
 ## [2014.1.2] - 2024-10-07
 

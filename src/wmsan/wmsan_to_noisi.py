@@ -3,7 +3,7 @@
 # Preamble
 #__author__ = "Laura Ermert"
 #__credits__ = ["Laura Ermert"]
-#__version__ = "0.1"
+#__version__ = "2025.0.0"
 #__maintainer__ = "Laura Ermert, Lisa Tomasetto"
 #__email__ = "lisa.tomasetto@univ-grenoble-alpes.fr"
 # Script by Laura Ermert

@@ -4,7 +4,7 @@
 #__author__ = "Lisa Tomasetto"
 #__copyright__ = "Copyright 2024, UGA"
 #__credits__ = ["Lisa Tomasetto"]
-#__version__ = "0.1"
+#__version__ = "2025.0.0"
 #__maintainer__ = "Lisa Tomasetto"
 #__email__ = "lisa.tomasetto@univ-grenoble-alpes.fr"
 #__status__ = "Production"
@@ -36,6 +36,8 @@ import argparse
 from datetime import date
 from datetime import datetime
 from netCDF4 import Dataset
+import netCDF4 as nc
+import os, fnmatch, glob, shutil
 
 def read_WWNC(file_path, time_vect, lon1, lat1):
     """Read netcdf _hs.nc file and return a matrix with dimension lon x lat of significant height of wind and swell waves in meters.
@@ -266,7 +268,7 @@ def read_hs(file_path, time_vect, lon1 = (-180, 180), lat1 = (-90, 90)):
     
     # extract data
     hs = ds.hs.sel(time= timestep, longitude = lon, latitude= lat, method = 'nearest')
-    
+    ds.close()
     return hs
     
 def read_p2l(file_path, time_vect, lon1 = (-180, 180), lat1 = (-90, 90)):
@@ -333,8 +335,42 @@ def read_p2l(file_path, time_vect, lon1 = (-180, 180), lat1 = (-90, 90)):
 
     # units
     unit1 = ds.p2l.units
+    ds.close()
     return lat, lon, freq, p2l, unit1
-    
+
+def read_p2l_from_url(url, time_vect, lon1 = (-180, 180), lat1 = (-90, 90)):
+    try:
+        nc_ds.close()
+        extract_ds.close()
+    except:
+        pass
+    (lat_min, lat_max) = lat1
+    (lon_min, lon_max) = lon1
+    #load netcdf from url as netCDF4 dataset
+    ncfile = nc.Dataset(url+'#mode=bytes')
+    #load netCDF4 dataset as Xarray dataset
+    nc_ds = xr.open_dataset(xr.backends.NetCDF4DataStore(ncfile))
+    # extract from Jan 1st to Jan 5th included
+    extract_ds=nc_ds.sel(time=datetime(time_vect[0], time_vect[1], time_vect[2], time_vect[3]))
+    extract_ds = extract_ds.sel(latitude=slice(lat_min, lat_max), longitude=slice(lon_min, lon_max))
+    extract_ds = extract_ds.rename({'f':'frequency'})
+
+    return extract_ds.latitude, extract_ds.longitude, extract_ds.frequency, extract_ds.p2l, 'log10(Pa2 m2 s+1E-12)'
+
+def read_hs_from_url(url, time_vect, lon1 = (-180, 180), lat1 = (-90, 90)):
+    lat_min, lat_max = lat1
+    lon_min, lon_max = lon1
+    #load netcdf from url as netCDF4 dataset
+    ncfile = nc.Dataset(url+'#mode=bytes')
+    #load netCDF4 dataset as Xarray dataset
+    nc_ds = xr.open_dataset(xr.backends.NetCDF4DataStore(ncfile))
+    # extract from Jan 1st to Jan 5th included
+    extract_ds=nc_ds.sel(time=datetime(time_vect[0], time_vect[1], time_vect[2], time_vect[3]))
+    extract_ds = extract_ds.sel(latitude=slice(lat_min, lat_max), longitude=slice(lon_min, lon_max))
+    extract_ds=extract_ds[['hs']]
+    nc_ds.close()
+    return extract_ds.hs
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog= 'ReadHSP2L',
                                      description = 'Read WW3 hs.nc and p2l.nc files for python, given the year, month, day, hour')
@@ -352,26 +388,16 @@ if __name__ == "__main__":
     day = int(args.day)
     hour = int(args.hour)
     time_vect = [year, month, day, hour]
-    lon_min, lon_max = 150, -150
+    lon_min, lon_max = -180, 180
     lat_min, lat_max = -90, 90
     
     ## read p2l.nc
     ### xarray
-    lat , lon, freq, p2l, unit1 = read_p2l(file_path_p2l, time_vect, [lon_min, lon_max], [lat_min, lat_max])
-    p2l_f = p2l.sel(frequency= 0.3, method = 'nearest')
-    fig = plt.figure(figsize=(9,6))
-    ax = plt.axes(projection=ccrs.PlateCarree(central_longitude=180))
-    p2l_f.plot(ax = ax, transform=ccrs.PlateCarree(), cbar_kwargs={'shrink': 0.4})
-    ax.coastlines()
-    ax.gridlines()
-    plt.show()
 
-    ## read hs
-    hs = read_hs(file_path_hs, time_vect, [lon_min, lon_max], [lat_min, lat_max])
     
-    fig = plt.figure(figsize=(9,6))
-    ax = plt.axes(projection=ccrs.PlateCarree(central_longitude=180))
-    hs.plot(ax=ax, transform=ccrs.PlateCarree(), cbar_kwargs={'shrink': 0.4})
-    ax.coastlines()
-    ax.gridlines()
+    url = 'https://data-ww3.ifremer.fr/PROJECT/SISMO/CCI_ERA5_CERSATSSMI_MERCAREA_T702_NOREF_05/2010/FIELD_NC/CCI_WW3-GLOB-30M_201001_p2l.nc'
+    
+    lat, lon, freq, p2l, unit1 = read_p2l_from_url(url, [2010, 1, 1, 6])
+    
+    plt.pcolormesh(lon, lat, p2l.sel(frequency=0.1, method='nearest'))
     plt.show()

@@ -4,7 +4,7 @@
 #__author__ = "Lisa Tomasetto"
 #__copyright__ = "Copyright 2024, UGA"
 #__credits__ = ["Lisa Tomasetto"]
-#__version__ = "0.1"
+#__version__ = "2025.0.0"
 #__maintainer__ = "Lisa Tomasetto"
 #__email__ = "lisa.tomasetto@univ-grenoble-alpes.fr"
 
@@ -43,7 +43,7 @@ from datetime import datetime
 from calendar import monthrange
 from numpy.lib.scimath import sqrt as csqrt
 
-from wmsan.read_hs_p2l import read_p2l
+from wmsan.read_hs_p2l import read_p2l, read_p2l_from_url
 
 plt.style.use("ggplot")
 SMALL_SIZE = 18
