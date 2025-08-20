@@ -3,7 +3,7 @@
 #__author__ = "Lisa Tomasetto"
 #__copyright__ = "Copyright 2024, UGA"
 #__credits__ = ["Lisa Tomasetto"]
-#__version__ = "0.1"
+#__version__ = "2025.0.0"
 #__maintainer__ = "Lisa Tomasetto"
 #__email__ = "lisa.tomasetto@univ-grenoble-alpes.fr"
 
@@ -131,27 +131,27 @@ def open_axisem(dist, path_file_axisem='../../data/NOISE_vertforce_dirac_0-ak135
         return None
     return trace_synth
 
-def taper_axisem_archive(time, distance, archive_name='../../data/NOISE_vertforce_dirac_0-ak135f_1.s_3600s.h5', umin = 2.5, umax = 3.5, comp='Z'):
+def taper_axisem_archive(time, distance, archive_name='../../data/NOISE_vertforce_dirac_0-ak135f_1.s_3600s.h5', umin = 2500, umax = 3500, comp='Z'):
     """Taper an AxiSEM .h5 archive in a 1D model given its path and distances as well as minimum and maximum Rayleigh wave velocity,and saves and returns the tapered archive.
     
     Args:
         time (numpy.ndarray): time vector
         distance (numpy.ndarray): distance vector
         archive_name (str, optional): path of axisem .h5 archive, default='../../data/NOISE_vertforce_dirac_0-ak135f_1.s_3600s.h5'
-        umin (float, optional): minimum Rayleigh wave velocity
-        umax (float, optional): maximum Rayleigh wave velocity
+        umin (float, optional): minimum Rayleigh wave velocity in m/s.
+        umax (float, optional): maximum Rayleigh wave velocity in m/s.
      
     Returns:
         tapered_archive (numpy.ndarray): tapered archive
     """
-    R = radius_earth*1e-3  # Radius of the Earth in km
+    R = radius_earth  # Radius of the Earth in m
     dt = time[1] - time[0]
     fe = 1/dt
     tapered_archive = np.zeros((len(distance), len(time)))
     for i, dist in enumerate(distance):
-        dist_in_km = dist*np.pi*R/180
-        tmin = dist_in_km/umax
-        tmax = dist_in_km/umin
+        dist_in_m = dist*np.pi*R/180
+        tmin = dist_in_m/umax
+        tmax = dist_in_m/umin
         if tmax >= np.max(time):
             tmax = np.max(time)
         if tmin >= np.max(time):

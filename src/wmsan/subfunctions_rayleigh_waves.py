@@ -4,7 +4,7 @@
 #__author__ = "Lisa Tomasetto"
 #__copyright__ = "Copyright 2024, UGA"
 #__credits__ = ["Lisa Tomasetto"]
-#__version__ = "1.0"
+#__version__ = "2025.0.0"
 #__maintainer__ = "Lisa Tomasetto"
 #__email__ = "lisa.tomasetto@univ-grenoble-alpes.fr"
 

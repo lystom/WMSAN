@@ -12,7 +12,7 @@ from wmsan.read_hs_p2l import read_p2l
 __author__ = "Reza D.D. Esfahani" # mod. by Lisa Tomasetto 07/2024
 __copyright__ = "Copyright 2024, UGA"
 __credits__ = ["Reza D.D. Esfahani"] 
-__version__ = "0.1"
+__version__ = "2025.0.0"
 __maintainer__ = "Lisa Tomasetto"
 __email__ = "lisa.tomasetto@univ-grenoble-alpes.fr"
 
