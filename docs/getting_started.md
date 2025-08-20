@@ -12,60 +12,67 @@ First, let's install the package!
 ### PyPI
 The package is available on [PyPI](https://pypi.org/project/wmsan).
 
-- Create an environment and install
+#### Create an environment and install
 
-    - if you use [Conda](https://docs.anaconda.com/free/miniconda/#quick-command-line-install) environments:
+- if you use [Conda](https://docs.anaconda.com/free/miniconda/#quick-command-line-install) environments:
+    ```
+    conda create --name wmsan 
+    conda activate wmsan
+    conda install pip
+    python3 -m pip install wmsan
+    ```
+    to deactivate your environment:
 
-            conda create --name wmsan 
-            conda activate wmsan
-            conda install pip
-            python3 -m pip install wmsan
-
-        to deactivate your environment:
-
-            conda deactivate
-
-    - otherwise
-
-            python3 -m venv venv
-            source venv/bin/activate
-            python3 -m pip install wmsan
-    
-        to deactivate your environment:
-    
-            deactivate
+    ```
+    conda deactivate
+    ```
+- otherwise
+    ```
+    python3 -m venv venv
+    source venv/bin/activate
+    python3 -m pip install wmsan
+    ```
+    to deactivate your environment:
+    ```
+    deactivate
+    ```
 
 ### From Source
 
-1. Clone the repository
+1. Clone the repository 
 
-        cd path_to_your_wmsan_directory/
-        git clone https://gricad-gitlab.univ-grenoble-alpes.fr/tomasetl/ww3-source-maps.git 
-        cd ww3-source-maps/
-
+    ``` 
+    cd path_to_your_wmsan_directory/
+    git clone https://gricad-gitlab.univ-grenoble-alpes.fr/tomasetl/ww3-source-maps.git 
+    cd ww3-source-maps/
+    ```
 
 2. Create an environment and install 
 
-    - if you use [Conda](https://docs.anaconda.com/free/miniconda/#quick-command-line-install) environments:
+- if you use [Conda](https://docs.anaconda.com/free/miniconda/#quick-command-line-install) environments:
 
-            conda create --name wmsan 
-            conda activate wmsan
-            conda install pip
-            pip install .
+    ```
+    conda create --name wmsan 
+    conda activate wmsan
+    conda install pip
+    pip install .
+    ```
+    to deactivate your environment:
+    ```
+    conda deactivate
+    ```
 
-        to deactivate your environment:
+- otherwise
 
-            conda deactivate
-
-    - otherwise
-
-            python3 -m venv venv
-            source venv/bin/activate
-            python3 -m pip install .
-    
-        to deactivate your environment:
-    
-            deactivate
+    ```
+    python3 -m venv venv
+    source venv/bin/activate
+    python3 -m pip install .
+    ```
+    to deactivate your environment:
+    ```
+    deactivate
+    ```
 
 ### Dependencies
 - [numpy](https://numpy.org/doc/stable/)
@@ -86,4 +93,4 @@ The package is available on [PyPI](https://pypi.org/project/wmsan).
 
 ## Where Should I Start ?
 Congratulations ! You successfully installed WMSAN.
-Now feel free to browse the [Tutorial](user_guide.md) for examples. The Python functions full descriptions can be found in the [API Overview](api_overview/api_overview.md). 
+Now feel free to browse the [Tutorial](user_guide.md) for examples. The Python functions' full descriptions can be found in the [API Overview](api_overview/api_overview.md). 
