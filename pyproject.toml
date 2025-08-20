@@ -6,13 +6,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wmsan"
-version = "2024.1.3"
+version = "2025.0.0"
 authors = [
   { name="Lisa Tomasetto", email="lisa.tomasetto@gmail.com" },
 ]
 description = "Compute seismic sources of ambient noise using wave model hindcast outputs."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = "<3.13"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",

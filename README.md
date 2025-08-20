@@ -30,7 +30,9 @@ ww3-source-maps/
 |-- notebooks/
 |   └── body_waves/
 │       ├── amplification_coeff.ipynb
-│       └── microseismic_sources.ipynb 
+│       └── microseismic_sources.ipynb
+│       └── synthetic_CCF.ipynb
+│       └── temporal_variations.ipynb
 │   └── rayleigh_waves/
 │       ├── amplification_coeff.ipynb
 │       ├── microseismic_sources.ipynb
@@ -57,59 +59,67 @@ ww3-source-maps/
 
 The package is available on [PyPI](https://pypi.org/).
 
-- Create an environment and install
+#### Create an environment and install
 
-    - if you use [Conda](https://docs.anaconda.com/free/miniconda/#quick-command-line-install) environments:
-
-            conda create --name wmsan 
-            conda activate wmsan
-            conda install pip
-            python3 -m pip install wmsan
-
-        to deactivate your environment:
-
-            conda deactivate
-
-    - otherwise
-
-            python3 -m venv venv
-            source venv/bin/activate
-            python3 -m pip install wmsan
+- if you use [Conda](https://docs.anaconda.com/free/miniconda/#quick-command-line-install) environments:
+    ```
+    conda create --name wmsan 
+    conda activate wmsan
+    conda install pip
+    python3 -m pip install wmsan
+    ```
     
-        to deactivate your environment:
-    
-            deactivate
+    to deactivate your environment:
+
+    ```
+    conda deactivate
+    ```
+- otherwise
+    ```
+    python3 -m venv venv
+    source venv/bin/activate
+    python3 -m pip install wmsan
+    ```
+    to deactivate your environment:
+    ```
+    deactivate
+    ```
 
 ### From Source
 1. Clone the repository 
-``` 
-cd path_to_your_wmsan_directory/
-git clone https://gricad-gitlab.univ-grenoble-alpes.fr/tomasetl/ww3-source-maps.git 
-cd ww3-source-maps/
-````
+
+    ``` 
+    cd path_to_your_wmsan_directory/
+    git clone https://gricad-gitlab.univ-grenoble-alpes.fr/tomasetl/ww3-source-maps.git 
+    cd ww3-source-maps/
+    ```
+
 2. Create an environment and install 
+
 - if you use [Conda](https://docs.anaconda.com/free/miniconda/#quick-command-line-install) environments:
-```
-conda create --name wmsan 
-conda activate wmsan
-conda install pip
-pip install .
-```
-to deactivate your environment:
-```
-conda deactivate
-```
+
+    ```
+    conda create --name wmsan 
+    conda activate wmsan
+    conda install pip
+    pip install .
+    ```
+    to deactivate your environment:
+    ```
+    conda deactivate
+    ```
 
 - otherwise
-```
-python3 -m venv venv
-source venv/bin/activate
-python3 -m pip install .
-```
-to deactivate your environment:
-```
-deactivate
-```
+
+    ```
+    python3 -m venv venv
+    source venv/bin/activate
+    python3 -m pip install .
+    ```
+    to deactivate your environment:
+    ```
+    deactivate
+    ```
 
 ### Dependencies
 
