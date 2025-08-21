@@ -16,73 +16,56 @@ The package is available on [PyPI](https://pypi.org/project/wmsan).
 
 - if you use [Conda](https://docs.anaconda.com/free/miniconda/#quick-command-line-install) environments:
 
-    ```
         conda create --name wmsan python=3.12
         conda activate wmsan
         conda install pip pyproj
         python3 -m pip install wmsan
-    ```
 
     to deactivate your environment:
-
-    ```
+        
         conda deactivate
-    ```
 
 - otherwise
 
-    ```
         python3 -m venv venv
         source venv/bin/activate
         python3 -m pip install wmsan
-    ```
 
     to deactivate your environment:
-    
-    ```
+        
         deactivate
-    ```
 
 ### From Source
 
 1. Clone the repository 
 
-    ``` 
         cd path_to_your_wmsan_directory/
         git clone https://gricad-gitlab.univ-grenoble-alpes.fr/tomasetl/ww3-source-maps.git 
         cd ww3-source-maps/
-    ```
 
 2. Create an environment and install 
 
 - if you use [Conda](https://docs.anaconda.com/free/miniconda/#quick-command-line-install) environments:
 
-    ```
         conda create --name wmsan python=3.12
         conda activate wmsan
         conda install pip pyproj
         pip install .
-    ```
 
     to deactivate your environment:
-
-    ```
+        
         conda deactivate
-    ```
 
 - otherwise
 
-    ```
         python3 -m venv venv
         source venv/bin/activate
         python3 -m pip install .
-    ```
+
 
     to deactivate your environment:
-
-    ```
+        
         deactivate
-    ```
 
 ### Dependencies
 - [numpy](https://numpy.org/doc/stable/)
