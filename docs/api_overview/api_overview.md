@@ -9,7 +9,7 @@ Fonctions to read WAVEWATCHIII NetCDF4 files. Using xarray or basic Python packa
 [Read WW3 Files](read_hs_p2l.md){: .btn}
 
 ## Body Waves Modeling (P and SV)
-Functions to compute body waves Proxy for the Source Force from secondary microseismic ocean sources and synthetic spectrograms.
+Functions to compute body waves Proxy for the Source Force from secondary microseismic ocean sources and synthetic cross-correlations.
 
 [Body Waves](body_waves.md){: .btn}
 

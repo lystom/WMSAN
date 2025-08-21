@@ -48,12 +48,15 @@ Once the site effect is quantified, let's make source distribution maps based on
 If you want to see the temporal evolution of the source intensity in a specific area check out this example (dv/v series comparison, clustering occurence, ...).
 
 [Rayleigh Waves](notebooks/rayleigh_waves/temporal_variations.ipynb){: .btn}
+[Body Waves](notebooks/body_waves/temporal_variations.ipynb){: .bn}
 
 ## Synthetic Cross-correlation Functions
 To compute synthetic cross-correlations with a WW3 model based source distribution.
 
 [Rayleigh Waves](notebooks/rayleigh_waves/synthetic_CCF.ipynb){: .btn}
+
 [Auto-Correlation](notebooks/rayleigh_waves/synthetic_CCF_autocorr.ipynb){: .bn}
+
 [Body Waves](notebooks/body_waves/synthetic_CCF.ipynb){: .btn}
 
 ## WMSAN to noisi
