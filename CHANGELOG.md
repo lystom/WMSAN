@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Calendar Versioning](https://calver.org/).
 
+## [2026.0.0] - 2026-03-02
+### Added 
+- Compatibility with Python 3.13
+- Compatibility with numpy 2.0
+
+### Changed
+- commented ```import netCDF4 as nc``` in read_hs_p2l to prevent compatibility errors (nc only used for OpenDAP branch)
+- modify engine to open netcdf files with xarray to prevent HDF errors in src/synthetics.py
+
+
+### Fixed Bugs
+- Fix a warning/memory issue by closing figures after saved
+
 ## [2025.0.0] - 2025-08-18
 
 ### Added 
