@@ -10,14 +10,17 @@ Please keep the architecture as follow:
     |-- notebooks/
     |   └── body_waves/
     │       ├── amplification_coeff.ipynb
-    │       └── microseismic_sources.ipynb 
+    │       ├── microseismic_sources.ipynb
+    |       ├── temporal_variations.ipynb
+    │       └── synthetic_CCF.ipynb
     │   └── rayleigh_waves/
     │       ├── amplification_coeff.ipynb
     │       ├── microseismic_sources.ipynb
     │       ├── spectrograms.ipynb
     │       ├── rayleigh_source.ipynb
-    │       └── synthetic_CCF.ipynb
-    │       └── wmsan_to_noisi.ipynb
+    │       ├── synthetic_CCF.ipynb
+    |       ├── synthetic_CCF_autocorr.ipynb
+    │       ├── wmsan_to_noisi.ipynb
     │       └── temporal_variations.ipynb
     |-- data/
     │   ├── C.nc

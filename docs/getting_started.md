@@ -16,9 +16,8 @@ The package is available on [PyPI](https://pypi.org/project/wmsan).
 
 - if you use [Conda](https://docs.anaconda.com/free/miniconda/#quick-command-line-install) environments:
 
-        conda create --name wmsan python=3.12
+        conda create --name wmsan
         conda activate wmsan
-        conda install pip pyproj
         python3 -m pip install wmsan
 
     to deactivate your environment:
@@ -47,9 +46,8 @@ The package is available on [PyPI](https://pypi.org/project/wmsan).
 
 - if you use [Conda](https://docs.anaconda.com/free/miniconda/#quick-command-line-install) environments:
 
-        conda create --name wmsan python=3.12
+        conda create --name wmsan
         conda activate wmsan
-        conda install pip pyproj
         pip install .
 
     to deactivate your environment:
