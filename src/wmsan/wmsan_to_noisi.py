@@ -66,8 +66,16 @@ def create_sourcegrid_WW3(lat_min, lat_max, lon_min, lon_max, output_path):
     xx, yy = np.meshgrid(lon, lat)
     xx = xx.flatten()
     yy = yy.flatten()
-    np.save(output_path + 'sourcegrid.npy', np.array([xx, yy]))
-    
+    try:
+        np.save(output_path + 'sourcegrid.npy', np.array([xx, yy]))
+    except:
+        ## say that the directory does not exist and create it
+        print("Directory does not exist: " + output_path)
+        ## if the output path does not exist, create it and save the file
+        ## create directory if it does not exist
+        os.makedirs(output_path, exist_ok=True)
+        np.save(output_path + 'sourcegrid.npy', np.array([xx, yy]))
+
 def get_nearest_neighbour_index(tree, query_point, n):
     """Get the indices of the nearest neighbors to a given query point using a ball tree.
     This function uses a ball tree to find the indices of the nearest neighbors to a given query point. It takes a ball tree object, a query point, and the number of nearest neighbors to find as input. It then queries the ball tree to find the distances and indices of the nearest neighbors to the query point. The function returns an array of indices of the nearest neighbors.

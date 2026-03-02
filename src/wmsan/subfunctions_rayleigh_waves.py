@@ -440,7 +440,7 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                         ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
                         SDF_plot.plot(ax=ax, transform=ccrs.PlateCarree(), vmin=vmin, vmax=vmax,  cbar_kwargs={'label':'SDF (m)', 'orientation': 'horizontal'}) 
                         plt.savefig('rayleigh_SDF_%d%02d%02dT%02d.png'%(iyear, imonth, iday, ih), dpi = 300, bbox_inches='tight')
-
+                        plt.close(fig)
                     ## Sum SDF
                     if plot_daily :
                         SDF_daily += SDF
@@ -464,7 +464,7 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                     ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
                     SDF_plot.plot(ax=ax, transform=ccrs.PlateCarree(), vmin = vmin, vmax = vmax, cbar_kwargs={'label':'SDF (m)', 'orientation': 'horizontal'})
                     plt.savefig('rayleigh_SDF_daily_%d%02d%02d.png'%(iyear, imonth, iday), dpi = 300, bbox_inches='tight')
-                    plt.close('all')
+                    plt.close(fig)
                     SDF_daily = np.zeros((dpt1.shape))
                     
             if plot_monthly :
@@ -483,7 +483,7 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                 SDF_plot.plot(ax=ax, transform=ccrs.PlateCarree(), vmin = vmin, vmax = vmax, cbar_kwargs={'label':'SDF (m)','orientation': 'horizontal'})
                 plt.savefig('rayleigh_SDF_monthly_%d%02d.png'%(iyear, imonth), dpi = 300, bbox_inches='tight')
                 #plt.show()
-                plt.close('all')
+                plt.close(fig)
                 SDF_monthly = np.zeros((dpt1.shape))
 
         if plot_yearly :
@@ -617,6 +617,7 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
     plt.ylim(0.1, 0.5)
     plt.colorbar(label='$10.log_{10}(m^2/Hz) [dB]$')
     plt.savefig('spectrogram_ww3.png', dpi=300, bbox_inches='tight')
+    plt.close('all')
     return dates, freq, spectro
 
 
@@ -885,7 +886,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
                         ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
                         F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'$F_{prox}$ (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax)
                         plt.savefig('F_R_%d%02d%02dT%02d.png'%(iyear, imonth, iday, ih), dpi = 300, bbox_inches='tight')
-
+                        plt.close('all')
                     ## Sum F
                     if plot_daily :
                         F_daily += F
@@ -910,6 +911,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
                     ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
                     F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax),
                     plt.savefig('F_R_%d%02d%02d.png'%(iyear, imonth, iday), dpi = 300, bbox_inches='tight')
+                    plt.close(fig)
                     F_daily = np.zeros((dpt1.shape))
                     
             if plot_monthly :
@@ -928,6 +930,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
                 ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
                 F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax)
                 plt.savefig('F_R_%d%02d.png'%(iyear, imonth), dpi = 300, bbox_inches='tight')
+                plt.close(fig)
                 F_monthly = np.zeros((dpt1.shape))
                     
 
@@ -947,6 +950,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
             ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
             F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax)
             plt.savefig('F_R_%d.png'%(iyear), dpi = 300, bbox_inches='tight')
+            plt.close(fig)
             F_daily = np.zeros((dpt1.shape))
             F_yearly = np.zeros((dpt1.shape))
         plt.close('all')

@@ -610,7 +610,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
                         else:
                             F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax)
                         plt.savefig('F_%s_%d%02d%02dT%02d.png'%(wave_type, iyear, imonth, iday, ih), dpi = 300, bbox_inches='tight')
-
+                        plt.close('all')
                     ## Sum F
                     if plot_daily :
                         F_daily += F
@@ -638,6 +638,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
                     else:
                         F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax)
                     plt.savefig('F_%s_%d%02d%02d.png'%(wave_type, iyear, imonth, iday), dpi = 300, bbox_inches='tight')
+                    plt.close('all')
                     F_daily = np.zeros((dpt1.shape))
                     
             if plot_monthly :
@@ -659,9 +660,9 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
                 else:
                     F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax)
                 plt.savefig('F_%s_%d%02d.png'%(wave_type, iyear, imonth), dpi = 300, bbox_inches='tight')
+                plt.close('all')
                 F_monthly = np.zeros((dpt1.shape))
                     
-
         if plot_yearly:
             plt.close('all')
             F_plot = xr.DataArray(F_yearly,
@@ -681,6 +682,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
             else:
                 F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax)
             plt.savefig('F_%s_%d.png'%(wave_type, iyear), dpi = 300, bbox_inches='tight')
+            plt.close('all')
             F_daily = np.zeros((dpt1.shape))
             F_yearly = np.zeros((dpt1.shape))
         plt.close('all')

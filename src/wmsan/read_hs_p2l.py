@@ -36,7 +36,7 @@ import argparse
 from datetime import date
 from datetime import datetime
 from netCDF4 import Dataset
-import netCDF4 as nc
+#import netCDF4 as nc
 import os, fnmatch, glob, shutil
 
 def read_WWNC(file_path, time_vect, lon1, lat1):
