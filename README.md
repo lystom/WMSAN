@@ -139,6 +139,7 @@ The package is available on [PyPI](https://pypi.org/).
 - [tqdm](https://tqdm.github.io/)
 - [notebook](https://jupyter-notebook.readthedocs.io/en/stable/)
 - [dask](https://www.dask.org/) 
+- [scikit-learn](https://scikit-learn.org/stable/) For noisi only
 
 ## Where should I start ?
 

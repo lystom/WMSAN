@@ -352,16 +352,34 @@ def open_model(path_file_WW3, N, fe, lon_slice=slice(-180, 180), lat_slice=slice
         force_spectrum (xarray.DataArray): Hermitian PSD of the given model in N^2.s with dimensions (dim_lon, dim_lat, 2*dim_freq+1).
     """
 
-    ## Open WW3 model 
-    ds = xr.open_dataset(path_file_WW3)
-    if lon_slice.start > lon_slice.stop:
-        ds = ds.assign_coords(longitude=((360 + (ds.longitude % 360)) % 360))
-        ds = ds.roll(longitude=int(len(ds['longitude']) / 2),roll_coords=True)
-        lon_slice = slice(((360 + (lon_slice.start % 360)) % 360), ((360 + (lon_slice.stop % 360)) % 360))
-    ww3_data = ds.F_f.sel(longitude=lon_slice, latitude=lat_slice)
-    ww3_data = ww3_data.dropna(dim='longitude', how='all').dropna(dim='latitude', how='all')
-    del ds
-    ww3_data = ww3_data.where(np.isfinite(ww3_data))
+    ## Open WW3 model
+    print(path_file_WW3)
+
+    # Try multiple backends to avoid NetCDF4/HDF5 ABI issues
+    ds = None
+    open_errors = []
+    for eng in ("h5netcdf", "netcdf4"):
+        try:
+            ds = xr.open_dataset(path_file_WW3, engine=eng)
+            break
+        except Exception as e:
+            open_errors.append(f"{eng}: {e}")
+            ds = None
+    if ds is None:
+        raise OSError(f"Failed to open {path_file_WW3} with available backends. Errors: " + " | ".join(open_errors))
+    try:
+        if lon_slice.start > lon_slice.stop:
+            ds = ds.assign_coords(longitude=((360 + (ds.longitude % 360)) % 360))
+            ds = ds.roll(longitude=int(len(ds['longitude']) / 2), roll_coords=True)
+            lon_slice = slice(((360 + (lon_slice.start % 360)) % 360), ((360 + (lon_slice.stop % 360)) % 360))
+        ww3_data = ds["F_f"].sel(longitude=lon_slice, latitude=lat_slice)
+        ww3_data = ww3_data.dropna(dim='longitude', how='all').dropna(dim='latitude', how='all')
+        ww3_data = ww3_data.where(np.isfinite(ww3_data))
+        
+        ## Load data into memory to avoid file handle issues
+        ww3_data = ww3_data.load()
+    finally:
+        ds.close()
 
     ## Spectrum Output
     if N%2 == 0:
