@@ -3,7 +3,7 @@
 #__author__ = "Lisa Tomasetto"
 #__copyright__ = "Copyright 2024, UGA"
 #__credits__ = ["Lisa Tomasetto"]
-#__version__ = "2025.0.0"
+#__version__ = "2026.0.1"
 #__maintainer__ = "Lisa Tomasetto"
 #__email__ = "lisa.tomasetto@univ-grenoble-alpes.fr"
 
@@ -62,6 +62,21 @@ from obspy.taup import TauPyModel
 from obspy.taup.taup_geo import calc_dist as calc_dist
 
 plt.style.use("ggplot")
+SMALL_SIZE = 18
+MEDIUM_SIZE = 20
+BIGGER_SIZE = 22
+
+plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
+plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+
+plt.rcParams['xtick.direction'] = 'inout'
+plt.rcParams['ytick.direction'] = 'inout'
+plt.rcParams['font.family'] = "sans-serif"
 ## Constants
 radius_earth = 6371e3  # Earth's Radius in meters
 

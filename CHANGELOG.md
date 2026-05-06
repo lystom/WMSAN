@@ -38,7 +38,7 @@ so that all parameters are in SI units (m/s instead of km/s).
 - dependency to dask in install, README, pyproject.toml
 - modified try except in subfunction_rayleigh_waves.spectrogram
 
-## [2014.1.2] - 2024-10-07
+## [2024.1.2] - 2024-10-07
 
 ### Added
 
@@ -47,7 +47,7 @@ so that all parameters are in SI units (m/s instead of km/s).
 - add exponential decay to temporal_variations.
 
 
-## [2014.1.1] - 2024-09-09
+## [2024.1.1] - 2024-09-09
 
 ### Added
 
@@ -61,7 +61,7 @@ so that all parameters are in SI units (m/s instead of km/s).
 ### Deprecated
 
 
-## [2014.1.0] - 2024-08-26
+## [2024.1.0] - 2024-08-26
 
 ### Added
 
@@ -73,7 +73,7 @@ so that all parameters are in SI units (m/s instead of km/s).
 - Increase patch in version 2024.1.0
 
 
-## [2014.0.6] - 2024-08-26
+## [2024.0.6] - 2024-08-26
 
 ### Added
 
@@ -102,7 +102,7 @@ so that all parameters are in SI units (m/s instead of km/s).
 
 - 
 
-## [2014.0.5] - 2024-08-09
+## [2024.0.5] - 2024-08-09
 
 ### Added
 
@@ -116,7 +116,7 @@ so that all parameters are in SI units (m/s instead of km/s).
 - Update for Numpy 2.0.1
 - Update minimum python version and OS
 
-## [2014.0.4] - 2024-08-09
+## [2024.0.4] - 2024-08-09
 
 ### Added
 
@@ -131,14 +131,14 @@ so that all parameters are in SI units (m/s instead of km/s).
 
 - Correct typos for documentation
 
-## [2014.0.3] - 2024-08-09
+## [2024.0.3] - 2024-08-09
 
 ### Added
 
 - Build docstrings for documentation.
 - Update Documentation with mkdocs
 
-## [2014.0.2] - 2024-08-09
+## [2024.0.2] - 2024-08-09
 
 ### Added
 

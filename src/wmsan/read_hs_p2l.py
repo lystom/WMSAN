@@ -4,7 +4,7 @@
 #__author__ = "Lisa Tomasetto"
 #__copyright__ = "Copyright 2024, UGA"
 #__credits__ = ["Lisa Tomasetto"]
-#__version__ = "2025.0.0"
+#__version__ = "2026.0.1"
 #__maintainer__ = "Lisa Tomasetto"
 #__email__ = "lisa.tomasetto@univ-grenoble-alpes.fr"
 #__status__ = "Production"
@@ -30,14 +30,12 @@ It contains four functions read_WWNC, read_WWNCf, read_hs and read_p2l:
 import numpy as np
 import matplotlib.pyplot as plt
 import xarray as xr
-import cartopy.crs as ccrs
 import argparse
 
 from datetime import date
 from datetime import datetime
 from netCDF4 import Dataset
 import netCDF4 as nc
-import os, fnmatch, glob, shutil
 
 def read_WWNC(file_path, time_vect, lon1, lat1):
     """Read netcdf _hs.nc file and return a matrix with dimension lon x lat of significant height of wind and swell waves in meters.

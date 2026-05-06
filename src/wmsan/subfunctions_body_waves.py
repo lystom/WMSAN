@@ -4,7 +4,7 @@
 #__author__ = "Lisa Tomasetto"
 #__copyright__ = "Copyright 2024, UGA"
 #__credits__ = ["Lisa Tomasetto"]
-#__version__ = "2025.0.0"
+#__version__ = "2026.0.1"
 #__maintainer__ = "Lisa Tomasetto"
 #__email__ = "lisa.tomasetto@univ-grenoble-alpes.fr"
 
@@ -57,6 +57,10 @@ plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
 plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
 plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
 plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+
+plt.rcParams['xtick.direction'] = 'inout'
+plt.rcParams['ytick.direction'] = 'inout'
+plt.rcParams['font.family'] = "sans-serif"
 ##################################################################################
 ############# DOWNLOAD WW3 FILES #################################################
 ##################################################################################

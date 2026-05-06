@@ -41,10 +41,12 @@ documentation/
 # Additionnal Directories #
 ###########################
 src/wmsan/.qodo/
+src/wmsan/primary_microseisms.py
 
 
 notebooks/body_waves/F/
 notebooks/body_waves/CCF/
+notebooks/body_waves/bathymetry.ipynb
 notebooks/rayleigh_waves/F/
 notebooks/rayleigh_waves/CCF/
 notebooks/rayleigh_waves/SDF/

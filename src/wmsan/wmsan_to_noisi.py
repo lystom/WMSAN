@@ -3,7 +3,7 @@
 # Preamble
 #__author__ = "Laura Ermert"
 #__credits__ = ["Laura Ermert"]
-#__version__ = "2025.0.0"
+#__version__ = "2026.0.1"
 #__maintainer__ = "Laura Ermert, Lisa Tomasetto"
 #__email__ = "lisa.tomasetto@univ-grenoble-alpes.fr"
 # Script by Laura Ermert
@@ -40,6 +40,25 @@ from sklearn.neighbors import BallTree
 # https://stackoverflow.com/questions/40845304/runtimewarning-numpy-dtype-size-changed-may-indicate-binary-incompatibility
 warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
+
+import matplotlib.pyplot as plt
+## Set font size parameters to make readable figures
+plt.style.use("ggplot")
+SMALL_SIZE = 18
+MEDIUM_SIZE = 22
+BIGGER_SIZE = 24
+
+plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
+plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+
+plt.rcParams['xtick.direction'] = 'inout'
+plt.rcParams['ytick.direction'] = 'inout'
+plt.rcParams['font.family'] = "sans-serif"
 
 ############################################################################
 ## Constants ##
