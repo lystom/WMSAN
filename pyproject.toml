@@ -5,20 +5,20 @@ build-backend = "hatchling.build"
 
 [project]
 name = "wmsan"
-version = "2025.0.0"
+version = "2026.0.1"
 authors = [
   { name="Lisa Tomasetto", email="lisa.tomasetto@gmail.com" },
 ]
 description = "Compute seismic sources of ambient noise using wave model hindcast outputs."
 readme = "README.md"
-requires-python = "<3.13"
+
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: MacOS",
     "Operating System :: Unix",
 ]
-dependencies = ["numpy<2.0.0",  # until obspy 1.5 is released
+dependencies = ["numpy",
                 "pandas",
                 "scipy",
                 "h5py",
@@ -32,7 +32,8 @@ dependencies = ["numpy<2.0.0",  # until obspy 1.5 is released
                 "obspy",
                 "datetime",
                 "ipykernel",
-                "notebook"
+                "notebook",
+                "scikit-learn" # for wmsan to noisi only
 ]
 
 [project.urls]
