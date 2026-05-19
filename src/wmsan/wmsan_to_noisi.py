@@ -40,6 +40,7 @@ from sklearn.neighbors import BallTree
 # https://stackoverflow.com/questions/40845304/runtimewarning-numpy-dtype-size-changed-may-indicate-binary-incompatibility
 warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
+from wmsan.constants import R_E
 
 import matplotlib.pyplot as plt
 ## Set font size parameters to make readable figures
@@ -59,10 +60,6 @@ plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 plt.rcParams['xtick.direction'] = 'inout'
 plt.rcParams['ytick.direction'] = 'inout'
 plt.rcParams['font.family'] = "sans-serif"
-
-############################################################################
-## Constants ##
-R = 6371008.7714
 
 ############################################################################
 ## Functions ##

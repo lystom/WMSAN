@@ -61,6 +61,8 @@ from tqdm import tqdm
 from obspy.taup import TauPyModel
 from obspy.taup.taup_geo import calc_dist as calc_dist
 
+from wmsan.constants import R_E
+
 plt.style.use("ggplot")
 SMALL_SIZE = 18
 MEDIUM_SIZE = 20
@@ -77,8 +79,7 @@ plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 plt.rcParams['xtick.direction'] = 'inout'
 plt.rcParams['ytick.direction'] = 'inout'
 plt.rcParams['font.family'] = "sans-serif"
-## Constants
-radius_earth = 6371e3  # Earth's Radius in meters
+
 
 ## Functions
 def apply_delay_f_domain(s,d=0.):
@@ -159,12 +160,12 @@ def taper_axisem_archive(time, distance, archive_name='../../data/NOISE_vertforc
     Returns:
         tapered_archive (numpy.ndarray): tapered archive
     """
-    R = radius_earth  # Radius of the Earth in m
+    
     dt = time[1] - time[0]
     fe = 1/dt
     tapered_archive = np.zeros((len(distance), len(time)))
     for i, dist in enumerate(distance):
-        dist_in_m = dist*np.pi*R/180
+        dist_in_m = dist*np.pi*R_E/180
         tmin = dist_in_m/umax
         tmax = dist_in_m/umin
         if tmax >= np.max(time):
@@ -393,7 +394,7 @@ def open_model(path_file_WW3, N, fe, lon_slice=slice(-180, 180), lat_slice=slice
     del ww3_data
     return force_spectrum**2  # in N^2.s
 
-def distance_to_station(lon, lat, lon_s=0, lat_s=90, radius_earth=6371e3):
+def distance_to_station(lon, lat, lon_s=0, lat_s=90, radius_earth=R_E):
     """Computes the distance of every point of the model to station of coordinates (lonS, latS)
     
     Args:

@@ -46,6 +46,7 @@ from calendar import monthrange
 from pyproj import Geod
 
 from wmsan.read_hs_p2l import read_p2l_from_url, read_p2l
+from wmsan.constants import R_E, LG10, RES_MOD 
 
 ## Set font size parameters to make readable figures
 plt.style.use("ggplot")
@@ -234,8 +235,6 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
     ww3_local_path = paths[1]
     path_longuet_higgins = paths[2]
     
-    # Constants
-    lg10 = log(10) # log of 10
     vs_crust = parameters[0]
     rho_s = parameters[1]
     f1 = parameters[2]
@@ -341,11 +340,11 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                 
                     ## Check units of the model, depends on version
                     if unit1 == 'log10(Pa2 m2 s+1E-12':
-                        p2l = np.exp(lg10*p2l)  - (1e-12-1e-16)
+                        p2l = np.exp(LG10*p2l)  - (1e-12-1e-16)
                     elif unit1 == 'log10(m4s+0.01':
-                        p2l = np.exp(lg10*p2l) - 0.009999
+                        p2l = np.exp(LG10*p2l) - 0.009999
                     elif unit1 == 'log10(Pa2 m2 s+1E-12)':
-                        p2l = np.exp(lg10*p2l)  - (1e-12-1e-16)
+                        p2l = np.exp(LG10*p2l)  - (1e-12-1e-16)
                 
                     ## Integral over a frequency band
                     if f1 < f2:
@@ -544,9 +543,6 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
         vmax = kwargs['vmax']
     else:
         vmax = -150
-    ## Constants
-    radius_earth = 6371e3  # m
-    res_mod = 0.5  # resolution ww3 model
     
     # open NetCDF for dims
     dates = pd.DatetimeIndex(dates)
@@ -564,7 +560,7 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
     # calculate spherical surface elementary elements
     msin = np.array([np.sin(np.pi/2 - np.radians(zlat))]).T
     ones = np.ones((1, len(zlon)))
-    dA = radius_earth**2*np.radians(res_mod)**2*np.dot(msin,ones)
+    dA = R_E**2*np.radians(RES_MOD)**2*np.dot(msin,ones)
     
     # Compute distance of each gridpoint to station
     geoid = Geod(ellps='WGS84')
@@ -572,7 +568,7 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
     lon_STA = np.ones((lon_grid.shape))*lon_sta
     lat_STA = np.ones((lat_grid.shape))*lat_sta
     _, _, distance_in_m = geoid.inv(lon_STA, lat_STA, lon_grid, lat_grid)
-    distance = distance_in_m*180/(np.pi*radius_earth)
+    distance = distance_in_m*180/(np.pi*R_E)
     # Initiate spectrogram
     n_dates = len(dates)
     spectro = np.zeros((n_dates, len(freq)))
@@ -597,8 +593,8 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
         F_delta = np.zeros((sdf_f.shape))
         for ifreq, f in enumerate(freq):
             SDF_freq = sdf_f.sel(frequency = freq[ifreq]).data
-            EXP = np.exp(-2*np.pi*f.data*np.radians(distance)*radius_earth/(U*Q))
-            denominateur = 1/(radius_earth*np.sin(np.radians(distance)))
+            EXP = np.exp(-2*np.pi*f.data*np.radians(distance)*R_E/(U*Q))
+            denominateur = 1/(R_E*np.sin(np.radians(distance)))
             facteur = EXP*denominateur
             F_delta[ifreq, :, :] = facteur.T*SDF_freq*dA*P
         disp_RMS = 10*np.log10(np.nansum(F_delta, axis = (1,2)))
@@ -646,11 +642,6 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
     
     ww3_local_path = paths[1]
     
-    # Constants
-    radius = 6.371*1e6 # radius of the earth in meters
-    lg10 = log(10) # log of 10
-    res_mod = radians(0.5) # angular resolution of the model
-    #
     f1 = parameters[0]
     f2 = parameters[1]
     ## Initialize variables
@@ -734,7 +725,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
     msin = np.array([np.sin(np.pi/2 - np.radians(zlat))]).T
     ones = np.ones((1, len(zlon)))
     res_mod = radians(abs(zlat[1] - zlat[0]))
-    dA = radius**2*res_mod**2*np.dot(msin,ones)
+    dA = R_E**2*res_mod**2*np.dot(msin,ones)
     
     ## Loop over dates
     YEAR = date_vec[0]
@@ -787,11 +778,11 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
                 
                     ## Check units of the model, depends on version
                     if unit1 == 'log10(Pa2 m2 s+1E-12':
-                        p2l = np.exp(lg10*p2l)  - (1e-12-1e-16)
+                        p2l = np.exp(LG10*p2l)  - (1e-12-1e-16)
                     elif unit1 == 'log10(m4s+0.01':
-                        p2l = np.exp(lg10*p2l) - 0.009999
+                        p2l = np.exp(LG10*p2l) - 0.009999
                     elif unit1 == 'log10(Pa2 m2 s+1E-12)':
-                        p2l = np.exp(lg10*p2l)  - (1e-12-1e-16)
+                        p2l = np.exp(LG10*p2l)  - (1e-12-1e-16)
     
                     ## Integral over a frequency band  
                     if f1 < f2:

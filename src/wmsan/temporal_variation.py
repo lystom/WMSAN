@@ -31,6 +31,7 @@ from calendar import monthrange
 
 from wmsan.synthetics import distance_to_station
 from wmsan.read_hs_p2l import read_p2l
+from wmsan.constants import R_E, LG10
 import matplotlib.pyplot as plt
 
 ## Set font size parameters to make readable figures
@@ -86,10 +87,6 @@ def rayleigh_wave_temporal_evolution(
     """
     ww3_local_path = paths[1]
 
-    # Constants
-    radius = 6.371*1e6 # radius of the earth in meters
-    lg10 = log(10) # log of 10
-    res_mod = radians(0.5) # angular resolution of the model
     #
     f1 = parameters[0]
     f2 = parameters[1]
@@ -157,7 +154,7 @@ def rayleigh_wave_temporal_evolution(
     msin = np.array([np.sin(np.pi/2 - np.radians(zlat))]).T
     ones = np.ones((1, len(zlon)))
     res_mod = radians(abs(zlat[1] - zlat[0]))
-    dA = radius**2*res_mod**2*np.dot(msin,ones)
+    dA = R_E**2*res_mod**2*np.dot(msin,ones)
     
     ## Loop over dates
     YEAR = date_vec[0]
@@ -213,11 +210,11 @@ def rayleigh_wave_temporal_evolution(
                 
                     ## Check units of the model, depends on version
                     if unit1 == 'log10(Pa2 m2 s+1E-12':
-                        p2l = np.exp(lg10*p2l)  - (1e-12-1e-16)
+                        p2l = np.exp(LG10*p2l)  - (1e-12-1e-16)
                     elif unit1 == 'log10(m4s+0.01':
-                        p2l = np.exp(lg10*p2l) - 0.009999
+                        p2l = np.exp(LG10*p2l) - 0.009999
                     elif unit1 == 'log10(Pa2 m2 s+1E-12)':
-                        p2l = np.exp(lg10*p2l)  - (1e-12-1e-16)
+                        p2l = np.exp(LG10*p2l)  - (1e-12-1e-16)
                         
                     ## Integral over a frequency band  
                     if f1 < f2:
@@ -320,11 +317,6 @@ def body_wave_temporal_evolution(
         temporal_variation (ndarray): An array containing the temporal variation of force of the seismic sources.
     """
     ww3_local_path = paths[1]
-
-    # Constants
-    radius = 6.371*1e6 # radius of the earth in meters
-    lg10 = log(10) # log of 10
-    res_mod = radians(0.5) # angular resolution of the model
     #
     f1 = parameters[0]
     f2 = parameters[1]
@@ -388,7 +380,7 @@ def body_wave_temporal_evolution(
     msin = np.array([np.sin(np.pi/2 - np.radians(zlat))]).T
     ones = np.ones((1, len(zlon)))
     res_mod = radians(abs(zlat[1] - zlat[0]))
-    dA = radius**2*res_mod**2*np.dot(msin,ones)
+    dA = R_E**2*res_mod**2*np.dot(msin,ones)
     
     ## Loop over dates
     YEAR = date_vec[0]
@@ -444,11 +436,11 @@ def body_wave_temporal_evolution(
                 
                     ## Check units of the model, depends on version
                     if unit1 == 'log10(Pa2 m2 s+1E-12':
-                        p2l = np.exp(lg10*p2l)  - (1e-12-1e-16)
+                        p2l = np.exp(LG10*p2l)  - (1e-12-1e-16)
                     elif unit1 == 'log10(m4s+0.01':
-                        p2l = np.exp(lg10*p2l) - 0.009999
+                        p2l = np.exp(LG10*p2l) - 0.009999
                     elif unit1 == 'log10(Pa2 m2 s+1E-12)':
-                        p2l = np.exp(lg10*p2l)  - (1e-12-1e-16)
+                        p2l = np.exp(LG10*p2l)  - (1e-12-1e-16)
                         
                     ## Integral over a frequency band  
                     if f1 < f2:

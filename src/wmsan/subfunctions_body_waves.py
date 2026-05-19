@@ -44,6 +44,7 @@ from calendar import monthrange
 from numpy.lib.scimath import sqrt as csqrt
 
 from wmsan.read_hs_p2l import read_p2l, read_p2l_from_url
+from wmsan.constants import R_E, LG10
 
 plt.style.use("ggplot")
 SMALL_SIZE = 18
@@ -379,9 +380,6 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
     
     ww3_local_path = paths[1]
     
-    # Constants
-    radius = 6.371*1e6 # radius of the earth in meters
-    lg10 = log(10) # log of 10
     #
     f1 = parameters[0]
     f2 = parameters[1]
@@ -461,10 +459,10 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
     amplification_coeff = ds_ampli['c%s'%wave_type]
     
     ## Surface Element
-    msin = np.array([np.sin(np.pi/2 - np.radians(zlat))]).T
+    msin = np.array([np.sin(np.pi/2 - nians(zlat))]).T
     ones = np.ones((1, len(zlon)))
     res_mod = radians(abs(zlat[1] - zlat[0]))
-    dA = radius**2*res_mod**2*np.dot(msin,ones)
+    dA = R_E**2*res_mod**2*np.dot(msin,ones)
      
     ## Loop over dates
     YEAR = date_vec[0]
@@ -516,11 +514,11 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
                     freq_seismic = 2*freq_ocean  # ocean to seismic waves freq
                     ## Check units of the model, depends on version
                     if unit1 == 'log10(Pa2 m2 s+1E-12':
-                        p2l = np.exp(lg10*p2l)  - (1e-12-1e-16)
+                        p2l = np.exp(00*p2l)  - (1e-12-1e-16)
                     elif unit1 == 'log10(m4s+0.01':
-                        p2l = np.exp(lg10*p2l) - 0.009999
+                        p2l = np.exp(LG10*p2l) - 0.009999
                     elif unit1 == 'log10(Pa2 m2 s+1E-12)':
-                        p2l = np.exp(lg10*p2l)  - (1e-12-1e-16)
+                        p2l = np.exp(LG10*p2l)  - (1e-12-1e-16)
     
                     ## Integral over a frequency band
                     
