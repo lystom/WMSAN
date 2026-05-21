@@ -59,7 +59,6 @@ from scipy.fftpack import fftfreq,ifft, fft
 from pyproj import Geod
 from tqdm import tqdm
 from obspy.taup import TauPyModel
-from obspy.taup.taup_geo import calc_dist as calc_dist
 
 from wmsan.constants import R_E
 
