@@ -459,7 +459,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
     amplification_coeff = ds_ampli['c%s'%wave_type]
     
     ## Surface Element
-    msin = np.array([np.sin(np.pi/2 - nians(zlat))]).T
+    msin = np.array([np.sin(np.pi/2 - np.radians(zlat))]).T
     ones = np.ones((1, len(zlon)))
     res_mod = radians(abs(zlat[1] - zlat[0]))
     dA = R_E**2*res_mod**2*np.dot(msin,ones)
