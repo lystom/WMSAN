@@ -50,6 +50,9 @@ notebooks/body_waves/bathymetry.ipynb
 notebooks/rayleigh_waves/F/
 notebooks/rayleigh_waves/CCF/
 notebooks/rayleigh_waves/SDF/
+notebooks/rayleigh_waves/SDF*/
+
+notebooks/rayleigh_waves/compare_C2.ipynb
 notebooks/AMPHAN/
 notebooks/G.PPTF/
 notebooks/COURSE_MUIFA/

@@ -80,10 +80,10 @@ def site_effect(z, f, zlat, zlon, vs_crust=2800, path='../../data/longuet_higgin
     """
 
     df = pd.read_csv('%s'%path, sep='\t', header =0, usecols=[0, 1, 2, 3, 4, 5, 6, 7], names = ['fh1', 'c1', 'fh2', 'c2', 'fh3', 'c3', 'fh4', 'c4'])
-    fc1 = interp1d(df.fh1, df.c1, kind='nearest', bounds_error=False, fill_value=0)
-    fc2 = interp1d(df.fh2, df.c2, kind='nearest', bounds_error=False, fill_value=0)
-    fc3 = interp1d(df.fh3, df.c3, kind='nearest', bounds_error=False, fill_value=0)
-    fc4 = interp1d(df.fh4, df.c4, kind='nearest', bounds_error=False, fill_value=0)
+    fc1 = interp1d(df.fh1, df.c1, kind='slinear', bounds_error=False, fill_value=0)
+    fc2 = interp1d(df.fh2, df.c2, kind='slinear', bounds_error=False, fill_value=0)
+    fc3 = interp1d(df.fh3, df.c3, kind='slinear', bounds_error=False, fill_value=0)
+    fc4 = interp1d(df.fh4, df.c4, kind='slinear', bounds_error=False, fill_value=0)
     try :
         n = len(f)
         x = z.shape[1]
@@ -92,11 +92,15 @@ def site_effect(z, f, zlat, zlon, vs_crust=2800, path='../../data/longuet_higgin
         for i, fq in enumerate(f):
             fh_v = 2*np.pi*fq*z/(vs_crust)
             C[i, :, :] = fc1(fh_v)**2 + fc2(fh_v)**2 + fc3(fh_v)**2 + fc4(fh_v)**2
+        C = np.squeeze(C)
+        ## C to xarray
+        C = xr.DataArray(C, dims=('frequency','latitude', 'longitude'), coords={'frequency': f,'latitude': zlat, 'longitude': zlon})
     except:
-        raise
-    C = np.squeeze(C)
-    ## C to xarray
-    C = xr.DataArray(C, dims=('frequency','latitude', 'longitude'), coords={'frequency': f,'latitude': zlat, 'longitude': zlon})
+        ## single frequency, f is a float
+        fh_v = 2*np.pi*f*z/(vs_crust)
+        C = fc1(fh_v)**2 + fc2(fh_v)**2 + fc3(fh_v)**2 + fc4(fh_v)**2
+        C = np.squeeze(C)
+        #C = xr.DataArray(C, dims=('latitude', 'longitude'), coords={'latitude': zlat, 'longitude': zlon})
     return C
 
 def download_ww3_local(YEAR, MONTH, ftp_path_to_files="ftp://ftp.ifremer.fr/ifremer/dataref/ww3/GLOBMULTI_ERA5_GLOBCUR_01/GLOB-30M/2020/FIELD_NC/", ww3_local_path= '../../data/ww3/', prefix = "WW3-GLOB-30M"):
@@ -209,7 +213,7 @@ def open_bathy(file_bathy = '../../data/WW3-GLOB-30M_202002_p2l.nc', refined_bat
     zlat = dpt1_mask.latitude
     return dpt1_mask, zlon, zlat
 
-def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [2.8, 2830, 1/12, 0.2], prefix = "WW3-GLOB-30M", **kwargs):
+def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [2.8, 2830, 1/12, 0.2], prefix = "WW3-GLOB-30M", c_file = None, **kwargs):
     """ Computes the power spectrum of the vertical displacement for Rayleigh waves in m.s.
     Saves in netcdf format if save argument True.
     Plots in PNG source maps of Rayleigh waves at given intervals depending on plot variables.
@@ -337,7 +341,10 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                     xfr = np.exp(np.log(freq_ocean[-1]/freq_ocean[0])/(nf-1))  # determines the xfr geometric progression factor
                     df = freq_ocean*0.5*(xfr-1/xfr)  # frequency interval in wave model times 2
                     freq_seismic = 2*freq_ocean  # ocean to seismic waves freq
-                
+
+                    ## Replace oceanic frequencies coordinates by seismic frequencies in p2l
+                    p2l = xr.DataArray(p2l, coords={'frequency': freq_seismic, 'latitude': lati, 'longitude': longi}, dims=["frequency", "latitude", "longitude"])
+
                     ## Check units of the model, depends on version
                     if unit1 == 'log10(Pa2 m2 s+1E-12':
                         p2l = np.exp(LG10*p2l)  - (1e-12-1e-16)
@@ -352,13 +359,30 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                         df = df[index_freq]
                         freq_seismic = freq_seismic[index_freq]
                         n_freq = len(df)
-                        Fp = p2l.sel(frequency = freq_ocean[index_freq], latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
-                        C = site_effect(dpt1, freq_seismic, zlat, zlon,vs_crust, path_longuet_higgins)  # computes Longuet-Higgins site effect given the bathymetryint(Fp.shape)
+                        Fp = p2l.sel(frequency = freq_seismic, latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
+                        ## Site effect
+                        if c_file is None:
+                            C = site_effect(dpt1, freq_seismic, zlat, zlon,vs_crust, path_longuet_higgins)  # computes Longuet-Higgins site effect given the bathymetryint(Fp.shape)
+                        else:
+                            try:
+                                ds_ampli = xr.open_dataarray(c_file).astype('float64')
+                                ## replace nan values by 0
+                                ds_ampli = ds_ampli.where(np.isfinite(ds_ampli), other=0)
+                                if extent[0] > extent[1]:
+                                    ds_ampli = ds_ampli.assign_coords(longitude=((360 + (ds_ampli.longitude % 360)) % 360))
+                                    ds_ampli = ds_ampli.roll(longitude=int(len(ds_ampli['longitude']) / 2), roll_coords=True)
+                                amplification_coeff = ds_ampli
+                                C = amplification_coeff.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
+                                C = C.sel(frequency = freq_seismic, method='nearest', tolerance=0.01, drop=True)
+                                #amplification_coeff = amplification_coeff.reindex_like(Fp, method='nearest', tolerance=0.01)
+                            except:
+                                print("Refined bathymetry grid \n PLEASE RUN amplification_coefficients.ipynb before running this script")
                         if C.shape == Fp.shape:
-                            SDF_f = 2*np.pi/((rho_s**2)*((vs_crust)**5))*C.data*Fp.data
+                            SDF_f = 2*np.pi*C.data*Fp.data/((rho_s**2)*((vs_crust)**5))
                         else:
                             Fp = Fp.interp(latitude = zlat, longitude = zlon)
-                            SDF_f = 2*np.pi/((rho_s**2)*((vs_crust)**5))*C.data*Fp.data
+                            C = C.interp(latitude = zlat, longitude = zlon)
+                            SDF_f = 2*np.pi*C.data*Fp.data/((rho_s**2)*((vs_crust)**5))
                         if SDF_f.shape != C.shape:
                             print('SDF shape', SDF_f.shape)
                             return
@@ -560,7 +584,7 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
     # calculate spherical surface elementary elements
     msin = np.array([np.sin(np.pi/2 - np.radians(zlat))]).T
     ones = np.ones((1, len(zlon)))
-    dA = R_E**2*np.radians(RES_MOD)**2*np.dot(msin,ones)
+    dA = R_E**2*RES_MOD**2*np.dot(msin,ones)
     
     # Compute distance of each gridpoint to station
     geoid = Geod(ellps='WGS84')

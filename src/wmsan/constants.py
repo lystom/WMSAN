@@ -9,7 +9,7 @@ Constants for the wmsan package.
 __version__ = "2026.1.0"
 
 ## General constants
-R_E = 6.371*1e6 # radius of the earth in meters
+R_E = 6371*1e3 # radius of the earth in meters
 LG10 = log(10) # log of 10
 g = 9.81
 
