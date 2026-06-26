@@ -42,6 +42,7 @@ documentation/
 ###########################
 src/wmsan/.qodo/
 src/wmsan/primary_microseisms.py
+src/wmsan/*.ipynb
 
 
 notebooks/body_waves/F/
@@ -60,6 +61,7 @@ notebooks/LA_BERARDE/
 notebooks/GILLIAN/
 notebooks/CAETANO/
 notebooks/ANTARCTICA/
+notebooks/RAPID_DAS/
 
 # Heavy Files #
 ###############

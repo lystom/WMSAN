@@ -15,6 +15,7 @@ g = 9.81
 
 
 ## Constants for the primary microseisms
+RHOW = 1026 # density of seawater in kg/m^3
 
 ## Constants for secondary microseisms
 RES_MOD = radians(0.5) # resolution of WW3 P2L model files
