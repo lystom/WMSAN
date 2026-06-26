@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Calendar Versioning](https://calver.org/).
 
+## [2026.0.1] - TBD
+### Added 
+
+
+### Changed
+- interpolate for C2 coefficients in subfunctions_rayleigh_waves.site_effect from nearest to slinear 
+- drp to drop_vars as it will be deprecated
+
+
+### Fixed Bugs
+- after year 2020 path for p2l files changes REF051020 instead of REF102040 : carefull note the same reflection coefficients
+- prefix also changes after 2020 WW3_GLOB30M instead of WW3-GLOB30M 
+
 ## [2026.0.0] - 2026-03-02
 ### Added 
 - Compatibility with Python 3.13

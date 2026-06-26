@@ -79,10 +79,10 @@ def site_effect(z, f, zlat, zlon, vs_crust=2800, path='../../data/longuet_higgin
     """
 
     df = pd.read_csv('%s'%path, sep='\t', header =0, usecols=[0, 1, 2, 3, 4, 5, 6, 7], names = ['fh1', 'c1', 'fh2', 'c2', 'fh3', 'c3', 'fh4', 'c4'])
-    fc1 = interp1d(df.fh1, df.c1, kind='nearest', bounds_error=False, fill_value=0)
-    fc2 = interp1d(df.fh2, df.c2, kind='nearest', bounds_error=False, fill_value=0)
-    fc3 = interp1d(df.fh3, df.c3, kind='nearest', bounds_error=False, fill_value=0)
-    fc4 = interp1d(df.fh4, df.c4, kind='nearest', bounds_error=False, fill_value=0)
+    fc1 = interp1d(df.fh1, df.c1, kind='slinear', bounds_error=False, fill_value=0)
+    fc2 = interp1d(df.fh2, df.c2, kind='slinear', bounds_error=False, fill_value=0)
+    fc3 = interp1d(df.fh3, df.c3, kind='slinear', bounds_error=False, fill_value=0)
+    fc4 = interp1d(df.fh4, df.c4, kind='slinear', bounds_error=False, fill_value=0)
     try :
         n = len(f)
         x = z.shape[1]
@@ -804,7 +804,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
                         Fp = Fp.where(np.isfinite(Fp))
                         Fp = Fp.assign_coords({"freq": freq_seismic})
                         Fp = Fp.swap_dims({"frequency": "freq"})
-                        Fp = Fp.drop('frequency')
+                        Fp = Fp.drop_vars('frequency')
                         Fp = Fp.rename({"freq": "frequency"})
                         res_p2l = abs(Fp.latitude[1] - Fp.latitude[0])
                         if res_bathy != res_p2l:

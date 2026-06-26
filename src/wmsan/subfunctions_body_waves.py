@@ -527,7 +527,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
                         n_freq = len(df)
                         Fp = p2l.sel(frequency = freq_ocean[index_freq], latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
                         Fp = Fp.where(np.isfinite(Fp))
-                        Fp = Fp.drop('frequency')
+                        Fp = Fp.drop_vars('frequency')
                         Fp.coords['frequency'] = freq_seismic
                         res_p2l = abs(Fp.longitude[1]-Fp.longitude[0])
                         if res_bathy != res_p2l:

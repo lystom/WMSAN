@@ -41,20 +41,16 @@ documentation/
 # Additionnal Directories #
 ###########################
 src/wmsan/.qodo/
+src/wmsan/primary_microseisms.py
 
-
-notebooks/body_waves/F/
-notebooks/body_waves/CCF/
-notebooks/rayleigh_waves/F/
-notebooks/rayleigh_waves/CCF/
-notebooks/rayleigh_waves/SDF/
-notebooks/AMPHAN/
-notebooks/G.PPTF/
-notebooks/COURSE_MUIFA/
-notebooks/LA_BERARDE/
-notebooks/GILLIAN/
-notebooks/CAETANO/
-notebooks/ANTARCTICA/
+notebooks/*
+!notebooks/rayleigh_waves/
+!notebooks/body_waves/
+notebooks/body_waves/F*/
+notebooks/body_waves/CCF*/
+notebooks/rayleigh_waves/F*/
+notebooks/rayleigh_waves/CCF*/
+notebooks/rayleigh_waves/SDF*/
 
 # Heavy Files #
 ###############
