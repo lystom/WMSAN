@@ -44,6 +44,9 @@ src/wmsan/.qodo/
 src/wmsan/primary_microseisms.py
 src/wmsan/*.ipynb
 
+notebooks/*
+!notebooks/body_waves/
+!notebooks/rayleigh_waves/
 
 notebooks/body_waves/F/
 notebooks/body_waves/CCF/
@@ -54,14 +57,6 @@ notebooks/rayleigh_waves/SDF/
 notebooks/rayleigh_waves/SDF*/
 
 notebooks/rayleigh_waves/compare_C2.ipynb
-notebooks/AMPHAN/
-notebooks/G.PPTF/
-notebooks/COURSE_MUIFA/
-notebooks/LA_BERARDE/
-notebooks/GILLIAN/
-notebooks/CAETANO/
-notebooks/ANTARCTICA/
-notebooks/RAPID_DAS/
 
 # Heavy Files #
 ###############

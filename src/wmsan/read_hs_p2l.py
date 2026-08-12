@@ -355,7 +355,8 @@ def read_p2l_from_url(url, time_vect, lon1 = (-180, 180), lat1 = (-90, 90)):
 
     return extract_ds.latitude, extract_ds.longitude, extract_ds.frequency, extract_ds.p2l, 'log10(Pa2 m2 s+1E-12)'
 
-def read_hs_from_url(url, time_vect, lon1 = (-180, 180), lat1 = (-90, 90)):
+def read_hs_from_url(time_vect, url='https://data-ww3.ifremer.fr/PROJECT/CCI/RUNS/GLOB-30M/' lon1 = (-180, 180), lat1 = (-90, 90)):
+    url = url+str(time_vect[0])
     lat_min, lat_max = lat1
     lon_min, lon_max = lon1
     #load netcdf from url as netCDF4 dataset
