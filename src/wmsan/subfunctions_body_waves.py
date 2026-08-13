@@ -420,7 +420,11 @@ def ampli(dpt1, f, rp=[], layers=[1500, 1000, 5540, 3200, 2500], theta = radians
 ################# LOOP WW3 SOURCES ###############################################
 ##################################################################################
 
+<<<<<<< HEAD
 def loop_ww3_sources(dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [1/12, 1/2], c_file = "../../data/cP.nc", prefix = "CCI_WW3-GLOB-30M_", **kwargs):
+=======
+def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [1/12, 1/2], c_file = "../../data/cP.nc", prefix = "CCI_WW3-GLOB-30M_", **kwargs):
+>>>>>>> edd6d12 (Update access to WW3 data files by opening files directly on server, not)
     """Compute the Proxy for the Source Force on the seafloor for a given wave type (P or S), given a path to the ww3 p2l file, the bathymetry, the wave type, the date vector and the spatial extent.
     Saves in netcdf format the Proxy for the Source Force for each frequency if save argument True.
     Plots in PNG source maps of P/S waves at given intervals depending on plot variables.
@@ -552,6 +556,11 @@ def loop_ww3_sources(dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [], [], []
             MONTH = np.array(MONTH)
         for imonth in MONTH:
             daymax = monthrange(iyear,imonth)[1]
+<<<<<<< HEAD
+=======
+            #filename_p2l = '%s/%s_%d%02d_p2l.nc'%(ww3_local_path, prefix, iyear, imonth)
+            #print("File WW3 ", filename_p2l)
+>>>>>>> edd6d12 (Update access to WW3 data files by opening files directly on server, not)
             try:
                 day = np.array(DAY)
                 if day[0] > day[-1]:
@@ -578,7 +587,11 @@ def loop_ww3_sources(dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [], [], []
                 for ih in HOUR:
                     
                     ## Open F_p3D 
+<<<<<<< HEAD
                     (lati, longi, freq_ocean, p2l, unit1) = read_p2l_from_url([iyear, imonth, iday, ih], prefix = prefix, lon = [lon_min, lon_max], lat = [lat_min, lat_max], url = url)
+=======
+                    (lati, longi, freq_ocean, p2l, unit1) = read_p2l_from_url([iyear, imonth, iday, ih], prefix = prefix, lon = [lon_min, lon_max], lat = [lat_min, lat_max])
+>>>>>>> edd6d12 (Update access to WW3 data files by opening files directly on server, not)
                     nf = len(freq_ocean)  # number of frequencies 
                     xfr = np.exp(np.log(freq_ocean[-1]/freq_ocean[0])/(nf-1))  # determines the xfr geometric progression factor
                     df = freq_ocean*0.5*(xfr-1/xfr)  # frequency interval in wave model times 2

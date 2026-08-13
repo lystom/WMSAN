@@ -280,7 +280,11 @@ def open_bathy(file_bathy = '../../data/LOPS_WW3-GLOB-30M_dataref_dpt.nc', refin
         
     return dpt1_mask, zlon, zlat
 
+<<<<<<< HEAD
 def loop_SDF(path_longuet_higgins, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [2800, 2830, 1/12, 0.2], prefix = "CCI_WW3-GLOB-30M_", c_file = None, **kwargs):
+=======
+def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [2.8, 2830, 1/12, 0.2], prefix = "CCI_WW3-GLOB-30M_", **kwargs):
+>>>>>>> edd6d12 (Update access to WW3 data files by opening files directly on server, not)
     """ Computes the power spectrum of the vertical displacement for Rayleigh waves in m.s.
     Saves in netcdf format if save argument True.
     Plots in PNG source maps of Rayleigh waves at given intervals depending on plot variables.
@@ -410,7 +414,11 @@ def loop_SDF(path_longuet_higgins, dpt1, zlon, zlat, date_vec=[2020, [], [], []]
                 for ih in HOUR:
                     
                     ## Open F_p3D 
+<<<<<<< HEAD
                     (lati, longi, freq_ocean, p2l, unit1) = read_p2l_from_url([iyear, imonth, iday, ih], prefix = prefix, lon = [lon_min, lon_max], lat = [lat_min, lat_max], url = url)
+=======
+                    (lati, longi, freq_ocean, p2l, unit1) = read_p2l_from_url([iyear, imonth, iday, ih], prefix = prefix, lon = [lon_min, lon_max], lat = [lat_min, lat_max])
+>>>>>>> edd6d12 (Update access to WW3 data files by opening files directly on server, not)
                     nf = len(freq_ocean)  # number of frequencies 
                     xfr = np.exp(np.log(freq_ocean[-1]/freq_ocean[0])/(nf-1))  # determines the xfr geometric progression factor
                     df = freq_ocean*0.5*(xfr-1/xfr)  # frequency interval in wave model times 2
@@ -718,7 +726,11 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
     return dates, freq, spectro
 
 
+<<<<<<< HEAD
 def loop_ww3_sources(dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [1/12, 1/2], c_file = '../../data/C.nc', prefix = 'CCI_WW3-GLOB-30M_', **kwargs):
+=======
+def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [1/12, 1/2], c_file = '../../data/C.nc', prefix = 'CCI_WW3-GLOB-30M_', **kwargs):
+>>>>>>> edd6d12 (Update access to WW3 data files by opening files directly on server, not)
     """ Compute Rayleigh waves sources from ww3 p2l file as the Proxy for the Source Force on the seafloor.
     Saves in netcdf format the Proxy for the Source Force for each frequency if save argument is True.
     Plots in PNG source maps of P or S waves at given intervals depending on plot variables.
@@ -851,6 +863,11 @@ def loop_ww3_sources(dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180
             MONTH = np.array(MONTH)
         for imonth in MONTH:
             daymax = monthrange(iyear,imonth)[1]
+<<<<<<< HEAD
+=======
+            #filename_p2l = '%s/%s_%d%02d_p2l.nc'%(ww3_local_path, prefix, iyear, imonth)
+            #print("File WW3 ", filename_p2l)
+>>>>>>> edd6d12 (Update access to WW3 data files by opening files directly on server, not)
             try:
                 day = np.array(DAY)
                 if day[0] > day[-1]:
@@ -877,7 +894,11 @@ def loop_ww3_sources(dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180
                 for ih in HOUR:
                     
                     ## Open F_p3D 
+<<<<<<< HEAD
                     (lati, longi, freq_ocean, p2l, unit1) = read_p2l_from_url([iyear, imonth, iday, ih], prefix = prefix, lon = [lon_min, lon_max], lat = [lat_min, lat_max], url = url)
+=======
+                    (lati, longi, freq_ocean, p2l, unit1) = read_p2l_from_url([iyear, imonth, iday, ih], prefix = prefix, lon = [lon_min, lon_max], lat = [lat_min, lat_max])
+>>>>>>> edd6d12 (Update access to WW3 data files by opening files directly on server, not)
                     nf = len(freq_ocean)  # number of frequencies 
                     xfr = np.exp(np.log(freq_ocean[-1]/freq_ocean[0])/(nf-1))  # determines the xfr geometric progression factor
                     df = freq_ocean*0.5*(xfr-1/xfr)  # frequency interval in wave model times 2

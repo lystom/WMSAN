@@ -8,6 +8,7 @@ from calendar import monthrange
 
 from wmsan.synthetics import distance_to_station
 from wmsan.read_hs_p2l import read_p2l_from_url
+<<<<<<< HEAD
 from wmsan.constants import R_E, LG10
 import matplotlib.pyplot as plt
 
@@ -28,6 +29,8 @@ plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 plt.rcParams['xtick.direction'] = 'inout'
 plt.rcParams['ytick.direction'] = 'inout'
 plt.rcParams['font.family'] = "sans-serif"
+=======
+>>>>>>> edd6d12 (Update access to WW3 data files by opening files directly on server, not)
 
 __author__ = "Reza D.D. Esfahani" # mod. by Lisa Tomasetto 07/2024
 __copyright__ = "Copyright 2024, UGA"
@@ -161,6 +164,11 @@ def rayleigh_wave_temporal_evolution(
             MONTH = np.array(MONTH)
         for imonth in MONTH:
             daymax = monthrange(iyear,imonth)[1]
+<<<<<<< HEAD
+=======
+            #filename_p2l = '%s/%s_%d%02d_p2l.nc'%(ww3_local_path, prefix, iyear, imonth)
+            #print("File WW3 ", filename_p2l)
+>>>>>>> edd6d12 (Update access to WW3 data files by opening files directly on server, not)
             try:
                 day = np.array(DAY)
                 if day[0] > day[-1]:
@@ -187,7 +195,11 @@ def rayleigh_wave_temporal_evolution(
                 for ih in HOUR:
                     
                     ## Open F_p3D 
+<<<<<<< HEAD
                     (lati, longi, freq_ocean, p2l, unit1) = read_p2l_from_url([iyear, imonth, iday, ih], prefix = prefix, lon = [lon_min, lon_max], lat = [lat_min, lat_max], url = url)
+=======
+                    (lati, longi, freq_ocean, p2l, unit1) = read_p2l_from_url([iyear, imonth, iday, ih], prefix = prefix, lon = [lon_min, lon_max], lat = [lat_min, lat_max])
+>>>>>>> edd6d12 (Update access to WW3 data files by opening files directly on server, not)
                     nf = len(freq_ocean)  # number of frequencies 
                     xfr = np.exp(np.log(freq_ocean[-1]/freq_ocean[0])/(nf-1))  # determines the xfr geometric progression factor
                     df = freq_ocean*0.5*(xfr-1/xfr)  # frequency interval in wave model times 2
@@ -383,6 +395,11 @@ def body_wave_temporal_evolution(
             MONTH = np.array(MONTH)
         for imonth in MONTH:
             daymax = monthrange(iyear,imonth)[1]
+<<<<<<< HEAD
+=======
+            #filename_p2l = '%s/%s_%d%02d_p2l.nc'%(ww3_local_path, prefix, iyear, imonth)
+            #print("File WW3 ", filename_p2l)
+>>>>>>> edd6d12 (Update access to WW3 data files by opening files directly on server, not)
             try:
                 day = np.array(DAY)
                 if day[0] > day[-1]:
