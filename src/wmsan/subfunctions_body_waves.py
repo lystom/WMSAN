@@ -61,7 +61,7 @@ plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 ############# DOWNLOAD WW3 FILES #################################################
 ##################################################################################
 
-def download_ww3_local(YEAR, MONTH, ftp_path_to_files="ftp://ftp.ifremer.fr/ifremer/dataref/ww3/GLOBMULTI_ERA5_GLOBCUR_01/GLOB-30M/2020/FIELD_NC/", ww3_local_path= '../../data/ww3/', prefix = "WW3-GLOB-30M"):
+def download_ww3_local(YEAR, MONTH, ftp_path_to_files="ftp://ftp.ifremer.fr/ifremer/dataref/ww3/GLOBMULTI_ERA5_GLOBCUR_01/GLOB-30M/2020/FIELD_NC/", ww3_local_path= '../../data/ww3/', prefix = "CCI_WW3-GLOB-30M_"):
     """Download WW3 files for a given year and month from the specified FTP path to a local directory.
     
     Args:
@@ -261,8 +261,8 @@ def bathy(z, f, p=[], m= [1500, 1000, 55400, 3200, 2500]):
                 c_P, c_S = bathy(z, f, p, m)
             else:
                 c_P, c_S = bathy(z, f[i], p, m)
-            cP[i, :] = cP[i, :] + np.trapz(abs(c_P)**2, x=a, axis=0)
-            cS[i, :] = cS[i, :] + np.trapz(abs(c_S)**2, x=a, axis=0)
+            cP[i, :] = cP[i, :] + np.trapezoid(abs(c_P)**2, x=a, axis=0)
+            cS[i, :] = cS[i, :] + np.trapezoid(abs(c_S)**2, x=a, axis=0)
         (cP, cS) = (csqrt(cP), csqrt(cS))
         return cP, cS
     
@@ -289,8 +289,8 @@ def bathy(z, f, p=[], m= [1500, 1000, 55400, 3200, 2500]):
 
         for i in range((np.size(f))):
                 a = np.arcsin(vpw*p)
-                cP[i, :] = cP[i, :] + np.trapz(abs(c_P[:,i,:])**2, x=a, axis=0)
-                cS[i, :] = cS[i, :] + np.trapz(abs(c_S[:, i, :])**2, x=a, axis=0)
+                cP[i, :] = cP[i, :] + np.trapezoid(abs(c_P[:,i,:])**2, x=a, axis=0)
+                cS[i, :] = cS[i, :] + np.trapezoid(abs(c_S[:, i, :])**2, x=a, axis=0)
         (cP, cS) = (np.squeeze(cP), np.squeeze(cS))
     Rpp, Tpp, Tps = subfcn_liquid_solid(p, [vpw, rhow], [vpc, vsc, rhoc])
     qw = csqrt(1/vpw**2 - p**2)
@@ -348,7 +348,7 @@ def ampli(dpt1, f, rp=[], layers=[1500, 1000, 5540, 3200, 2500], theta = radians
 ################# LOOP WW3 SOURCES ###############################################
 ##################################################################################
 
-def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [1/12, 1/2], c_file = "../../data/cP.nc", prefix = "WW3-GLOB-30M", **kwargs):
+def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [1/12, 1/2], c_file = "../../data/cP.nc", prefix = "CCI_WW3-GLOB-30M_", **kwargs):
     """Compute the Proxy for the Source Force on the seafloor for a given wave type (P or S), given a path to the ww3 p2l file, the bathymetry, the wave type, the date vector and the spatial extent.
     Saves in netcdf format the Proxy for the Source Force for each frequency if save argument True.
     Plots in PNG source maps of P/S waves at given intervals depending on plot variables.
@@ -477,8 +477,8 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
             MONTH = np.array(MONTH)
         for imonth in MONTH:
             daymax = monthrange(iyear,imonth)[1]
-            filename_p2l = '%s/%s_%d%02d_p2l.nc'%(ww3_local_path, prefix, iyear, imonth)
-            print("File WW3 ", filename_p2l)
+            #filename_p2l = '%s/%s_%d%02d_p2l.nc'%(ww3_local_path, prefix, iyear, imonth)
+            #print("File WW3 ", filename_p2l)
             try:
                 day = np.array(DAY)
                 if day[0] > day[-1]:
@@ -505,7 +505,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
                 for ih in HOUR:
                     
                     ## Open F_p3D 
-                    (lati, longi, freq_ocean, p2l, unit1) = read_p2l(filename_p2l, [iyear, imonth, iday, ih], [extent[0], extent[1]], [lat_min, lat_max])
+                    (lati, longi, freq_ocean, p2l, unit1) = read_p2l_from_url([iyear, imonth, iday, ih], prefix = prefix, lon = [lon_min, lon_max], lat = [lat_min, lat_max])
                     nf = len(freq_ocean)  # number of frequencies 
                     xfr = np.exp(np.log(freq_ocean[-1]/freq_ocean[0])/(nf-1))  # determines the xfr geometric progression factor
                     df = freq_ocean*0.5*(xfr-1/xfr)  # frequency interval in wave model times 2

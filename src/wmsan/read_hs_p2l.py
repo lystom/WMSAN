@@ -338,16 +338,18 @@ def read_p2l(file_path, time_vect, lon1 = (-180, 180), lat1 = (-90, 90)):
     ds.close()
     return lat, lon, freq, p2l, unit1
 
-def read_p2l_from_url(url, time_vect, lon1 = (-180, 180), lat1 = (-90, 90)):
+def read_p2l_from_url(time_vect, prefix = 'CCI_WW3-GLOB-30M_', url='https://data-ww3.ifremer.fr/PROJECT/CCI/RUNS/GLOB-30M/', lon = (-180, 180), lat = (-90, 90)):
+    url = url+str(time_vect[0])+ '/FIELD_NC/' +prefix+str(time_vect[0])+str(time_vect[1]).zfill(2)+'_p2l.nc'
+
     try:
         nc_ds.close()
         extract_ds.close()
     except:
         pass
-    (lat_min, lat_max) = lat1
-    (lon_min, lon_max) = lon1
+    (lat_min, lat_max) = lat
+    (lon_min, lon_max) = lon
     #load netcdf from url as netCDF4 dataset
-    ncfile = nc.Dataset(url+'#mode=bytes')
+    ncfile = Dataset(url+'#mode=bytes')
     #load netCDF4 dataset as Xarray dataset
     nc_ds = xr.open_dataset(xr.backends.NetCDF4DataStore(ncfile))
     # extract from Jan 1st to Jan 5th included
@@ -357,19 +359,18 @@ def read_p2l_from_url(url, time_vect, lon1 = (-180, 180), lat1 = (-90, 90)):
 
     return extract_ds.latitude, extract_ds.longitude, extract_ds.frequency, extract_ds.p2l, 'log10(Pa2 m2 s+1E-12)'
 
-def read_hs_from_url(url, time_vect, lon1 = (-180, 180), lat1 = (-90, 90)):
-    lat_min, lat_max = lat1
-    lon_min, lon_max = lon1
+def read_hs_from_url(time_vect, prefix = 'CCI_WW3-GLOB-30M_', url='https://data-ww3.ifremer.fr/PROJECT/CCI/RUNS/GLOB-30M/', lon = (-180, 180), lat = (-90, 90)):
+    url = url+str(time_vect[0])+ '/FIELD_NC/' +prefix+str(time_vect[0])+str(time_vect[1]).zfill(2)+'.nc'
+    lat_min, lat_max = lat
+    lon_min, lon_max = lon
     #load netcdf from url as netCDF4 dataset
-    ncfile = nc.Dataset(url+'#mode=bytes')
+    ncfile = Dataset(url+'#mode=bytes')
     #load netCDF4 dataset as Xarray dataset
-    nc_ds = xr.open_dataset(xr.backends.NetCDF4DataStore(ncfile))
-    # extract from Jan 1st to Jan 5th included
+    nc_ds = xr.open_dataset(xr.backends.NetCDF4DataStore(ncfile)).hs
     extract_ds=nc_ds.sel(time=datetime(time_vect[0], time_vect[1], time_vect[2], time_vect[3]))
     extract_ds = extract_ds.sel(latitude=slice(lat_min, lat_max), longitude=slice(lon_min, lon_max))
-    extract_ds=extract_ds[['hs']]
     nc_ds.close()
-    return extract_ds.hs
+    return extract_ds
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog= 'ReadHSP2L',
@@ -390,14 +391,23 @@ if __name__ == "__main__":
     time_vect = [year, month, day, hour]
     lon_min, lon_max = -180, 180
     lat_min, lat_max = -90, 90
-    
+    freq_to_plot = 0.1  # frequency to plot in Hz
     ## read p2l.nc
-    ### xarray
+    
+    lat, lon, freq, p2l, unit1 = read_p2l_from_url([2010, 1, 1, 6])
+    fig = plt.figure(figsize=(9,6))
+    ax = plt.axes(projection=ccrs.Robinson())
+    ax.coastlines()
+    ax.gridlines()
+    plt.pcolormesh(lon, lat, p2l.sel(frequency=freq_to_plot, method='nearest'), shading='auto', cmap='plasma', rasterized=True, transform=ccrs.PlateCarree())
+    plt.colorbar(label=unit1)
+    plt.show()
 
-    
-    url = 'https://data-ww3.ifremer.fr/PROJECT/SISMO/CCI_ERA5_CERSATSSMI_MERCAREA_T702_NOREF_05/2010/FIELD_NC/CCI_WW3-GLOB-30M_201001_p2l.nc'
-    
-    lat, lon, freq, p2l, unit1 = read_p2l_from_url(url, [2010, 1, 1, 6])
-    
-    plt.pcolormesh(lon, lat, p2l.sel(frequency=0.1, method='nearest'))
+    ## read hs.nc
+    hs = read_hs_from_url([2010, 1, 1, 6])
+    fig = plt.figure(figsize=(9,6))
+    ax = plt.axes(projection=ccrs.Robinson())
+    ax.coastlines()
+    ax.gridlines()
+    hs.plot(ax=ax, transform=ccrs.PlateCarree(), cbar_kwargs={'shrink': 0.4})
     plt.show()

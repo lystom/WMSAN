@@ -7,12 +7,12 @@ from datetime import datetime
 from calendar import monthrange
 
 from wmsan.synthetics import distance_to_station
-from wmsan.read_hs_p2l import read_p2l
+from wmsan.read_hs_p2l import read_p2l_from_url
 
 __author__ = "Reza D.D. Esfahani" # mod. by Lisa Tomasetto 07/2024
 __copyright__ = "Copyright 2024, UGA"
 __credits__ = ["Reza D.D. Esfahani"] 
-__version__ = "2025.0.0"
+__version__ = "2026.1.0"
 __maintainer__ = "Lisa Tomasetto"
 __email__ = "lisa.tomasetto@univ-grenoble-alpes.fr"
 
@@ -28,7 +28,7 @@ def rayleigh_wave_temporal_evolution(
         extent: list= [-180, 180, -90, 90],
         parameters: list = [1/12, 1/2],
         c_file: str = '../../data/C.nc',
-        prefix: str = 'WW3-GLOB-30M',
+        prefix: str = 'CCI_WW3-GLOB-30M_',
         **kwargs
         ) -> tuple:
     
@@ -144,8 +144,8 @@ def rayleigh_wave_temporal_evolution(
             MONTH = np.array(MONTH)
         for imonth in MONTH:
             daymax = monthrange(iyear,imonth)[1]
-            filename_p2l = '%s/%s_%d%02d_p2l.nc'%(ww3_local_path, prefix, iyear, imonth)
-            print("File WW3 ", filename_p2l)
+            #filename_p2l = '%s/%s_%d%02d_p2l.nc'%(ww3_local_path, prefix, iyear, imonth)
+            #print("File WW3 ", filename_p2l)
             try:
                 day = np.array(DAY)
                 if day[0] > day[-1]:
@@ -172,7 +172,7 @@ def rayleigh_wave_temporal_evolution(
                 for ih in HOUR:
                     
                     ## Open F_p3D 
-                    (lati, longi, freq_ocean, p2l, unit1) = read_p2l(filename_p2l, [iyear, imonth, iday, ih], [extent[0], extent[1]], [lat_min, lat_max])
+                    (lati, longi, freq_ocean, p2l, unit1) = read_p2l_from_url([iyear, imonth, iday, ih], prefix = prefix, lon = [lon_min, lon_max], lat = [lat_min, lat_max])
                     nf = len(freq_ocean)  # number of frequencies 
                     xfr = np.exp(np.log(freq_ocean[-1]/freq_ocean[0])/(nf-1))  # determines the xfr geometric progression factor
                     df = freq_ocean*0.5*(xfr-1/xfr)  # frequency interval in wave model times 2
@@ -375,8 +375,8 @@ def body_wave_temporal_evolution(
             MONTH = np.array(MONTH)
         for imonth in MONTH:
             daymax = monthrange(iyear,imonth)[1]
-            filename_p2l = '%s/%s_%d%02d_p2l.nc'%(ww3_local_path, prefix, iyear, imonth)
-            print("File WW3 ", filename_p2l)
+            #filename_p2l = '%s/%s_%d%02d_p2l.nc'%(ww3_local_path, prefix, iyear, imonth)
+            #print("File WW3 ", filename_p2l)
             try:
                 day = np.array(DAY)
                 if day[0] > day[-1]:
@@ -403,7 +403,7 @@ def body_wave_temporal_evolution(
                 for ih in HOUR:
                     
                     ## Open F_p3D 
-                    (lati, longi, freq_ocean, p2l, unit1) = read_p2l(filename_p2l, [iyear, imonth, iday, ih], [extent[0], extent[1]], [lat_min, lat_max])
+                    (lati, longi, freq_ocean, p2l, unit1) = read_p2l_from_url([iyear, imonth, iday, ih], prefix = prefix, lon = [lon_min, lon_max], lat = [lat_min, lat_max])
                     nf = len(freq_ocean)  # number of frequencies 
                     xfr = np.exp(np.log(freq_ocean[-1]/freq_ocean[0])/(nf-1))  # determines the xfr geometric progression factor
                     df = freq_ocean*0.5*(xfr-1/xfr)  # frequency interval in wave model times 2
