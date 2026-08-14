@@ -44,7 +44,6 @@ site/
 
 !/notebooks/
 /notebooks/**
-
 !notebooks/rayleigh_waves/
 !notebooks/rayleigh_waves/**
 !notebooks/body_waves/
