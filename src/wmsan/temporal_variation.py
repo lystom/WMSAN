@@ -8,6 +8,26 @@ from calendar import monthrange
 
 from wmsan.synthetics import distance_to_station
 from wmsan.read_hs_p2l import read_p2l_from_url
+from wmsan.constants import R_E, LG10
+import matplotlib.pyplot as plt
+
+## Set font size parameters to make readable figures
+plt.style.use("ggplot")
+SMALL_SIZE = 18
+MEDIUM_SIZE = 22
+BIGGER_SIZE = 24
+
+plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
+plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+
+plt.rcParams['xtick.direction'] = 'inout'
+plt.rcParams['ytick.direction'] = 'inout'
+plt.rcParams['font.family'] = "sans-serif"
 
 __author__ = "Reza D.D. Esfahani" # mod. by Lisa Tomasetto 07/2024
 __copyright__ = "Copyright 2024, UGA"
@@ -20,7 +40,6 @@ __email__ = "lisa.tomasetto@univ-grenoble-alpes.fr"
 def rayleigh_wave_temporal_evolution(
         lon_s: float, 
         lat_s: float,
-        paths: str,
         dpt1: np.ndarray,
         zlon: np.ndarray,
         zlat: np.ndarray,
@@ -51,13 +70,6 @@ def rayleigh_wave_temporal_evolution(
         time (list): A list of datetime objects representing the time of each computation.
         temporal_variation (ndarray): An array containing the temporal variation of force of the seismic sources.
     """
-    ww3_local_path = paths[1]
-
-    # Constants
-    radius = 6.371*1e6 # radius of the earth in meters
-    lg10 = log(10) # log of 10
-    res_mod = radians(0.5) # angular resolution of the model
-    #
     f1 = parameters[0]
     f2 = parameters[1]
     
@@ -124,7 +136,7 @@ def rayleigh_wave_temporal_evolution(
     msin = np.array([np.sin(np.pi/2 - np.radians(zlat))]).T
     ones = np.ones((1, len(zlon)))
     res_mod = radians(abs(zlat[1] - zlat[0]))
-    dA = radius**2*res_mod**2*np.dot(msin,ones)
+    dA = R_E**2*res_mod**2*np.dot(msin,ones)
     
     ## Loop over dates
     YEAR = date_vec[0]
@@ -144,8 +156,6 @@ def rayleigh_wave_temporal_evolution(
             MONTH = np.array(MONTH)
         for imonth in MONTH:
             daymax = monthrange(iyear,imonth)[1]
-            #filename_p2l = '%s/%s_%d%02d_p2l.nc'%(ww3_local_path, prefix, iyear, imonth)
-            #print("File WW3 ", filename_p2l)
             try:
                 day = np.array(DAY)
                 if day[0] > day[-1]:
@@ -180,11 +190,11 @@ def rayleigh_wave_temporal_evolution(
                 
                     ## Check units of the model, depends on version
                     if unit1 == 'log10(Pa2 m2 s+1E-12':
-                        p2l = np.exp(lg10*p2l)  - (1e-12-1e-16)
+                        p2l = np.exp(LG10*p2l)  - (1e-12-1e-16)
                     elif unit1 == 'log10(m4s+0.01':
-                        p2l = np.exp(lg10*p2l) - 0.009999
+                        p2l = np.exp(LG10*p2l) - 0.009999
                     elif unit1 == 'log10(Pa2 m2 s+1E-12)':
-                        p2l = np.exp(lg10*p2l)  - (1e-12-1e-16)
+                        p2l = np.exp(LG10*p2l)  - (1e-12-1e-16)
                         
                     ## Integral over a frequency band  
                     if f1 < f2:
@@ -255,7 +265,6 @@ def rayleigh_wave_temporal_evolution(
 def body_wave_temporal_evolution(
         lon_s: float, 
         lat_s: float,
-        paths: str,
         dpt1: np.ndarray,
         zlon: np.ndarray,
         zlat: np.ndarray,
@@ -263,7 +272,7 @@ def body_wave_temporal_evolution(
         extent: list= [-180, 180, -90, 90],
         parameters: list = [1/12, 1/2],
         c_file: str = '../../data/cP.nc',
-        prefix: str = 'WW3-GLOB-30M',
+        prefix: str = 'CCI_WW3-GLOB-30M_',
         **kwargs
         ) -> tuple:
     
@@ -286,12 +295,6 @@ def body_wave_temporal_evolution(
         time (list): A list of datetime objects representing the time of each computation.
         temporal_variation (ndarray): An array containing the temporal variation of force of the seismic sources.
     """
-    ww3_local_path = paths[1]
-
-    # Constants
-    radius = 6.371*1e6 # radius of the earth in meters
-    lg10 = log(10) # log of 10
-    res_mod = radians(0.5) # angular resolution of the model
     #
     f1 = parameters[0]
     f2 = parameters[1]
@@ -355,7 +358,7 @@ def body_wave_temporal_evolution(
     msin = np.array([np.sin(np.pi/2 - np.radians(zlat))]).T
     ones = np.ones((1, len(zlon)))
     res_mod = radians(abs(zlat[1] - zlat[0]))
-    dA = radius**2*res_mod**2*np.dot(msin,ones)
+    dA = R_E**2*res_mod**2*np.dot(msin,ones)
     
     ## Loop over dates
     YEAR = date_vec[0]
@@ -375,8 +378,6 @@ def body_wave_temporal_evolution(
             MONTH = np.array(MONTH)
         for imonth in MONTH:
             daymax = monthrange(iyear,imonth)[1]
-            #filename_p2l = '%s/%s_%d%02d_p2l.nc'%(ww3_local_path, prefix, iyear, imonth)
-            #print("File WW3 ", filename_p2l)
             try:
                 day = np.array(DAY)
                 if day[0] > day[-1]:
@@ -411,11 +412,11 @@ def body_wave_temporal_evolution(
                 
                     ## Check units of the model, depends on version
                     if unit1 == 'log10(Pa2 m2 s+1E-12':
-                        p2l = np.exp(lg10*p2l)  - (1e-12-1e-16)
+                        p2l = np.exp(LG10*p2l)  - (1e-12-1e-16)
                     elif unit1 == 'log10(m4s+0.01':
-                        p2l = np.exp(lg10*p2l) - 0.009999
+                        p2l = np.exp(LG10*p2l) - 0.009999
                     elif unit1 == 'log10(Pa2 m2 s+1E-12)':
-                        p2l = np.exp(lg10*p2l)  - (1e-12-1e-16)
+                        p2l = np.exp(LG10*p2l)  - (1e-12-1e-16)
                         
                     ## Integral over a frequency band  
                     if f1 < f2:

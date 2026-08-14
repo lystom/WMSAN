@@ -5,14 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Calendar Versioning](https://calver.org/).
 
-## [2026.0.1] - TBD
+## [2026.1.0] - TBD
 ### Added 
-
+- a constant file to be called in every scripts from the src/wmsan/ folder to homogenize constants values
 
 ### Changed
-- interpolate for C2 coefficients in subfunctions_rayleigh_waves.site_effect from nearest to slinear 
-- drp to drop_vars as it will be deprecated
+- Update access to WW3 data files by opening files directly on server, not downloading .nc files anymore.
 
+- change version to 2026.1.0.
+- modify read_hs_from_url and read_p2l_from_url functions
+- add these functions as default for the whole package when opening p2l or hs field.
+- modify and run test notebooks
+- modify the same notebooks in the documentation
+
+- interpolate for C2 coefficients in subfunctions_rayleigh_waves.site_effect from nearest to slinear 
+- drop to drop_vars as it will be deprecated
 
 ### Fixed Bugs
 - after year 2020 path for p2l files changes REF051020 instead of REF102040 : carefull note the same reflection coefficients
@@ -64,7 +71,7 @@ so that all parameters are in SI units (m/s instead of km/s).
 - dependency to dask in install, README, pyproject.toml
 - modified try except in subfunction_rayleigh_waves.spectrogram
 
-## [2014.1.2] - 2024-10-07
+## [2024.1.2] - 2024-10-07
 
 ### Added
 
@@ -73,7 +80,7 @@ so that all parameters are in SI units (m/s instead of km/s).
 - add exponential decay to temporal_variations.
 
 
-## [2014.1.1] - 2024-09-09
+## [2024.1.1] - 2024-09-09
 
 ### Added
 
@@ -87,7 +94,7 @@ so that all parameters are in SI units (m/s instead of km/s).
 ### Deprecated
 
 
-## [2014.1.0] - 2024-08-26
+## [2024.1.0] - 2024-08-26
 
 ### Added
 
@@ -99,7 +106,7 @@ so that all parameters are in SI units (m/s instead of km/s).
 - Increase patch in version 2024.1.0
 
 
-## [2014.0.6] - 2024-08-26
+## [2024.0.6] - 2024-08-26
 
 ### Added
 
@@ -128,7 +135,7 @@ so that all parameters are in SI units (m/s instead of km/s).
 
 - 
 
-## [2014.0.5] - 2024-08-09
+## [2024.0.5] - 2024-08-09
 
 ### Added
 
@@ -142,7 +149,7 @@ so that all parameters are in SI units (m/s instead of km/s).
 - Update for Numpy 2.0.1
 - Update minimum python version and OS
 
-## [2014.0.4] - 2024-08-09
+## [2024.0.4] - 2024-08-09
 
 ### Added
 
@@ -157,14 +164,14 @@ so that all parameters are in SI units (m/s instead of km/s).
 
 - Correct typos for documentation
 
-## [2014.0.3] - 2024-08-09
+## [2024.0.3] - 2024-08-09
 
 ### Added
 
 - Build docstrings for documentation.
 - Update Documentation with mkdocs
 
-## [2014.0.2] - 2024-08-09
+## [2024.0.2] - 2024-08-09
 
 ### Added
 

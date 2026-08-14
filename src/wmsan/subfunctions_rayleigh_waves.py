@@ -2,11 +2,11 @@
 
 # Preamble
 #__author__ = "Lisa Tomasetto"
-#__copyright__ = "Copyright 2024, UGA"
+#__copyright__ = "Copyright 2026, CNES"
 #__credits__ = ["Lisa Tomasetto"]
-#__version__ = "2025.0.0"
+#__version__ = "2026.1.0"
 #__maintainer__ = "Lisa Tomasetto"
-#__email__ = "lisa.tomasetto@univ-grenoble-alpes.fr"
+#__email__ = "lisa.tomasetto@partenaire-exterieur.ifremer.fr"
 
 """This set of functions aims at modeling the ambient noise source in the secondary microseismic range for Rayleigh waves.
 Using Longuet-Higgins site effect and WW3 model.
@@ -19,11 +19,11 @@ It contains six functions:
 
 - `open_bathy(file_bathy, refined_bathymetry, extent)`: open the bathymetry file. Either default WW3 grid, ETOPOv2 or a custom grid.
 
-- `loop_SDF(paths, dpt1, zlon, zlat, date_vec, extent, parameters, prefix, **kwargs)`: Computes the power spectrum of the vertical displacement for Rayleigh waves in m.s.
+- `loop_SDF(path_longuet_higgins, zlon, zlat, date_vec, extent, parameters, prefix, **kwargs)`: Computes the power spectrum of the vertical displacement for Rayleigh waves in m.s.
 
 - `spectrogram(path_netcdf, dates, lon_sta, lat_sta, Q, U, P, **kwargs)`: Plot spectrogram for a given path to NetCDF file, dates, and optional station coordinates and constants.
 
-- `loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type, date_vec, extent, parameters, c_file, prefix, **kwargs)`: compute the Proxy for the Source Force.
+- `loop_ww3_sources(dpt1, zlon, zlat, wave_type, date_vec, extent, parameters, c_file, prefix, **kwargs)`: compute the Proxy for the Source Force.
 """
 ##################################################################################
 
@@ -46,6 +46,7 @@ from calendar import monthrange
 from pyproj import Geod
 
 from wmsan.read_hs_p2l import read_p2l_from_url, read_p2l
+from wmsan.constants import R_E, LG10, RES_MOD
 
 ## Set font size parameters to make readable figures
 plt.style.use("ggplot")
@@ -63,7 +64,7 @@ plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
 plt.rcParams['xtick.direction'] = 'inout'
 plt.rcParams['ytick.direction'] = 'inout'
-plt.rcParams['font.family'] = "serif"
+plt.rcParams['font.family'] = "sans-serif"
 
 def site_effect(z, f, zlat, zlon, vs_crust=2800, path='../../data/longuet_higgins.txt'):
     """ Bathymetry secondary microseismic excitation coefficients (Rayleigh waves).
@@ -91,11 +92,14 @@ def site_effect(z, f, zlat, zlon, vs_crust=2800, path='../../data/longuet_higgin
         for i, fq in enumerate(f):
             fh_v = 2*np.pi*fq*z/(vs_crust)
             C[i, :, :] = fc1(fh_v)**2 + fc2(fh_v)**2 + fc3(fh_v)**2 + fc4(fh_v)**2
+        C = np.squeeze(C)
+        ## C to xarray
+        C = xr.DataArray(C, dims=('frequency','latitude', 'longitude'), coords={'frequency': f,'latitude': zlat, 'longitude': zlon})
     except:
-        raise
-    C = np.squeeze(C)
-    ## C to xarray
-    C = xr.DataArray(C, dims=('frequency','latitude', 'longitude'), coords={'frequency': f,'latitude': zlat, 'longitude': zlon})
+        ## single frequency, f is a float
+        fh_v = 2*np.pi*f*z/(vs_crust)
+        C = fc1(fh_v)**2 + fc2(fh_v)**2 + fc3(fh_v)**2 + fc4(fh_v)**2
+        C = np.squeeze(C)
     return C
 
 def download_ww3_local(YEAR, MONTH, ftp_path_to_files="ftp://ftp.ifremer.fr/ifremer/dataref/ww3/GLOBMULTI_ERA5_GLOBCUR_01/GLOB-30M/2020/FIELD_NC/", ww3_local_path= '../../data/ww3/', prefix = "CCI_WW3-GLOB-30M_"):
@@ -208,13 +212,13 @@ def open_bathy(file_bathy = '../../data/WW3-GLOB-30M_202002_p2l.nc', refined_bat
     zlat = dpt1_mask.latitude
     return dpt1_mask, zlon, zlat
 
-def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [2.8, 2830, 1/12, 0.2], prefix = "CCI_WW3-GLOB-30M_", **kwargs):
+def loop_SDF(path_longuet_higgins, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [2.8, 2830, 1/12, 0.2], prefix = "CCI_WW3-GLOB-30M_", c_file = None, **kwargs):
     """ Computes the power spectrum of the vertical displacement for Rayleigh waves in m.s.
     Saves in netcdf format if save argument True.
     Plots in PNG source maps of Rayleigh waves at given intervals depending on plot variables.
     
     Args:
-        paths (list): [file_bathy, ww3_local_path, longuet_higgins_file]: paths of additional files bathymetry, ww3 p2l file and Longuet-Higgins coefficients
+        path_longuet_higgins (str): path to the Longuet-Higgins coefficients file
         dpt1 (xarray.DataArray): bathymetry grid in m (depth) with dimensions lon x lat
         zlon (xarray.DataArray): longitude of bathymetry file (°)
         zlat (xarray.DataArray): latitude of bathymetry file (°)
@@ -222,6 +226,7 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
         extent (list, optional): spatial extent format [lon_min, lon_max, lat_min, lat_max].
         parameters (list, optional): parameters vS of the crust, density of the crust, minimum frequency, maximum frequency.
         prefix (str, optional): prefix of the ww3 p2l file.
+        c_file (str, optional): path to the amplification coefficient file.
         plot (bool, optional): plot maps.
         plot_hourly (bool, optional):  plot maps every 3-hours default = False.
         plot_daily (bool, optional): plot maps every day, default = False.
@@ -230,12 +235,7 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
         save (bool, optional): save 3-hourly matrix, default = False.
    
     """
-    
-    ww3_local_path = paths[1]
-    path_longuet_higgins = paths[2]
-    
-    # Constants
-    lg10 = log(10) # log of 10
+
     vs_crust = parameters[0]
     rho_s = parameters[1]
     f1 = parameters[2]
@@ -278,6 +278,10 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
         vmax = kwargs['vmax']
     else:
         vmax = 1e-16
+    if 'path_out' in kwargs:
+        path_out = kwargs['path_out']
+    else:
+        path_out = './SDF/'
     
     ## Adapt latitude and longitude to values in parameters file
     lon_min, lon_max, lat_min, lat_max = extent[0], extent[1], extent[2], extent[3]
@@ -338,14 +342,17 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                     xfr = np.exp(np.log(freq_ocean[-1]/freq_ocean[0])/(nf-1))  # determines the xfr geometric progression factor
                     df = freq_ocean*0.5*(xfr-1/xfr)  # frequency interval in wave model times 2
                     freq_seismic = 2*freq_ocean  # ocean to seismic waves freq
-                
+
+                    ## Replace oceanic frequencies coordinates by seismic frequencies in p2l
+                    p2l = xr.DataArray(p2l, coords={'frequency': freq_seismic, 'latitude': lati, 'longitude': longi}, dims=["frequency", "latitude", "longitude"])
+
                     ## Check units of the model, depends on version
                     if unit1 == 'log10(Pa2 m2 s+1E-12':
-                        p2l = np.exp(lg10*p2l)  - (1e-12-1e-16)
+                        p2l = np.exp(LG10*p2l)  - (1e-12-1e-16)
                     elif unit1 == 'log10(m4s+0.01':
-                        p2l = np.exp(lg10*p2l) - 0.009999
+                        p2l = np.exp(LG10*p2l) - 0.009999
                     elif unit1 == 'log10(Pa2 m2 s+1E-12)':
-                        p2l = np.exp(lg10*p2l)  - (1e-12-1e-16)
+                        p2l = np.exp(LG10*p2l)  - (1e-12-1e-16)
                 
                     ## Integral over a frequency band
                     if f1 < f2:
@@ -353,13 +360,31 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                         df = df[index_freq]
                         freq_seismic = freq_seismic[index_freq]
                         n_freq = len(df)
-                        Fp = p2l.sel(frequency = freq_ocean[index_freq], latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
-                        C = site_effect(dpt1, freq_seismic, zlat, zlon,vs_crust, path_longuet_higgins)  # computes Longuet-Higgins site effect given the bathymetryint(Fp.shape)
+                        Fp = p2l.sel(frequency = freq_seismic, latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
+                        ## Site effect
+                        if c_file is None:
+                            C = site_effect(dpt1, freq_seismic, zlat, zlon,vs_crust, path_longuet_higgins)  # computes Longuet-Higgins site effect given the bathymetryint(Fp.shape)
+                        else:
+                            try:
+                                ds_ampli = xr.open_dataarray(c_file).astype('float64')
+                                ## replace nan values by 0
+                                ds_ampli = ds_ampli.where(np.isfinite(ds_ampli), other=0)
+                                if extent[0] > extent[1]:
+                                    ds_ampli = ds_ampli.assign_coords(longitude=((360 + (ds_ampli.longitude % 360)) % 360))
+                                    ds_ampli = ds_ampli.roll(longitude=int(len(ds_ampli['longitude']) / 2), roll_coords=True)
+                                amplification_coeff = ds_ampli
+                                C = amplification_coeff.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
+                                C = C.sel(frequency = freq_seismic, method='nearest', tolerance=0.01, drop=True)
+                                #amplification_coeff = amplification_coeff.reindex_like(Fp, method='nearest', tolerance=0.01)
+                            except:
+                                print("Refined bathymetry grid \n PLEASE RUN amplification_coefficients.ipynb before running this script")
                         if C.shape == Fp.shape:
-                            SDF_f = 2*np.pi/((rho_s**2)*((vs_crust)**5))*C.data*Fp.data
+                            SDF_f = 2*np.pi*C.data*Fp.data/((rho_s**2)*((vs_crust)**5))
                         else:
                             Fp = Fp.interp(latitude = zlat, longitude = zlon)
-                            SDF_f = 2*np.pi/((rho_s**2)*((vs_crust)**5))*C.data*Fp.data
+                            C = C.interp(latitude = zlat, longitude = zlon)
+                            SDF_f = 2*np.pi*C.data*Fp.data/((rho_s**2)*((vs_crust)**5))
+
                         if SDF_f.shape != C.shape:
                             print('SDF shape', SDF_f.shape)
                             return
@@ -389,7 +414,6 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                     ## Save SDF to file
                     if save :
                         ## Save SDF to file
-                        path_out = './SDF/'
                         if not os.path.exists(path_out):
                             print('make directory '+path_out)
                             os.makedirs(path_out)  
@@ -439,7 +463,7 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                         gl.yformatter = LATITUDE_FORMATTER
                         ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
                         SDF_plot.plot(ax=ax, transform=ccrs.PlateCarree(), vmin=vmin, vmax=vmax,  cbar_kwargs={'label':'SDF (m)', 'orientation': 'horizontal'}) 
-                        plt.savefig('rayleigh_SDF_%d%02d%02dT%02d.png'%(iyear, imonth, iday, ih), dpi = 300, bbox_inches='tight')
+                        plt.savefig(path_out+'rayleigh_SDF_%d%02d%02dT%02d.png'%(iyear, imonth, iday, ih), dpi = 300, bbox_inches='tight')
                         plt.close(fig)
                     ## Sum SDF
                     if plot_daily :
@@ -463,7 +487,7 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                     gl.yformatter = LATITUDE_FORMATTER
                     ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
                     SDF_plot.plot(ax=ax, transform=ccrs.PlateCarree(), vmin = vmin, vmax = vmax, cbar_kwargs={'label':'SDF (m)', 'orientation': 'horizontal'})
-                    plt.savefig('rayleigh_SDF_daily_%d%02d%02d.png'%(iyear, imonth, iday), dpi = 300, bbox_inches='tight')
+                    plt.savefig(path_out+'rayleigh_SDF_daily_%d%02d%02d.png'%(iyear, imonth, iday), dpi = 300, bbox_inches='tight')
                     plt.close(fig)
                     SDF_daily = np.zeros((dpt1.shape))
                     
@@ -481,7 +505,7 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                 gl.yformatter = LATITUDE_FORMATTER
                 ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
                 SDF_plot.plot(ax=ax, transform=ccrs.PlateCarree(), vmin = vmin, vmax = vmax, cbar_kwargs={'label':'SDF (m)','orientation': 'horizontal'})
-                plt.savefig('rayleigh_SDF_monthly_%d%02d.png'%(iyear, imonth), dpi = 300, bbox_inches='tight')
+                plt.savefig(path_out+'rayleigh_SDF_monthly_%d%02d.png'%(iyear, imonth), dpi = 300, bbox_inches='tight')
                 #plt.show()
                 plt.close(fig)
                 SDF_monthly = np.zeros((dpt1.shape))
@@ -500,7 +524,7 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
             ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
             fig.suptitle('Source of the power spectrum for the vertical displacement.Rayleigh waves.\nFrequency %.3f-%.3f Hz %d'%(f1, f2, iyear))
             SDF_plot.plot(ax=ax, transform=ccrs.PlateCarree(), vmin = vmin, vmax = vmax, cbar_kwargs={'label':'SDF (m)','orientation': 'horizontal'})
-            plt.savefig('rayleigh_SDF_yearly_%d.png'%(iyear), dpi = 300, bbox_inches='tight')
+            plt.savefig(path_out+'rayleigh_SDF_yearly_%d.png'%(iyear), dpi = 300, bbox_inches='tight')
             plt.close('all')
             SDF_yearly = np.zeros((dpt1.shape))
         plt.close('all')
@@ -544,9 +568,10 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
         vmax = kwargs['vmax']
     else:
         vmax = -150
-    ## Constants
-    radius_earth = 6371e3  # m
-    res_mod = 0.5  # resolution ww3 model
+    if 'path_out' in kwargs:
+        path_out = kwargs['path_out']
+    else:
+        path_out = './'
     
     # open NetCDF for dims
     dates = pd.DatetimeIndex(dates)
@@ -564,7 +589,7 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
     # calculate spherical surface elementary elements
     msin = np.array([np.sin(np.pi/2 - np.radians(zlat))]).T
     ones = np.ones((1, len(zlon)))
-    dA = radius_earth**2*np.radians(res_mod)**2*np.dot(msin,ones)
+    dA = R_E**2*RES_MOD**2*np.dot(msin,ones)
     
     # Compute distance of each gridpoint to station
     geoid = Geod(ellps='WGS84')
@@ -572,7 +597,7 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
     lon_STA = np.ones((lon_grid.shape))*lon_sta
     lat_STA = np.ones((lat_grid.shape))*lat_sta
     _, _, distance_in_m = geoid.inv(lon_STA, lat_STA, lon_grid, lat_grid)
-    distance = distance_in_m*180/(np.pi*radius_earth)
+    distance = distance_in_m*180/(np.pi*R_E)
     # Initiate spectrogram
     n_dates = len(dates)
     spectro = np.zeros((n_dates, len(freq)))
@@ -597,8 +622,8 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
         F_delta = np.zeros((sdf_f.shape))
         for ifreq, f in enumerate(freq):
             SDF_freq = sdf_f.sel(frequency = freq[ifreq]).data
-            EXP = np.exp(-2*np.pi*f.data*np.radians(distance)*radius_earth/(U*Q))
-            denominateur = 1/(radius_earth*np.sin(np.radians(distance)))
+            EXP = np.exp(-2*np.pi*f.data*np.radians(distance)*R_E/(U*Q))
+            denominateur = 1/(R_E*np.sin(np.radians(distance)))
             facteur = EXP*denominateur
             F_delta[ifreq, :, :] = facteur.T*SDF_freq*dA*P
         disp_RMS = 10*np.log10(np.nansum(F_delta, axis = (1,2)))
@@ -616,12 +641,12 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
     plt.gcf().autofmt_xdate()
     plt.ylim(0.1, 0.5)
     plt.colorbar(label='$10.log_{10}(m^2/Hz) [dB]$')
-    plt.savefig('spectrogram_ww3.png', dpi=300, bbox_inches='tight')
+    plt.savefig(path_out + 'spectrogram_ww3.png', dpi=300, bbox_inches='tight')
     plt.close('all')
     return dates, freq, spectro
 
 
-def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [1/12, 1/2], c_file = '../../data/C.nc', prefix = 'CCI_WW3-GLOB-30M_', **kwargs):
+def loop_ww3_sources(dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [1/12, 1/2], c_file = '../../data/C.nc', prefix = 'CCI_WW3-GLOB-30M_', **kwargs):
     """ Compute Rayleigh waves sources from ww3 p2l file as the Proxy for the Source Force on the seafloor.
     Saves in netcdf format the Proxy for the Source Force for each frequency if save argument is True.
     Plots in PNG source maps of P or S waves at given intervals depending on plot variables.
@@ -644,14 +669,6 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
         save (bool, optional): save 3-hourly matrix.
 
     """
-    
-    ww3_local_path = paths[1]
-    
-    # Constants
-    radius = 6.371*1e6 # radius of the earth in meters
-    lg10 = log(10) # log of 10
-    res_mod = radians(0.5) # angular resolution of the model
-    #
     f1 = parameters[0]
     f2 = parameters[1]
     ## Initialize variables
@@ -691,6 +708,11 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
         vmax = kwargs['vmax']
     else:
         vmax = 1e10
+        
+    if 'path_out' in kwargs:
+        path_out = kwargs['path_out']
+    else:
+        path_out = './F/'
         
     ## Adapt latitude and longitude to values in parameters file
     lon_min = extent[0]
@@ -735,7 +757,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
     msin = np.array([np.sin(np.pi/2 - np.radians(zlat))]).T
     ones = np.ones((1, len(zlon)))
     res_mod = radians(abs(zlat[1] - zlat[0]))
-    dA = radius**2*res_mod**2*np.dot(msin,ones)
+    dA = R_E**2*res_mod**2*np.dot(msin,ones)
     
     ## Loop over dates
     YEAR = date_vec[0]
@@ -752,8 +774,6 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
             MONTH = np.array(MONTH)
         for imonth in MONTH:
             daymax = monthrange(iyear,imonth)[1]
-            #filename_p2l = '%s/%s_%d%02d_p2l.nc'%(ww3_local_path, prefix, iyear, imonth)
-            #print("File WW3 ", filename_p2l)
             try:
                 day = np.array(DAY)
                 if day[0] > day[-1]:
@@ -788,11 +808,11 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
                 
                     ## Check units of the model, depends on version
                     if unit1 == 'log10(Pa2 m2 s+1E-12':
-                        p2l = np.exp(lg10*p2l)  - (1e-12-1e-16)
+                        p2l = np.exp(LG10*p2l)  - (1e-12-1e-16)
                     elif unit1 == 'log10(m4s+0.01':
-                        p2l = np.exp(lg10*p2l) - 0.009999
+                        p2l = np.exp(LG10*p2l) - 0.009999
                     elif unit1 == 'log10(Pa2 m2 s+1E-12)':
-                        p2l = np.exp(lg10*p2l)  - (1e-12-1e-16)
+                        p2l = np.exp(LG10*p2l)  - (1e-12-1e-16)
     
                     ## Integral over a frequency band  
                     if f1 < f2:
@@ -835,7 +855,6 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
 
                     ## Save F to file
                     if save :
-                        path_out = './F/'
                         if not os.path.exists(path_out):
                             print("make directory %s"%path_out)
                             os.makedirs(path_out)
@@ -885,7 +904,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
                         gl.yformatter = LATITUDE_FORMATTER
                         ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
                         F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'$F_{prox}$ (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax)
-                        plt.savefig('F_R_%d%02d%02dT%02d.png'%(iyear, imonth, iday, ih), dpi = 300, bbox_inches='tight')
+                        plt.savefig(path_out+'F_R_%d%02d%02dT%02d.png'%(iyear, imonth, iday, ih), dpi = 300, bbox_inches='tight')
                         plt.close('all')
                     ## Sum F
                     if plot_daily :
@@ -910,7 +929,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
                     gl.yformatter = LATITUDE_FORMATTER
                     ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
                     F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax),
-                    plt.savefig('F_R_%d%02d%02d.png'%(iyear, imonth, iday), dpi = 300, bbox_inches='tight')
+                    plt.savefig(path_out+'F_R_%d%02d%02d.png'%(iyear, imonth, iday), dpi = 300, bbox_inches='tight')
                     plt.close(fig)
                     F_daily = np.zeros((dpt1.shape))
                     
@@ -929,7 +948,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
                 gl.yformatter = LATITUDE_FORMATTER
                 ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
                 F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax)
-                plt.savefig('F_R_%d%02d.png'%(iyear, imonth), dpi = 300, bbox_inches='tight')
+                plt.savefig(path_out+'F_R_%d%02d.png'%(iyear, imonth), dpi = 300, bbox_inches='tight')
                 plt.close(fig)
                 F_monthly = np.zeros((dpt1.shape))
                     
@@ -949,7 +968,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
             gl.yformatter = LATITUDE_FORMATTER
             ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
             F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax)
-            plt.savefig('F_R_%d.png'%(iyear), dpi = 300, bbox_inches='tight')
+            plt.savefig(path_out+'F_R_%d.png'%(iyear), dpi = 300, bbox_inches='tight')
             plt.close(fig)
             F_daily = np.zeros((dpt1.shape))
             F_yearly = np.zeros((dpt1.shape))

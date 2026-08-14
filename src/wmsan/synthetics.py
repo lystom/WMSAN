@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
 #__author__ = "Lisa Tomasetto"
-#__copyright__ = "Copyright 2024, UGA"
+#__copyright__ = "Copyright 2026, CNES"
 #__credits__ = ["Lisa Tomasetto"]
-#__version__ = "2025.0.0"
+#__version__ = "2026.1.0"
 #__maintainer__ = "Lisa Tomasetto"
-#__email__ = "lisa.tomasetto@univ-grenoble-alpes.fr"
+#__email__ = "lisa.tomasetto@partenaire-exterieur.ifremer.fr"
 
 """Functions to generate synthetic cross-correlations from secondary microseisms sources.
 
@@ -59,11 +59,24 @@ from scipy.fftpack import fftfreq,ifft, fft
 from pyproj import Geod
 from tqdm import tqdm
 from obspy.taup import TauPyModel
-from obspy.taup.taup_geo import calc_dist as calc_dist
+from wmsan.constants import R_E
 
 plt.style.use("ggplot")
-## Constants
-radius_earth = 6371e3  # Earth's Radius in meters
+SMALL_SIZE = 18
+MEDIUM_SIZE = 20
+BIGGER_SIZE = 22
+
+plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
+plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+
+plt.rcParams['xtick.direction'] = 'inout'
+plt.rcParams['ytick.direction'] = 'inout'
+plt.rcParams['font.family'] = "sans-serif"
 
 ## Functions
 def apply_delay_f_domain(s,d=0.):
@@ -126,7 +139,6 @@ def open_axisem(dist, path_file_axisem='../../data/NOISE_vertforce_dirac_0-ak135
         trace_synth = h5_file['L']['SYNTH%03d.00'%(dist*10)][comp][:].astype(np.single)
         h5_file.close()
     except:
-        raise
         print('File not found', path_file_axisem, "Download the file from: https://zenodo.org/records/11126562 \n", "Save in ../data/")
         return None
     return trace_synth
@@ -144,12 +156,11 @@ def taper_axisem_archive(time, distance, archive_name='../../data/NOISE_vertforc
     Returns:
         tapered_archive (numpy.ndarray): tapered archive
     """
-    R = radius_earth  # Radius of the Earth in m
     dt = time[1] - time[0]
     fe = 1/dt
     tapered_archive = np.zeros((len(distance), len(time)))
     for i, dist in enumerate(distance):
-        dist_in_m = dist*np.pi*R/180
+        dist_in_m = dist*np.pi*R_E/180
         tmin = dist_in_m/umax
         tmax = dist_in_m/umin
         if tmax >= np.max(time):
@@ -353,33 +364,15 @@ def open_model(path_file_WW3, N, fe, lon_slice=slice(-180, 180), lat_slice=slice
     """
 
     ## Open WW3 model
-    print(path_file_WW3)
-
-    # Try multiple backends to avoid NetCDF4/HDF5 ABI issues
-    ds = None
-    open_errors = []
-    for eng in ("h5netcdf", "netcdf4"):
-        try:
-            ds = xr.open_dataset(path_file_WW3, engine=eng)
-            break
-        except Exception as e:
-            open_errors.append(f"{eng}: {e}")
-            ds = None
-    if ds is None:
-        raise OSError(f"Failed to open {path_file_WW3} with available backends. Errors: " + " | ".join(open_errors))
-    try:
-        if lon_slice.start > lon_slice.stop:
-            ds = ds.assign_coords(longitude=((360 + (ds.longitude % 360)) % 360))
-            ds = ds.roll(longitude=int(len(ds['longitude']) / 2), roll_coords=True)
-            lon_slice = slice(((360 + (lon_slice.start % 360)) % 360), ((360 + (lon_slice.stop % 360)) % 360))
-        ww3_data = ds["F_f"].sel(longitude=lon_slice, latitude=lat_slice)
-        ww3_data = ww3_data.dropna(dim='longitude', how='all').dropna(dim='latitude', how='all')
-        ww3_data = ww3_data.where(np.isfinite(ww3_data))
-        
-        ## Load data into memory to avoid file handle issues
-        ww3_data = ww3_data.load()
-    finally:
-        ds.close()
+    ds = xr.open_dataset(path_file_WW3)
+    if lon_slice.start > lon_slice.stop:
+        ds = ds.assign_coords(longitude=((360 + (ds.longitude % 360)) % 360))
+        ds = ds.roll(longitude=int(len(ds['longitude']) / 2),roll_coords=True)
+        lon_slice = slice(((360 + (lon_slice.start % 360)) % 360), ((360 + (lon_slice.stop % 360)) % 360))
+    ww3_data = ds.F_f.sel(longitude=lon_slice, latitude=lat_slice)
+    ww3_data = ww3_data.dropna(dim='longitude', how='all').dropna(dim='latitude', how='all')
+    del ds
+    ww3_data = ww3_data.where(np.isfinite(ww3_data))
 
     ## Spectrum Output
     if N%2 == 0:
@@ -396,7 +389,7 @@ def open_model(path_file_WW3, N, fe, lon_slice=slice(-180, 180), lat_slice=slice
     del ww3_data
     return force_spectrum**2  # in N^2.s
 
-def distance_to_station(lon, lat, lon_s=0, lat_s=90, radius_earth=6371e3):
+def distance_to_station(lon, lat, lon_s=0, lat_s=90, radius_earth=R_E):
     """Computes the distance of every point of the model to station of coordinates (lonS, latS)
     
     Args:

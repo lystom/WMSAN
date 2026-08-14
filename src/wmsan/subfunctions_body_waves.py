@@ -2,11 +2,11 @@
 
 # Preamble
 #__author__ = "Lisa Tomasetto"
-#__copyright__ = "Copyright 2024, UGA"
+#__copyright__ = "Copyright 2026, CNES"
 #__credits__ = ["Lisa Tomasetto"]
-#__version__ = "2025.0.0"
+#__version__ = "2026.1.0"
 #__maintainer__ = "Lisa Tomasetto"
-#__email__ = "lisa.tomasetto@univ-grenoble-alpes.fr"
+#__email__ = "lisa.tomasetto@partenaire-exterieur.ifremer.fr"
 
 
 """This set of functions aims at modeling the ambient noise source in the secondary microseismic range for body waves.
@@ -24,7 +24,7 @@ It contains six functions:
 
 - `ampli(dpt1, f, rp, layers, theta)`: compute the amplification coefficient for P and S waves integrated over a range of takeoff angles.
 
-- `loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type, date_vec, extent, parameters, c_file, prefix, **kwargs)`: compute the proxy for the source force amplitude.
+- `loop_ww3_sources(dpt1, zlon, zlat, wave_type, date_vec, extent, parameters, c_file, prefix, **kwargs)`: compute the proxy for the source force amplitude.
 """
 ##################################################################################
 
@@ -44,6 +44,7 @@ from calendar import monthrange
 from numpy.lib.scimath import sqrt as csqrt
 
 from wmsan.read_hs_p2l import read_p2l, read_p2l_from_url
+from wmsan.constants import R_E, LG10
 
 plt.style.use("ggplot")
 SMALL_SIZE = 18
@@ -57,6 +58,10 @@ plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
 plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
 plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
 plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+
+plt.rcParams['xtick.direction'] = 'inout'
+plt.rcParams['ytick.direction'] = 'inout'
+plt.rcParams['font.family'] = "sans-serif"
 ##################################################################################
 ############# DOWNLOAD WW3 FILES #################################################
 ##################################################################################
@@ -348,13 +353,13 @@ def ampli(dpt1, f, rp=[], layers=[1500, 1000, 5540, 3200, 2500], theta = radians
 ################# LOOP WW3 SOURCES ###############################################
 ##################################################################################
 
-def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [1/12, 1/2], c_file = "../../data/cP.nc", prefix = "CCI_WW3-GLOB-30M_", **kwargs):
+def loop_ww3_sources(dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [1/12, 1/2], c_file = "../../data/cP.nc", prefix = "CCI_WW3-GLOB-30M_", **kwargs):
     """Compute the Proxy for the Source Force on the seafloor for a given wave type (P or S), given a path to the ww3 p2l file, the bathymetry, the wave type, the date vector and the spatial extent.
     Saves in netcdf format the Proxy for the Source Force for each frequency if save argument True.
     Plots in PNG source maps of P/S waves at given intervals depending on plot variables.
 
     Args:
-        paths (list): [file_bathy, ww3_local_path]: paths of additional files bathymetry, ww3 p2l file
+        output_path (str): path to the output directory
         dpt1 (xarray.ndarray): bathymetry grid in m (depth) with dimensions lon x lat
         zlon (xarray.ndarray): longitude of bathymetry file (°)
         zlat (xarray.ndarray): latitude of bathymetry file (°)
@@ -372,13 +377,6 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
         save (bool, optional): save 3-hourly matrix, default: False
 
     """
-    
-    ww3_local_path = paths[1]
-    
-    # Constants
-    radius = 6.371*1e6 # radius of the earth in meters
-    lg10 = log(10) # log of 10
-    #
     f1 = parameters[0]
     f2 = parameters[1]
     ## Initialize variables
@@ -418,6 +416,11 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
         vmax = kwargs['vmax']
     else:
         vmax = 1e10
+
+    if 'path_output' in kwargs:
+        path_output = kwargs['path_output']
+    else:
+        path_output = './'
 
     ## Adapt latitude and longitude to values in parameters file
     lon_min = extent[0]
@@ -477,8 +480,6 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
             MONTH = np.array(MONTH)
         for imonth in MONTH:
             daymax = monthrange(iyear,imonth)[1]
-            #filename_p2l = '%s/%s_%d%02d_p2l.nc'%(ww3_local_path, prefix, iyear, imonth)
-            #print("File WW3 ", filename_p2l)
             try:
                 day = np.array(DAY)
                 if day[0] > day[-1]:
@@ -512,11 +513,11 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
                     freq_seismic = 2*freq_ocean  # ocean to seismic waves freq
                     ## Check units of the model, depends on version
                     if unit1 == 'log10(Pa2 m2 s+1E-12':
-                        p2l = np.exp(lg10*p2l)  - (1e-12-1e-16)
+                        p2l = np.exp(LG10*p2l)  - (1e-12-1e-16)
                     elif unit1 == 'log10(m4s+0.01':
-                        p2l = np.exp(lg10*p2l) - 0.009999
+                        p2l = np.exp(LG10*p2l) - 0.009999
                     elif unit1 == 'log10(Pa2 m2 s+1E-12)':
-                        p2l = np.exp(lg10*p2l)  - (1e-12-1e-16)
+                        p2l = np.exp(LG10*p2l)  - (1e-12-1e-16)
     
                     ## Integral over a frequency band
                     
@@ -555,7 +556,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
 
                     ## Save F to file
                     if save:
-                        path_out = './F/'
+                        path_out += '/F/'
                         if not os.path.exists(path_out):
                             print("make directory %s"%path_out)
                             os.makedirs(path_out)
@@ -609,7 +610,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
                             F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax)
                         else:
                             F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax)
-                        plt.savefig('F_%s_%d%02d%02dT%02d.png'%(wave_type, iyear, imonth, iday, ih), dpi = 300, bbox_inches='tight')
+                        plt.savefig(path_out + '/F_%s_%d%02d%02dT%02d.png'%(wave_type, iyear, imonth, iday, ih), dpi = 300, bbox_inches='tight')
                         plt.close('all')
                     ## Sum F
                     if plot_daily :
@@ -637,7 +638,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
                         F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax),
                     else:
                         F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax)
-                    plt.savefig('F_%s_%d%02d%02d.png'%(wave_type, iyear, imonth, iday), dpi = 300, bbox_inches='tight')
+                    plt.savefig(path_out + '/F_%s_%d%02d%02d.png'%(wave_type, iyear, imonth, iday), dpi = 300, bbox_inches='tight')
                     plt.close('all')
                     F_daily = np.zeros((dpt1.shape))
                     
@@ -659,7 +660,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
                     F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax)
                 else:
                     F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax)
-                plt.savefig('F_%s_%d%02d.png'%(wave_type, iyear, imonth), dpi = 300, bbox_inches='tight')
+                plt.savefig(path_out + '/F_%s_%d%02d.png'%(wave_type, iyear, imonth), dpi = 300, bbox_inches='tight')
                 plt.close('all')
                 F_monthly = np.zeros((dpt1.shape))
                     
@@ -681,7 +682,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [],
                 F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax)
             else:
                 F_plot.plot(ax=ax, transform=ccrs.PlateCarree(),  cbar_kwargs={'label':'F (N)', 'orientation': 'horizontal'}, vmin=vmin, vmax=vmax)
-            plt.savefig('F_%s_%d.png'%(wave_type, iyear), dpi = 300, bbox_inches='tight')
+            plt.savefig(path_out + '/F_%s_%d.png'%(wave_type, iyear), dpi = 300, bbox_inches='tight')
             plt.close('all')
             F_daily = np.zeros((dpt1.shape))
             F_yearly = np.zeros((dpt1.shape))

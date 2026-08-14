@@ -2,11 +2,11 @@
 
 # Preamble
 #__author__ = "Lisa Tomasetto"
-#__copyright__ = "Copyright 2024, UGA"
+#__copyright__ = "Copyright 2026, CNES"
 #__credits__ = ["Lisa Tomasetto"]
-#__version__ = "2025.0.0"
+#__version__ = "2026.1.0"
 #__maintainer__ = "Lisa Tomasetto"
-#__email__ = "lisa.tomasetto@univ-grenoble-alpes.fr"
+#__email__ = "lisa.tomasetto@partenaire-exterieur.ifremer.fr"
 #__status__ = "Production"
 
 """This set of functions reads the netcdf files _hs.nc and _p2l.nc produced by WW3.
@@ -36,8 +36,6 @@ import argparse
 from datetime import date
 from datetime import datetime
 from netCDF4 import Dataset
-#import netCDF4 as nc
-import os, fnmatch, glob, shutil
 
 def read_WWNC(file_path, time_vect, lon1, lat1):
     """Read netcdf _hs.nc file and return a matrix with dimension lon x lat of significant height of wind and swell waves in meters.
