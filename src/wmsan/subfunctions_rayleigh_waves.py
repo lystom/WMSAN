@@ -726,11 +726,7 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
     return dates, freq, spectro
 
 
-<<<<<<< HEAD
-def loop_ww3_sources(dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [1/12, 1/2], c_file = '../../data/C.nc', prefix = 'CCI_WW3-GLOB-30M_', **kwargs):
-=======
 def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180, 180, -90, 90],parameters= [1/12, 1/2], c_file = '../../data/C.nc', prefix = 'CCI_WW3-GLOB-30M_', **kwargs):
->>>>>>> edd6d12 (Update access to WW3 data files by opening files directly on server, not)
     """ Compute Rayleigh waves sources from ww3 p2l file as the Proxy for the Source Force on the seafloor.
     Saves in netcdf format the Proxy for the Source Force for each frequency if save argument is True.
     Plots in PNG source maps of P or S waves at given intervals depending on plot variables.
