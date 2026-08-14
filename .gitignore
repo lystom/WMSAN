@@ -43,8 +43,8 @@ documentation/
 src/wmsan/.qodo/
 src/wmsan/primary_microseisms.py
 
-notebooks/*
-!notebooks/
+!/notebooks/
+/notebooks/**
 !notebooks/rayleigh_waves/
 !notebooks/body_waves/
 notebooks/body_waves/F*/
