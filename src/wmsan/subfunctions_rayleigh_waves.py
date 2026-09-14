@@ -421,8 +421,9 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
 >>>>>>> edd6d12 (Update access to WW3 data files by opening files directly on server, not)
                     nf = len(freq_ocean)  # number of frequencies 
                     xfr = np.exp(np.log(freq_ocean[-1]/freq_ocean[0])/(nf-1))  # determines the xfr geometric progression factor
-                    df = freq_ocean*0.5*(xfr-1/xfr)  # frequency interval in wave model times 2
                     freq_seismic = 2*freq_ocean  # ocean to seismic waves freq
+                    df = freq_seismic*0.5*(xfr-1/xfr)  # frequency interval in wave model times 2
+                    
 
                     ## Replace oceanic frequencies coordinates by seismic frequencies in p2l
                     p2l = xr.DataArray(p2l, coords={'frequency': freq_seismic, 'latitude': lati, 'longitude': longi}, dims=["frequency", "latitude", "longitude"])
@@ -897,7 +898,6 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
 >>>>>>> edd6d12 (Update access to WW3 data files by opening files directly on server, not)
                     nf = len(freq_ocean)  # number of frequencies 
                     xfr = np.exp(np.log(freq_ocean[-1]/freq_ocean[0])/(nf-1))  # determines the xfr geometric progression factor
-                    df = freq_ocean*0.5*(xfr-1/xfr)  # frequency interval in wave model times 2
                     freq_seismic = 2*freq_ocean  # ocean to seismic waves freq
                     ## Check units of the model, depends on version
                     if unit1 == 'log10(Pa2 m2 s+1E-12':
