@@ -96,6 +96,11 @@ def rayleigh_wave_temporal_evolution(
     else:
         # Default temporal resolution
         temporal_resol_hourly = True
+
+    if 'url' in kwargs:
+        url = kwargs['url']
+    else:
+        url = 'https://data-ww3.ifremer.fr/PROJECT/CCI/RUNS/GLOB-30M/'
         
     ## Adapt latitude and longitude to values in parameters file
     lon_min = extent[0]
@@ -182,7 +187,7 @@ def rayleigh_wave_temporal_evolution(
                 for ih in HOUR:
                     
                     ## Open F_p3D 
-                    (lati, longi, freq_ocean, p2l, unit1) = read_p2l_from_url([iyear, imonth, iday, ih], prefix = prefix, lon = [lon_min, lon_max], lat = [lat_min, lat_max])
+                    (lati, longi, freq_ocean, p2l, unit1) = read_p2l_from_url([iyear, imonth, iday, ih], prefix = prefix, lon = [lon_min, lon_max], lat = [lat_min, lat_max], url = url)
                     nf = len(freq_ocean)  # number of frequencies 
                     xfr = np.exp(np.log(freq_ocean[-1]/freq_ocean[0])/(nf-1))  # determines the xfr geometric progression factor
                     df = freq_ocean*0.5*(xfr-1/xfr)  # frequency interval in wave model times 2

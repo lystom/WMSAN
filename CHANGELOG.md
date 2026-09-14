@@ -10,6 +10,7 @@ and this project adheres to [Calendar Versioning](https://calver.org/).
 - a constant file to be called in every scripts from the src/wmsan/ folder to homogenize constants values
 
 ### Changed
+- open bathy function now adapted to several ETOPO and GEBCO files format
 - Update access to WW3 data files by opening files directly on server, not downloading .nc files anymore.
 
 - change version to 2026.1.0.
@@ -22,8 +23,9 @@ and this project adheres to [Calendar Versioning](https://calver.org/).
 - drop to drop_vars as it will be deprecated
 
 ### Fixed Bugs
-- after year 2020 path for p2l files changes REF051020 instead of REF102040 : carefull note the same reflection coefficients
-- prefix also changes after 2020 WW3_GLOB30M instead of WW3-GLOB30M 
+- factor pi added in SDF computation after comparison with Fabrice 's Ardhuin matlab code
+- (for downloading) after year 2020 path for p2l files changes REF051020 instead of REF102040 : carefull note the same reflection coefficients
+- (for downloading) prefix also changes after 2020 WW3_GLOB30M instead of WW3-GLOB30M 
 
 ## [2026.0.0] - 2026-03-02
 ### Added 

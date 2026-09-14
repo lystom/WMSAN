@@ -35,6 +35,7 @@ import cartopy.crs as ccrs
 import xarray as xr
 import cartopy
 import os.path
+import fnmatch
 
 from netCDF4 import Dataset, date2num
 from math import radians, log
@@ -114,7 +115,7 @@ def download_ww3_local(YEAR, MONTH, ftp_path_to_files="ftp://ftp.ifremer.fr/ifre
 ################ OPEN BATHYMETRY FILE ############################################
 ##################################################################################
 
-def open_bathy(file_bathy = '../../data/WW3-GLOB-30M_202002_p2l.nc', refined_bathymetry=False, extent=[-180, 180, -90, 90]):
+def open_bathy(file_bathy = '../../data/LOPS_WW3-GLOB-30M_dataref_dpt.nc', refined_bathymetry=False, extent=[-180, 180, -90, 90]):
     """Open bathymetry file and optionally refine bathymetry using ETOPOv2 dataset. 
 
     Args:
@@ -131,10 +132,75 @@ def open_bathy(file_bathy = '../../data/WW3-GLOB-30M_202002_p2l.nc', refined_bat
     if np.abs(lat_min) > 90 or np.abs(lat_max) > 90:
         print("Latitude not correct, absolute value > 90")
         return
-    
-    if refined_bathymetry or file_bathy == '../../data/ETOPO_2022_v1_60s_N90W180_bed.nc':
-        try:
+    ## check file bathymetry name
+
+    ## DEFAULT
+    if fnmatch.fnmatch(file_bathy, '*/LOPS_WW3-GLOB-30M_dataref_dpt.nc'):
+        ds = xr.open_mfdataset(file_bathy, combine='by_coords')
+        print("Use default bathymetry or download refined.")
+        if lon_min > lon_max:
+                ## work on the pacific ocean
+                ds = ds.assign_coords(longitude=((360 + (ds.longitude % 360)) % 360))
+                ds = ds.roll(longitude=int(len(ds['longitude']) / 2),roll_coords=True)
+                lon_min = ((360 + (lon_min % 360)) % 360)
+                lon_max = ((360 + (lon_max % 360)) % 360)
+        dpt1 = ds['dpt'].squeeze(dim = 'time', drop=True)
+        dpt1 = dpt1.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
+        ## Mask nan values    
+        dpt1_mask = dpt1.where(np.isfinite(dpt1))
+        zlon = dpt1_mask.longitude
+        zlat = dpt1_mask.latitude
+        return dpt1_mask, zlon, zlat
+
+    ## ETOPO
+    elif fnmatch.fnmatch(file_bathy, '*/ETOPO_20??_*_bed.nc'):
+        ds = xr.open_mfdataset(file_bathy, combine='by_coords')
+        print("Use refined bathymetry.ETOPO.")
+        ds  = ds.rename({'lon':'longitude', 'lat': 'latitude'})
+        if lon_min > lon_max:
+            ## work on the pacific ocean
+            ds = ds.assign_coords(longitude=((360 + (ds.longitude % 360)) % 360))
+            ds = ds.roll(longitude=int(len(ds['longitude']) / 2),roll_coords=True)
+            lon_min = ((360 + (lon_min % 360)) % 360)
+            lon_max = ((360 + (lon_max % 360)) % 360)
+        ds = ds.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
+        dpt1 = ds['z']
+        dpt1 *= -1 # ETOPOv2 to Depth
+        dpt1 = dpt1.where(dpt1>0, other=np.nan)
+        ## Mask nan values    
+        dpt1_mask = dpt1.where(np.isfinite(dpt1))
+        zlon = dpt1_mask.longitude
+        zlat = dpt1_mask.latitude
+        return dpt1_mask, zlon, zlat
+
+    ## GEBCO
+    elif fnmatch.fnmatch(file_bathy, '*/GEBCO_20??_*.nc'):
+        ds = xr.open_mfdataset(file_bathy, combine='by_coords')
+        print("Use refined bathymetry.GEBCO.")
+        ds  = ds.rename({'lon':'longitude', 'lat': 'latitude'})
+        if extent[0] > extent[1]:
+            ## work on the pacific ocean
+            ds = ds.assign_coords(longitude=((360 + (ds.longitude % 360)) % 360))
+            ds = ds.roll(longitude=int(len(ds['longitude']) / 2),roll_coords=True)
+            lon_min = ((360 + (lon_min % 360)) % 360)
+            lon_max = ((360 + (lon_max % 360)) % 360)
+        ds = ds.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
+        dpt1 = ds['elevation']
+        dpt1 *= -1 # GEBCO to Depth
+        dpt1 = dpt1.where(dpt1>0, other=np.nan)
+        ## Mask nan values    
+        dpt1_mask = dpt1.where(np.isfinite(dpt1))
+        zlon = dpt1_mask.longitude
+        zlat = dpt1_mask.latitude
+        return dpt1_mask, zlon, zlat
+
+    ## refined bathymetry, no file given
+    elif refined_bathymetry:
+        print("Use refined bathymetry.")
+        try: ## ETOPO
+            file_bathy = '../../data/ETOPO_2022_v1_60s_N90W180_bed.nc'
             ds = xr.open_mfdataset(file_bathy, combine='by_coords')
+            print("ETOPO")
             ds  = ds.rename({'lon':'longitude', 'lat': 'latitude'})
             if extent[0] > extent[1]:
                 ## work on the pacific ocean
@@ -142,15 +208,21 @@ def open_bathy(file_bathy = '../../data/WW3-GLOB-30M_202002_p2l.nc', refined_bat
                 ds = ds.roll(longitude=int(len(ds['longitude']) / 2),roll_coords=True)
                 lon_min = ((360 + (lon_min % 360)) % 360)
                 lon_max = ((360 + (lon_max % 360)) % 360)
-            z = ds['z']
-            z *= -1 # ETOPOv2 to Depth
-            z = z.where(z>0, other=np.nan)
-            dpt1 = z.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))         
+            ds = ds.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
+            dpt1 = ds['z']
+            dpt1 *= -1 # ETOPOv2 to Depth
+            dpt1 = dpt1.where(dpt1>0, other=np.nan)
+            ## Mask nan values    
+            dpt1_mask = dpt1.where(np.isfinite(dpt1))
+            zlon = dpt1_mask.longitude
+            zlat = dpt1_mask.latitude
+            return dpt1_mask, zlon, zlat
+        
         except:
-            try:
-                # load refined bathymetry ETOPOv2
-                file_bathy = '../../data/ETOPO_2022_v1_60s_N90W180_bed.nc'
+            try: # GEBCO
+                file_bathy = '../../data/GEBCO_2026_sub_ice.nc'
                 ds = xr.open_mfdataset(file_bathy, combine='by_coords')
+                print("GEBCO")
                 ds  = ds.rename({'lon':'longitude', 'lat': 'latitude'})
                 if extent[0] > extent[1]:
                     ## work on the pacific ocean
@@ -158,28 +230,23 @@ def open_bathy(file_bathy = '../../data/WW3-GLOB-30M_202002_p2l.nc', refined_bat
                     ds = ds.roll(longitude=int(len(ds['longitude']) / 2),roll_coords=True)
                     lon_min = ((360 + (lon_min % 360)) % 360)
                     lon_max = ((360 + (lon_max % 360)) % 360)
-                z = ds['z']
-                z *= -1 # ETOPOv2 to Depth
-                z = z.where(z>0, other=np.nan)
-                dpt1 = z.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))    
+                ds = ds.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
+                dpt1 = ds['elevation']
+                dpt1 *= -1 # GEBCO to Depth
+                dpt1 = dpt1.where(dpt1>0, other=np.nan)
+                ## Mask nan values    
+                dpt1_mask = dpt1.where(np.isfinite(dpt1))
+                zlon = dpt1_mask.longitude
+                zlat = dpt1_mask.latitude
+                return dpt1_mask, zlon, zlat        
+
             except:
-                print("Refined bathymetry ETOPOv2 not found. \nYou can download it from:\n https://www.ngdc.noaa.gov/thredds/catalog/global/ETOPO2022/60s/60s_bed_elev_netcdf/catalog.html?dataset=globalDatasetScan/ETOPO2022/60s/60s_bed_elev_netcdf/ETOPO_2022_v1_60s_N90W180_bed.nc\nSave in ../data/")
-                return None, None, None
-    else:
-        ds = xr.open_mfdataset(file_bathy, combine='by_coords')
-        if lon_min > lon_max:
-            ## work on the pacific ocean
-            ds = ds.assign_coords(longitude=((360 + (ds.longitude % 360)) % 360))
-            ds = ds.roll(longitude=int(len(ds['longitude']) / 2),roll_coords=True)
-            lon_min = ((360 + (lon_min % 360)) % 360)
-            lon_max = ((360 + (lon_max % 360)) % 360)
-        dpt1 = ds['dpt'].squeeze(dim = 'time', drop=True)
-        dpt1 = dpt1.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
-    ## Mask nan values    
-    dpt1_mask = dpt1.where(np.isfinite(dpt1))
-    zlon = dpt1_mask.longitude
-    zlat = dpt1_mask.latitude
+                print("Refined bathymetry GEBCO not found. \nYou can download it from:\n https://www.gebco.net/\nSave in ../data/")
+            print("Refined bathymetry ETOPOv2 not found. \nYou can download it from:\n https://www.ngdc.noaa.gov/thredds/catalog/global/ETOPO2022/60s/60s_bed_elev_netcdf/catalog.html?dataset=globalDatasetScan/ETOPO2022/60s/60s_bed_elev_netcdf/ETOPO_2022_v1_60s_N90W180_bed.nc\nSave in ../data/")
+            return None, None, None
+        
     return dpt1_mask, zlon, zlat
+
 ##################################################################################
 ############################ SITE EFFECT #########################################
 ##################################################################################
@@ -417,10 +484,15 @@ def loop_ww3_sources(dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [], [], []
     else:
         vmax = 1e10
 
-    if 'path_output' in kwargs:
-        path_output = kwargs['path_output']
+    if 'path_out' in kwargs:
+        path_out = kwargs['path_out']
     else:
-        path_output = './'
+        path_out = './'
+
+    if 'url' in kwargs:
+        url = kwargs['url']
+    else:
+        url = 'https://data-ww3.ifremer.fr/PROJECT/CCI/RUNS/GLOB-30M/'
 
     ## Adapt latitude and longitude to values in parameters file
     lon_min = extent[0]
@@ -463,7 +535,7 @@ def loop_ww3_sources(dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [], [], []
     msin = np.array([np.sin(np.pi/2 - np.radians(zlat))]).T
     ones = np.ones((1, len(zlon)))
     res_mod = radians(abs(zlat[1] - zlat[0]))
-    dA = radius**2*res_mod**2*np.dot(msin,ones)
+    dA = R_E**2*res_mod**2*np.dot(msin,ones)
      
     ## Loop over dates
     YEAR = date_vec[0]
@@ -506,7 +578,7 @@ def loop_ww3_sources(dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [], [], []
                 for ih in HOUR:
                     
                     ## Open F_p3D 
-                    (lati, longi, freq_ocean, p2l, unit1) = read_p2l_from_url([iyear, imonth, iday, ih], prefix = prefix, lon = [lon_min, lon_max], lat = [lat_min, lat_max])
+                    (lati, longi, freq_ocean, p2l, unit1) = read_p2l_from_url([iyear, imonth, iday, ih], prefix = prefix, lon = [lon_min, lon_max], lat = [lat_min, lat_max], url = url)
                     nf = len(freq_ocean)  # number of frequencies 
                     xfr = np.exp(np.log(freq_ocean[-1]/freq_ocean[0])/(nf-1))  # determines the xfr geometric progression factor
                     df = freq_ocean*0.5*(xfr-1/xfr)  # frequency interval in wave model times 2
@@ -556,13 +628,13 @@ def loop_ww3_sources(dpt1, zlon, zlat, wave_type='P', date_vec=[2020, [], [], []
 
                     ## Save F to file
                     if save:
-                        path_out += '/F/'
-                        if not os.path.exists(path_out):
-                            print("make directory %s"%path_out)
-                            os.makedirs(path_out)
+                        path_save = path_out+'/F/'
+                        if not os.path.exists(path_save):
+                            print("make directory %s"%path_save)
+                            os.makedirs(path_save)
 
                         # Create netCDF 3-hourly file
-                        ncfile = Dataset(path_out+"F_%d%02d%02d%02d.nc"%(iyear, imonth, iday, ih), mode='w',format='NETCDF4_CLASSIC')
+                        ncfile = Dataset(path_save+"F_%d%02d%02d%02d.nc"%(iyear, imonth, iday, ih), mode='w',format='NETCDF4_CLASSIC')
                         lat_dim = ncfile.createDimension('latitude', len(zlat))  # latitude axis
                         lon_dim = ncfile.createDimension('longitude', len(zlon))  # longitude axis
                         time_dim = ncfile.createDimension('time', daymax*8)  # unlimited axis (can be appended to).
