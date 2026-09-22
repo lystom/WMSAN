@@ -413,9 +413,8 @@ def loop_SDF(path_longuet_higgins, dpt1, zlon, zlat, date_vec=[2020, [], [], []]
                     (lati, longi, freq_ocean, p2l, unit1) = read_p2l_from_url([iyear, imonth, iday, ih], prefix = prefix, lon = [lon_min, lon_max], lat = [lat_min, lat_max], url = url)
                     nf = len(freq_ocean)  # number of frequencies 
                     xfr = np.exp(np.log(freq_ocean[-1]/freq_ocean[0])/(nf-1))  # determines the xfr geometric progression factor
+                    df = freq_ocean*0.5*(xfr-1/xfr)  # frequency interval in wave model times 2
                     freq_seismic = 2*freq_ocean  # ocean to seismic waves freq
-                    df = freq_seismic*0.5*(xfr-1/xfr)  # frequency interval in wave model times 2
-                    
 
                     ## Replace oceanic frequencies coordinates by seismic frequencies in p2l
                     p2l = xr.DataArray(p2l, coords={'frequency': freq_seismic, 'latitude': lati, 'longitude': longi}, dims=["frequency", "latitude", "longitude"])
@@ -477,7 +476,7 @@ def loop_SDF(path_longuet_higgins, dpt1, zlon, zlat, date_vec=[2020, [], [], []]
                         print('unique frequency ', f1)
                         Fp = p2l[:, :, index_freq]
                         C = site_effect(dpt1, f1, vs_crust, path_longuet_higgins)
-                        SDF_f = 2*np.pi*2*f1/((rho_s**2)*(vs_crust)**5)*Fp.data*C.data
+                        SDF_f = 2*np.pi**2*f1/((rho_s**2)*(vs_crust)**5)*Fp.data*C.data
                         SDF = SDF_f
                         
                     ## Exception in parametrization of frequencies
@@ -603,7 +602,6 @@ def loop_SDF(path_longuet_higgins, dpt1, zlon, zlat, date_vec=[2020, [], [], []]
             SDF_yearly = np.zeros((dpt1.shape))
         plt.close('all')
     print('Rayleigh source maps done!')
-    
     
     
 def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=1800, P=1, **kwargs):
@@ -882,9 +880,8 @@ def loop_ww3_sources(dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180
                     (lati, longi, freq_ocean, p2l, unit1) = read_p2l_from_url([iyear, imonth, iday, ih], prefix = prefix, lon = [lon_min, lon_max], lat = [lat_min, lat_max], url = url)
                     nf = len(freq_ocean)  # number of frequencies 
                     xfr = np.exp(np.log(freq_ocean[-1]/freq_ocean[0])/(nf-1))  # determines the xfr geometric progression factor
+                    df = freq_ocean*0.5*(xfr-1/xfr)  # frequency interval in wave model times 2
                     freq_seismic = 2*freq_ocean  # ocean to seismic waves freq
-                    df = freq_seismic*0.5*(xfr-1/xfr)  # frequency interval in wave model times 2
-                    
                     ## Check units of the model, depends on version
                     if unit1 == 'log10(Pa2 m2 s+1E-12':
                         p2l = np.exp(LG10*p2l)  - (1e-12-1e-16)

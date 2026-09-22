@@ -37,6 +37,8 @@ dist/
 
 # Documentation Directory #
 documentation/
+site/
+
 
 # Additionnal Directories #
 ###########################
@@ -45,13 +47,18 @@ src/wmsan/primary_microseisms.py
 
 !/notebooks/
 /notebooks/**
+
 !notebooks/rayleigh_waves/
+!notebooks/rayleigh_waves/**
 !notebooks/body_waves/
+!notebooks/body_waves/**
 notebooks/body_waves/F*/
 notebooks/body_waves/CCF*/
+notebooks/body_waves/*.png
 notebooks/rayleigh_waves/F*/
 notebooks/rayleigh_waves/CCF*/
 notebooks/rayleigh_waves/SDF*/
+notebooks/rayleigh_waves/*.png
 
 # Heavy Files #
 ###############
