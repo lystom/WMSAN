@@ -39,11 +39,8 @@ dist/
 documentation/
 site/
 
-
 # Additionnal Directories #
 ###########################
-src/wmsan/.qodo/
-src/wmsan/primary_microseisms.py
 
 !/notebooks/
 /notebooks/**
