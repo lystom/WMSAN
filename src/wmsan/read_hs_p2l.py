@@ -36,6 +36,20 @@ import argparse
 from datetime import date
 from datetime import datetime
 from netCDF4 import Dataset
+from scipy.interpolate import NearestNDInterpolator
+
+
+def _fill_nearest_2d(data):
+    """Fill NaNs in a 2D (latitude, longitude) slice with the value of the closest non-NaN cell."""
+    valid = ~np.isnan(data)
+    if valid.all() or not valid.any():
+        return data
+    yy, xx = np.mgrid[0:data.shape[0], 0:data.shape[1]]
+    interp = NearestNDInterpolator(np.column_stack((yy[valid], xx[valid])), data[valid])
+    filled = data.copy()
+    nan_mask = ~valid
+    filled[nan_mask] = interp(yy[nan_mask], xx[nan_mask])
+    return filled
 
 def read_WWNC(file_path, time_vect, lon1, lat1):
     """Read netcdf _hs.nc file and return a matrix with dimension lon x lat of significant height of wind and swell waves in meters.
@@ -357,6 +371,25 @@ def read_p2l_from_url(time_vect, prefix = 'CCI_WW3-GLOB-30M_', url='https://data
     extract_ds=nc_ds.sel(time=datetime(time_vect[0], time_vect[1], time_vect[2], time_vect[3]))
     extract_ds = extract_ds.sel(latitude=slice(lat_min, lat_max), longitude=slice(lon_min, lon_max))
     extract_ds = extract_ds.rename({'f':'frequency'})
+
+    ## only fill nan values which are next to a non-NaN value for p2l data
+    ## do not fill every nan value, only those adjacent to non-NaN values
+    mask_is_nan = extract_ds['p2l'].isnull()
+    ## fill only the NaN values adjacent to non-NaN values with closest non-NaN neighbors
+    mask_adjacent_to_non_nan = mask_is_nan & (extract_ds['p2l'].shift(latitude=1).notnull() |
+        extract_ds['p2l'].shift(latitude=-1).notnull() |
+        extract_ds['p2l'].shift(longitude=1).notnull() |
+        extract_ds['p2l'].shift(longitude=-1).notnull()
+    )
+    ## fill NaN values adjacent to non-NaN values with the closest non-NaN neighbor, per time/frequency slice
+    filled = xr.apply_ufunc(
+        _fill_nearest_2d,
+        extract_ds['p2l'],
+        input_core_dims=[['latitude', 'longitude']],
+        output_core_dims=[['latitude', 'longitude']],
+        vectorize=True,
+    )
+    extract_ds['p2l'] = xr.where(mask_adjacent_to_non_nan, filled, extract_ds['p2l'])
 
     return extract_ds.latitude, extract_ds.longitude, extract_ds.frequency, extract_ds.p2l, 'log10(Pa2 m2 s+1E-12)'
 
