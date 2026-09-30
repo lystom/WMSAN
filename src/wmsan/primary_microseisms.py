@@ -195,65 +195,75 @@ def site_effect(z, f, zlat, zlon, vs_crust=2800, path='../../data/longuet_higgin
     return C
 
 
-#def dispNewtonTH(f, dep, eps=1e-6, max_iter=50):
-#    """
-#    Inverts the linear dispersion relation (2*pi*f)^2 = g*k*tanh(k*dep)
-#    to get k from f and dep. Fully vectorized: `f` and `dep` can be
-#    scalars or arrays of any (broadcastable) shape, e.g. f of shape (nf,)
-#    and dep of shape (ny, nx) can be combined via
-#    `dispNewtonTH(f[:, None, None], dep[None, :, :])` to get k of shape
-#    (nf, ny, nx) without any Python loop.
-#
-#    If deep water (kh >= 6), use the deep-water approximation directly.
-#    If shallow/intermediate water (kh < 6), use Newton iteration.
-#
-#    Parameters
-#    ----------
-#    f : array_like
-#        Frequency in Hz (any shape).
-#    dep : array_like
-#        Water depth (m) (any shape broadcastable with f).
-#    eps : float
-#        Convergence tolerance on the iteration.
-#    max_iter : int
-#        Maximum number of Newton iterations.
-#
-#    Returns
-#    -------
-#    k : ndarray
-#        Wavenumber, broadcast shape of f and dep.
-#    """
-#    f = np.asarray(f, dtype=float)
-#    dep = np.asarray(dep, dtype=float)
-#
-#    sig = 2 * np.pi * f
-#    # broadcast sig and dep together
-#    sig, dep_b = np.broadcast_arrays(sig, dep)
-#    dep_b = dep_b.copy()
-#
-#    Y = dep_b * sig**2 / g   # squared dimensionless frequency
-#    X = np.sqrt(Y)           # initial guess valid for deep water
-#
-#    mask = X < 6
-#
-#    if np.any(mask):
-#        Xm = X[mask]
-#        Ym = Y[mask]
-#        for _ in range(max_iter):
-#            th = np.tanh(Xm)
-#            f_val = Xm * th - Ym
-#            df_val = th + Xm * (1 - th**2)
-#            dX = f_val / df_val
-#            Xm = Xm - dX
-#            if np.max(np.abs(dX)) < eps:
-#                break
-#        X[mask] = Xm
-#
-#    # avoid division by zero for dep == 0
-#    with np.errstate(divide='ignore', invalid='ignore'):
-#        k = np.where(dep_b > 0, X / dep_b, 0.0)
-#
-#    return k
+def dispNewton(f, dep, eps=1e-6, max_iter=50):
+    """
+    Inverts the linear dispersion relation (2*pi*f)^2 = g*k*tanh(k*dep)
+    to get k from f and dep. Fully vectorized: `f` and `dep` can be
+    scalars or arrays of any (broadcastable) shape, e.g. f of shape (nf,)
+    and dep of shape (ny, nx) can be combined via
+    `dispNewtonTH(f[:, None, None], dep[None, :, :])` to get k of shape
+    (nf, ny, nx) without any Python loop.
+
+    If deep water (kh >= 6), use the deep-water approximation directly.
+    If shallow/intermediate water (kh < 6), use Newton iteration.
+
+    Parameters
+    ----------
+    f : array_like
+        Frequency in Hz (any shape).
+    dep : array_like
+        Water depth (m) (any shape broadcastable with f).
+    eps : float
+        Convergence tolerance on the iteration.
+    max_iter : int
+        Maximum number of Newton iterations.
+
+    Returns
+    -------
+    k : ndarray
+        Wavenumber, broadcast shape of f and dep.
+    """
+    f = np.asarray(f, dtype=float)
+    dep = np.asarray(dep, dtype=float)
+
+    # if f and dep are not directly broadcastable (e.g. f of shape (nf,) and
+    # dep of shape (ny, nx)), assume an outer combination is wanted: expand f
+    # with trailing singleton dims so it broadcasts against dep as (nf, ny, nx)
+    if f.ndim > 0 and dep.ndim > 0:
+        try:
+            np.broadcast_shapes(f.shape, dep.shape)
+        except ValueError:
+            f = f.reshape(f.shape + (1,) * dep.ndim)
+    
+
+    sig = 2 * np.pi * f
+    # broadcast sig and dep together
+    sig, dep_b = np.broadcast_arrays(sig, dep)
+    dep_b = dep_b.copy()
+
+    Y = dep_b * sig**2 / g   # squared dimensionless frequency
+    X = np.sqrt(Y)           # initial guess valid for deep water
+
+    mask = X < 6
+
+    if np.any(mask):
+        Xm = X[mask]
+        Ym = Y[mask]
+        for _ in range(max_iter):
+            th = np.tanh(Xm)
+            f_val = Xm * th - Ym
+            df_val = th + Xm * (1 - th**2)
+            dX = f_val / df_val
+            Xm = Xm - dX
+            if np.max(np.abs(dX)) < eps:
+                break
+        X[mask] = Xm
+
+    # avoid division by zero for dep == 0
+    with np.errstate(divide='ignore', invalid='ignore'):
+        k = np.where(dep_b > 0, X / dep_b, np.nan)
+
+    return k
 def dispNewtonTH(f, dep):
     """
     Inverts the linear dispersion relation (2*pi*f)^2 = g*k*tanh(k*dep)
@@ -486,7 +496,6 @@ def read_ef_from_url(start, end, prefix = 'CCI_WW3-GLOB-30M_', url='https://data
     nc_ds = xr.open_dataset(xr.backends.NetCDF4DataStore(ncfile))
     # extract from Jan 1st to Jan 5th included
     extract_ds=nc_ds.sel(f=slice(0, 0.1))
-    print(extract_ds.keys())
     extract_ds = extract_ds.sel(time=slice(start, end), latitude=slice(lat_min, lat_max), longitude=slice(lon_min, lon_max))
 
     return extract_ds.latitude.values, extract_ds.longitude.values, extract_ds.f[:].values, extract_ds.time[:].values, extract_ds.ef
@@ -531,24 +540,20 @@ def compute_Fp1_ef_map(
     df = freq * 0.5 * (xfr - 1.0 / xfr)
 
     theta = np.linspace(0, 360 - 360 / nd, nd)
-
-    depth_sub = xr.open_dataarray(dpt)  # Assuming dpt_map is a path to a NetCDF file containing the depth data
-    depth_sub = depth_sub.sel(latitude=slice(lat_min, lat_max), longitude=slice(lon_min, lon_max))
-    ## size is (1, nys, nxs) because there is a singleton time dimension in the depth data
-    depth_sub = depth_sub.isel(time=0)  # Remove the singleton time dimension
+    depth_sub, _, _ = open_bathy(depth_file, extent=[lon_min, lon_max, lat_min, lat_max])
     valid = depth_sub.values > 1
     
     # valid = valid.values  # Convert to numpy array for indexing
 
     # --- wavenumber map (vectorized over sub-grid, looped over frequency) ---
     k_map = np.ones((nf, ny, nx))
-    k_sub = np.ones((nf,) + depth_sub.shape)
-    for i in range(nf):
-        #k_sub[i][valid] = dispNewtonTH(np.full(np.sum(valid), freqp[i]),
-        #                                depth_sub.values[valid])[:, 0] if False else \
-        #                   np.array([dispNewtonTH(freqp[i], d)[0] for d in depth_sub.values[valid]])
-        ## compute dispNewton for valid grid, dispNewton works with matrix 
-        k_sub[i][valid] = np.array([dispNewtonTH(freq[i], d)[0] for d in depth_sub.values[valid]])
+    k_sub = dispNewton(freq[:ifmax], depth_sub.values)
+    #for i in range(nf):
+    #    #k_sub[i][valid] = dispNewtonTH(np.full(np.sum(valid), freqp[i]),
+    #    #                                depth_sub.values[valid])[:, 0] if False else \
+    #    #                   np.array([dispNewtonTH(freqp[i], d)[0] for d in depth_sub.values[valid]])
+    #    ## compute dispNewton for valid grid, dispNewton works with matrix 
+    #    k_sub[i][valid] = np.array([dispNewtonTH(freq[i], d)[0] for d in depth_sub.values[valid]])
     # place back into full map
     for i in range(nf):
         k_map[i][np.ix_(np.where((lat >= lat_min) & (lat <= lat_max))[0], np.where((lon >= lon_min) & (lon <= lon_max))[0])] = k_sub[i]
@@ -651,9 +656,7 @@ def compute_F_delta_ef_map(
     lat_sub = lat[(lat >= lat_min) & (lat <= lat_max)]
     lon_grid, lat_grid = np.meshgrid(lon_sub, lat_sub)  # (nys, nxs)
 
-    depth_sub = xr.open_dataset(dpt)
-    depth_sub = depth_sub.sel(latitude=slice(lat_min, lat_max), longitude=slice(lon_min, lon_max))['dpt']
-    depth_sub = depth_sub.isel(time=0)  # Remove the singleton time dimension
+    depth_sub, _, _ = open_bathy(depth_file, extent=[lon_min, lon_max, lat_min, lat_max])
     valid = depth_sub.values > 1
 
     # --- great-circle distance (alpha, rad), vectorized like `spectrogram` ---
@@ -699,34 +702,31 @@ def compute_F_delta_ef_map(
     return F_delta, map_source, botspec_map, k_map, freq, df, times
 
 if __name__ == '__main__':
-
-
     # For the following file, you can get it here: https://data-ww3.ifremer.fr/PROJECT/CCI/RUNS/GLOB-30M/2023/FIELD_NC/CCI_WW3-GLOB-30M_202308_ef.nc
     wave_spectrum_1D='/home/ltomaset/Documents/WMSAN_gitlab/microseisms_LOPS/data/waves/CCI_WW3-GLOB-30M_202308_ef.nc'
     depth_file='/home/ltomaset/Documents/WMSAN_gitlab/microseisms_LOPS/data/depth/LOPS_WW3-GLOB-30M_dataref_dpt.nc'
     bottom_topography_spectrum='/home/ltomaset/Documents/WMSAN_gitlab/microseisms_LOPS/data/bottom/spectrum_Ireland_shallow_rocks.bsp'
 
-    ## dpt_map is the matrix from the depth map file used for the computation
-    dpt_map, zlon, zlat = open_bathy(depth_file)
-    longitude = dpt_map['longitude'].values
-    latitude = dpt_map['latitude'].values
-    ## focus on North Atlantic
-    lon_min = -100
-    lon_max = -10
-    lat_min = 0
+    # Define the bounding box for the North Atlantic region
+    lon_min = -30
+    lon_max = 10
+    lat_min = 30
     lat_max = 60
 
     start=[2025,1,20]
     end=[2025,1,30]
 
-    ## Open depth and plot it
-    plt.figure(figsize=(10, 6))
-    plt.pcolormesh(dpt_map, shading='auto')
-    plt.xlabel('Longitude')
-    plt.ylabel('Latitude')
-    plt.title('Depth Map')
-    plt.colorbar(label='Depth')
-    plt.show()
+
+    ## Test dispN
+    depth_sub, lat, lon = open_bathy(depth_file, extent=[lon_min, lon_max, lat_min, lat_max])
+    lat, lon, freq, times, efall = read_ef_from_url(start=start, end=end, lat=(lat_min, lat_max), lon=(lon_min, lon_max))
+    
+    nt, nf, ny, nx = np.shape(efall)
+    k_map = np.ones((nf, ny, nx))
+    k_sub = np.ones((nf,) + depth_sub.shape)
+
+
+    ## Check bottom topography
 
     ## Open bottom topography spectrum and plot it
     botspec_map, kbxmax, kbymax = open_bottom_topography_spectrum(bottom_topography_spectrum)
@@ -738,42 +738,65 @@ if __name__ == '__main__':
     plt.colorbar(label='Spectrum')
     plt.show()
 
-    exit()
+    ### compare computing time for k_sub and k_sub_2D
+    #import time
+    #start_time = time.time()
+    #for i in range(nf):
+    #    k_sub[i] = np.array([dispNewtonTH(freq[i], d) for d in depth_sub.values])
+    #k_sub_time = time.time() - start_time
 
-    F_delta, map_source, botspec_map, k_map, freq, df, times = compute_F_delta_ef_map(start=start,
-                                                                                        end=end,
-                                                                                        bottom_topography_spectrum=bottom_topography_spectrum,
-                                                                                        dpt=depth_file,
-                                                                                        lon_min=lon_min,
-                                                                                        lon_max=lon_max,
-                                                                                        lat_min=lat_min,
-                                                                                        lat_max=lat_max,
-                                                                                        CgR=1800,Q=88, lono=4.542, lato=45.279,
-                                                                                        lon=np.arange(-180, 180, 0.5),
-                                                                                        lat=np.arange(-78, 80.5, 0.5),
-                                                                                        statname='G.SSB')
+    #start_time = time.time()
+    #k_sub_2D = dispNewton(freq, depth_sub.values)
+    #k_sub_2D_time = time.time() - start_time
 
-    ## Plot F_delta as a function of time (x) and frequency (y)
+    #print(f"Computing time for k_sub: {k_sub_time:.4f} seconds")
+    #print(f"Computing time for k_sub_2D: {k_sub_2D_time:.4f} seconds")
 
-    plt.figure(figsize=(10, 6))
-    plt.pcolormesh(times, freq, 10*np.log10(F_delta.T), shading='auto')
-    plt.xlabel('Time')
-    plt.ylabel('Frequency')
-    plt.title('F_delta as a function of time and frequency')
-    plt.colorbar(label='F_delta (dB)')
-    plt.show()  
-
-    ### Plot map_source as a function of longitude (x) and latitude (y)
+    ### plot k_sub and k_sub_2D for the first frequency 
     #plt.figure(figsize=(10, 6))
-    #plt.pcolormesh(map_source, shading='auto')
+    #plt.pcolormesh(k_sub[0], shading='auto')
     #plt.xlabel('Longitude')
     #plt.ylabel('Latitude')
-    #plt.title('Map Source')
-    #plt.colorbar(label='Map Source')
+    #plt.title('Wavenumber Map for First Frequency (k_sub)')
+    #plt.colorbar(label='Wavenumber')
     #plt.show()
 
-    ## save F_delta as netcdf 
-    ## xarray dataset
+    #plt.figure(figsize=(10, 6))
+    #plt.pcolormesh(k_sub_2D[0], shading='auto')
+    #plt.xlabel('Longitude')
+    #plt.ylabel('Latitude')
+    #plt.title('Wavenumber Map for First Frequency (k_sub_2D)')
+    #plt.colorbar(label='Wavenumber')
+    #plt.show()
 
-    F_delta_da = xr.DataArray(F_delta, coords=[times, freq], dims=['time', 'frequency'])
-    F_delta_da.to_netcdf(f'F_delta_G.SSB_{start[0]}{start[1]:02d}{start[2]:02d}_{end[0]}{end[1]:02d}{end[2]:02d}.nc')
+
+    ### plot the difference between k_sub and k_sub_2D for the first frequency
+    #plt.figure(figsize=(10, 6))
+    #plt.pcolormesh(k_sub[0] - k_sub_2D[0], shading='auto')
+    #plt.xlabel('Longitude')
+    #plt.ylabel('Latitude')
+    #plt.title('Difference in Wavenumber Map for First Frequency (k_sub - k_sub_2D)')
+    #plt.colorbar(label='Wavenumber Difference')
+    #plt.show()
+    #exit()
+
+    #F_delta, map_source, botspec_map, k_map, freq, df, times = compute_F_delta_ef_map(start=start,
+    #                                                                                    end=end,
+    #                                                                                    bottom_topography_spectrum=bottom_topography_spectrum,
+    #                                                                                    dpt=depth_file,
+    #                                                                                    lon_min=lon_min,
+    #                                                                                    lon_max=lon_max,
+    #                                                                                    lat_min=lat_min,
+    #                                                                                    lat_max=lat_max,
+    #                                                                                    CgR=1800,Q=88, lono=4.542, lato=45.279,
+    #                                                                                    lon=np.arange(-180, 180, 0.5),
+    #                                                                                    lat=np.arange(-78, 80.5, 0.5),
+    #                                                                                    statname='G.SSB')
+    ## Plot F_delta with time and frequency
+    #plt.figure(figsize=(16, 9))
+    #plt.pcolormesh(times, freq, 10*np.log10(F_delta.T), shading='auto')
+    #plt.xlabel('Time')
+    #plt.ylabel('Frequency')
+    #plt.title('F_delta with Time and Frequency')
+    #plt.colorbar(label='F_delta')
+    #plt.show()
