@@ -66,6 +66,7 @@ plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 plt.rcParams['xtick.direction'] = 'inout'
 plt.rcParams['ytick.direction'] = 'inout'
 plt.rcParams['font.family'] = "sans-serif"
+plt.rcParams['font.family'] = "sans-serif"
 
 def site_effect(z, f, zlat, zlon, vs_crust=2800, path='../../data/longuet_higgins.txt'):
     """ Bathymetry secondary microseismic excitation coefficients (Rayleigh waves).
@@ -81,6 +82,10 @@ def site_effect(z, f, zlat, zlon, vs_crust=2800, path='../../data/longuet_higgin
     """
 
     df = pd.read_csv('%s'%path, sep='\t', header =0, usecols=[0, 1, 2, 3, 4, 5, 6, 7], names = ['fh1', 'c1', 'fh2', 'c2', 'fh3', 'c3', 'fh4', 'c4'])
+    fc1 = interp1d(df.fh1, df.c1, kind='slinear', bounds_error=False, fill_value=0)
+    fc2 = interp1d(df.fh2, df.c2, kind='slinear', bounds_error=False, fill_value=0)
+    fc3 = interp1d(df.fh3, df.c3, kind='slinear', bounds_error=False, fill_value=0)
+    fc4 = interp1d(df.fh4, df.c4, kind='slinear', bounds_error=False, fill_value=0)
     fc1 = interp1d(df.fh1, df.c1, kind='slinear', bounds_error=False, fill_value=0)
     fc2 = interp1d(df.fh2, df.c2, kind='slinear', bounds_error=False, fill_value=0)
     fc3 = interp1d(df.fh3, df.c3, kind='slinear', bounds_error=False, fill_value=0)
@@ -427,12 +432,19 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                     ## Replace oceanic frequencies coordinates by seismic frequencies in p2l
                     p2l = xr.DataArray(p2l, coords={'frequency': freq_seismic, 'latitude': lati, 'longitude': longi}, dims=["frequency", "latitude", "longitude"])
 
+
+                    ## Replace oceanic frequencies coordinates by seismic frequencies in p2l
+                    p2l = xr.DataArray(p2l, coords={'frequency': freq_seismic, 'latitude': lati, 'longitude': longi}, dims=["frequency", "latitude", "longitude"])
+
                     ## Check units of the model, depends on version
                     if unit1 == 'log10(Pa2 m2 s+1E-12':
                         p2l = np.exp(LG10*p2l)  - (1e-12-1e-16)
+                        p2l = np.exp(LG10*p2l)  - (1e-12-1e-16)
                     elif unit1 == 'log10(m4s+0.01':
                         p2l = np.exp(LG10*p2l) - 0.009999
+                        p2l = np.exp(LG10*p2l) - 0.009999
                     elif unit1 == 'log10(Pa2 m2 s+1E-12)':
+                        p2l = np.exp(LG10*p2l)  - (1e-12-1e-16)
                         p2l = np.exp(LG10*p2l)  - (1e-12-1e-16)
                 
                     ## Integral over a frequency band
@@ -441,6 +453,24 @@ def loop_SDF(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180,
                         df = df[index_freq]
                         freq_seismic = freq_seismic[index_freq]
                         n_freq = len(df)
+                        Fp = p2l.sel(frequency = freq_seismic, latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
+                        ## Site effect
+                        if c_file is None:
+                            C = site_effect(dpt1, freq_seismic, zlat, zlon,vs_crust, path_longuet_higgins)  # computes Longuet-Higgins site effect given the bathymetryint(Fp.shape)
+                        else:
+                            try:
+                                ds_ampli = xr.open_dataarray(c_file).astype('float64')
+                                ## replace nan values by 0
+                                ds_ampli = ds_ampli.where(np.isfinite(ds_ampli), other=0)
+                                if extent[0] > extent[1]:
+                                    ds_ampli = ds_ampli.assign_coords(longitude=((360 + (ds_ampli.longitude % 360)) % 360))
+                                    ds_ampli = ds_ampli.roll(longitude=int(len(ds_ampli['longitude']) / 2), roll_coords=True)
+                                amplification_coeff = ds_ampli
+                                C = amplification_coeff.sel(latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
+                                C = C.sel(frequency = freq_seismic, method='nearest', tolerance=0.01, drop=True)
+                                #amplification_coeff = amplification_coeff.reindex_like(Fp, method='nearest', tolerance=0.01)
+                            except:
+                                print("Refined bathymetry grid \n PLEASE RUN amplification_coefficients.ipynb before running this script")
                         Fp = p2l.sel(frequency = freq_seismic, latitude = slice(lat_min, lat_max), longitude = slice(lon_min, lon_max))
                         ## Site effect
                         if c_file is None:
@@ -670,6 +700,7 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
     msin = np.array([np.sin(np.pi/2 - np.radians(zlat))]).T
     ones = np.ones((1, len(zlon)))
     dA = R_E**2*RES_MOD**2*np.dot(msin,ones)
+    dA = R_E**2*RES_MOD**2*np.dot(msin,ones)
     
     # Compute distance of each gridpoint to station
     geoid = Geod(ellps='WGS84')
@@ -677,6 +708,7 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
     lon_STA = np.ones((lon_grid.shape))*lon_sta
     lat_STA = np.ones((lat_grid.shape))*lat_sta
     _, _, distance_in_m = geoid.inv(lon_STA, lat_STA, lon_grid, lat_grid)
+    distance = distance_in_m*180/(np.pi*R_E)
     distance = distance_in_m*180/(np.pi*R_E)
     # Initiate spectrogram
     n_dates = len(dates)
@@ -702,6 +734,8 @@ def spectrogram(path_netcdf, dates, lon_sta=-21.3268, lat_sta=64.7474, Q=200, U=
         F_delta = np.zeros((sdf_f.shape))
         for ifreq, f in enumerate(freq):
             SDF_freq = sdf_f.sel(frequency = freq[ifreq]).data
+            EXP = np.exp(-2*np.pi*f.data*np.radians(distance)*R_E/(U*Q))
+            denominateur = 1/(R_E*np.sin(np.radians(distance)))
             EXP = np.exp(-2*np.pi*f.data*np.radians(distance)*R_E/(U*Q))
             denominateur = 1/(R_E*np.sin(np.radians(distance)))
             facteur = EXP*denominateur
@@ -843,6 +877,7 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
     ones = np.ones((1, len(zlon)))
     res_mod = radians(abs(zlat[1] - zlat[0]))
     dA = R_E**2*res_mod**2*np.dot(msin,ones)
+    dA = R_E**2*res_mod**2*np.dot(msin,ones)
     
     ## Loop over dates
     YEAR = date_vec[0]
@@ -902,9 +937,12 @@ def loop_ww3_sources(paths, dpt1, zlon, zlat, date_vec=[2020, [], [], []], exten
                     ## Check units of the model, depends on version
                     if unit1 == 'log10(Pa2 m2 s+1E-12':
                         p2l = np.exp(LG10*p2l)  - (1e-12-1e-16)
+                        p2l = np.exp(LG10*p2l)  - (1e-12-1e-16)
                     elif unit1 == 'log10(m4s+0.01':
                         p2l = np.exp(LG10*p2l) - 0.009999
+                        p2l = np.exp(LG10*p2l) - 0.009999
                     elif unit1 == 'log10(Pa2 m2 s+1E-12)':
+                        p2l = np.exp(LG10*p2l)  - (1e-12-1e-16)
                         p2l = np.exp(LG10*p2l)  - (1e-12-1e-16)
     
                     ## Integral over a frequency band  

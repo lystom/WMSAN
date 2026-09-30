@@ -30,7 +30,6 @@ It contains four functions read_WWNC, read_WWNCf, read_hs and read_p2l:
 import numpy as np
 import matplotlib.pyplot as plt
 import xarray as xr
-import cartopy.crs as ccrs
 import argparse
 
 from datetime import date
@@ -337,16 +336,11 @@ def read_p2l(file_path, time_vect, lon1 = (-180, 180), lat1 = (-90, 90)):
     return lat, lon, freq, p2l, unit1
 
 def read_p2l_from_url(time_vect, prefix = 'CCI_WW3-GLOB-30M_', url='https://data-ww3.ifremer.fr/PROJECT/CCI/RUNS/GLOB-30M/', lon = (-180, 180), lat = (-90, 90)):
-<<<<<<< HEAD
     ## if default url then use the following url
     if url == 'https://data-ww3.ifremer.fr/PROJECT/CCI/RUNS/GLOB-30M/':
         url = url+str(time_vect[0])+ '/FIELD_NC/' +prefix+str(time_vect[0])+str(time_vect[1]).zfill(2)+'_p2l.nc'
     else:
         url = url+prefix+str(time_vect[0])+str(time_vect[1]).zfill(2)+'_p2l.nc'
-=======
-    url = url+str(time_vect[0])+ '/FIELD_NC/' +prefix+str(time_vect[0])+str(time_vect[1]).zfill(2)+'_p2l.nc'
-
->>>>>>> edd6d12 (Update access to WW3 data files by opening files directly on server, not)
     try:
         nc_ds.close()
         extract_ds.close()

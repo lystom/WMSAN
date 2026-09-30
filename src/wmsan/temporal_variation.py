@@ -1,4 +1,27 @@
 #!/usr/bin/env python3
+
+# Preamble
+__author__ = "Reza D.D. Esfahani" # mod. by Lisa Tomasetto 07/2024
+__copyright__ = "Copyright 2024, UGA"
+__credits__ = ["Reza D.D. Esfahani"] 
+__version__ = "2026.0.1"
+__maintainer__ = "Lisa Tomasetto"
+__email__ = "lisa.tomasetto@univ-grenoble-alpes.fr"
+# mod. by Lisa Tomasetto 07/2024
+
+""" Functions to compute the rayleigh  wave temporal evolution . 
+
+It contains two functions:
+
+- `rayleigh_wave_temporal_evolution(
+        lon_s, lat_s, paths, dpt1, zlon, zlat,
+        date_vec, extent, parameters, c_file, prefix, **kwargs): Compute the temporal evolution of the seismic sources of Rayleigh waves in a given region..
+
+- `body_wave_temporal_evolution(
+        lon_s, lat_s, paths, dpt1, zlon, zlat, date_vec,
+        extent, parameters, c_file, prefix, **kwargs)`: Compute the temporal evolution of the seismic sources of Body waves in a given region..
+"""
+
 import numpy as np
 import xarray as xr
 
@@ -36,7 +59,17 @@ __version__ = "2026.1.0"
 __maintainer__ = "Lisa Tomasetto"
 __email__ = "lisa.tomasetto@univ-grenoble-alpes.fr"
 
+plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
+plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
+plt.rcParams['xtick.direction'] = 'inout'
+plt.rcParams['ytick.direction'] = 'inout'
+plt.rcParams['font.family'] = "sans-serif"
 def rayleigh_wave_temporal_evolution(
         lon_s: float, 
         lat_s: float,
