@@ -975,7 +975,7 @@ def loop_ww3_sources(dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180
                         fig.suptitle('Proxy for the Source Force. Rayleigh waves.\nFrequency %.3f-%.3f Hz.%d-%02d-%02dT%02d'%(f1, f2, iyear, imonth, iday, ih))
                         ax = plt.axes(projection=ccrs.Robinson(central_longitude=central_longitude))
                         ax.coastlines()
-                        gl = ax.gridlines()
+                        gl = ax.gridlines(draw_labels=True, dms=True, x_inline=False, y_inline=False, top=False, right=False)
                         gl.xformatter = LONGITUDE_FORMATTER
                         gl.yformatter = LATITUDE_FORMATTER
                         ax.add_feature(cartopy.feature.LAND, zorder=100, edgecolor='k', facecolor='linen')
@@ -989,7 +989,7 @@ def loop_ww3_sources(dpt1, zlon, zlat, date_vec=[2020, [], [], []], extent=[-180
                         F_monthly += F
                     if plot_yearly :
                         F_yearly += F
-                   
+
                 if plot_daily :
                     plt.close('all') 
                     F_plot = xr.DataArray(F_daily, 
